@@ -36,6 +36,27 @@ verification for executed evidence.
 
 ---
 
+## OPERATING MODE — OBSERVATION / CALIBRATION FREEZE (set 2026-09-03 by the user)
+
+The deployed system is left **running as-is**. This is an observation/calibration period.
+
+**Hard freeze — do NOT, without an explicit new instruction from the user:**
+- modify **scoring** (`score.py`), **eligibility** (`eligibility.py`), or the **architecture / frozen
+  spine** (`models.py`, `sources/base.py`, pipeline stage order, `store.py` schema);
+- change adapters, config logic, or the workflow;
+- trigger manual `workflow_dispatch` runs or otherwise babysit the schedule.
+
+**Do:** let the daily GitHub Actions cron run on its own; **preserve all evidence in this file.** When
+observations accumulate (e.g. surprising eligibility calls, threshold miscalibration, missed/duplicate
+notifications), record them below under *Observation log* as data for a later, explicitly-instructed
+calibration pass — do not act on them unilaterally.
+
+### Observation log
+*(Append dated entries here as real-run evidence arrives. Empty = none recorded yet.)*
+- 2026-09-03 — Deployment run 33754711547 (dispatch): 233→201→23→1 notified. Baseline; see §Phase 3.
+
+---
+
 ## Live verification (Gate 1) — executed evidence, not narrated
 
 **Real end-to-end run executed** via `python -m job_scout -c config/profile.yaml` against GitLab's
@@ -290,11 +311,12 @@ Decisions #3–6.)*
 
 *(Written only when a checkpoint interrupts work mid-task. Empty = nothing in flight.)*
 
-**Nothing in flight. DEPLOYED + VERIFIED.** The project is live at
-`https://github.com/DagiHabtu/job-scout` (PUBLIC) and running on a daily GitHub Actions schedule at
-`$0`; a `workflow_dispatch` run (33754711547) succeeded end-to-end (scout ran, digest artifact
-uploaded, `data/scout.db` committed back). Local `main` synced to the bot commit; **85 tests pass**;
-spine unchanged. Deferred (by choice): Adzuna (needs a key + discovery design), hard-logic tuning
-(needs more real-run evidence). Next event is optional — observe scheduled runs, widen coverage via
-`config/profile.yaml`, or build Adzuna once a key exists. Spine must not change without a
-spine-architect pass + a Decisions entry here.
+**Nothing in flight. DEPLOYED + VERIFIED. Now in an OBSERVATION / CALIBRATION FREEZE** (see
+§Operating mode). The project is live at `https://github.com/DagiHabtu/job-scout` (PUBLIC) and runs
+daily on GitHub Actions at `$0`; the dispatch run (33754711547) succeeded end-to-end. Local `main`
+synced; **85 tests pass**; spine unchanged.
+
+**A future session must NOT modify scoring, eligibility, or architecture, or trigger manual runs,
+without an explicit new user instruction.** Let the cron run; append real-run findings to the
+§Operating mode → Observation log as evidence for a later, explicitly-instructed calibration pass.
+Deferred by choice: Adzuna (needs a key), hard-logic tuning (needs more evidence).
