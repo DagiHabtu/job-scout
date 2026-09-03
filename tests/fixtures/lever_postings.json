@@ -1,0 +1,58 @@
+{
+  "_recorded_from": "https://api.lever.co/v0/postings/leverdemo?mode=json",
+  "site": "leverdemo",
+  "postings": [
+    {
+      "id": "681fbc53-1e34-4a46-8677-3a78118674eb",
+      "text": "Approved Professional 3",
+      "hostedUrl": "https://jobs.lever.co/leverdemo/681fbc53-1e34-4a46-8677-3a78118674eb",
+      "applyUrl": "https://jobs.lever.co/leverdemo/681fbc53-1e34-4a46-8677-3a78118674eb/apply",
+      "categories": {
+        "location": "Baltimore, MD",
+        "team": "Operations",
+        "allLocations": [
+          "Baltimore, MD"
+        ]
+      },
+      "workplaceType": "remote",
+      "descriptionPlain": "Welcome to the Demo Job Listing for Lever! This is a fictional job created solely for demonstration purposes and is not an actual open position. We’ve crafted this listing to showcase the functionality of our ATS platform, including job descriptions, application processes, and more.\n\nWhile you can explore the application process and features here, please note that applications submitted to this job will not be reviewed or responded to as it’s for demonstration only. \n\n\nThis posting\n",
+      "createdAt": 1565990241800
+    },
+    {
+      "id": "18c23ab2-ac77-473b-b2aa-ba13e0d52164",
+      "text": "C++ Software Developer",
+      "hostedUrl": "https://jobs.lever.co/leverdemo/18c23ab2-ac77-473b-b2aa-ba13e0d52164",
+      "applyUrl": "https://jobs.lever.co/leverdemo/18c23ab2-ac77-473b-b2aa-ba13e0d52164/apply",
+      "categories": {
+        "commitment": "Regular Full Time (Salary)",
+        "department": "Engineering",
+        "location": "Jerusalem",
+        "team": "Software developer",
+        "allLocations": [
+          "Jerusalem"
+        ]
+      },
+      "workplaceType": "hybrid",
+      "descriptionPlain": "",
+      "createdAt": 1788318624638
+    },
+    {
+      "id": "ad208490-4052-4f91-a57e-433f2d1e484b",
+      "text": "Customer Success Manager AH Test",
+      "hostedUrl": "https://jobs.lever.co/leverdemo/ad208490-4052-4f91-a57e-433f2d1e484b",
+      "applyUrl": "https://jobs.lever.co/leverdemo/ad208490-4052-4f91-a57e-433f2d1e484b/apply",
+      "categories": {
+        "commitment": "Regular Full Time (Salary)",
+        "department": "Customer Success",
+        "location": "Atlanta, Georgia",
+        "team": "Customer Success Team",
+        "allLocations": [
+          "Atlanta, Georgia"
+        ]
+      },
+      "workplaceType": "hybrid",
+      "descriptionPlain": "This is a test job - created by Alex Haugan, for testing candidate insights.\n \nJoin a scaling, tight-knit team that’s working directly with innovative talent acquisition teams and thought leaders across various industries and geographies to make hiring a strategic advantage for their organizations. You'll serve as an advisor to our customers and take a consultative approach to ensure customers are setup for long-term success as high performing hiring organizations using the Lever product suite.\n \nAs a Customer Success Manager on the Customer Advocacy team, you will be our customers biggest cha",
+      "createdAt": 1788199939703
+    }
+  ]
+}

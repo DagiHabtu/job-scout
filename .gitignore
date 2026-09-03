@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.env
+.venv/
+data/digest.html
+# NOTE: data/scout.db is intentionally NOT ignored — the GitHub Actions deployment commits it back
+# each run (persistence on the ephemeral runner + doubles as the schedule keepalive). See PLAN.md §6.

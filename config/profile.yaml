@@ -1,0 +1,38 @@
+# Live profile for the Job Scout. Non-secret preferences only — secrets load from env / .env.
+# Copied from profile.example.yaml and pointed at real Greenhouse boards for the Gate-1 live run.
+profile:
+  target_roles: ["software engineer intern", "backend intern", "data engineer intern", "backend engineer"]
+  target_technologies: ["python", "sql", "docker", "postgres", "kubernetes", "go"]
+  employment_types: ["internship", "stipend_program"]
+  experience_level: "entry"
+  location:
+    country_code: "ET"
+    country_name: "Ethiopia"
+    city: "Addis Ababa"
+    timezone: "Africa/Addis_Ababa"
+  remote_preference: "remote"
+  work_authorization: ["ET"]          # countries you are ALREADY authorized to work in
+  keywords_prioritize: ["open source", "mentorship", "remote"]
+  keywords_penalize: ["senior", "staff", "principal", "clearance", "lead", "director", "manager"]
+  companies_prioritize: []
+
+sources:
+  # Available adapters: greenhouse, lever, ashby, known_programs. Add a name here AND fill its
+  # company list below to enable it. known_programs needs no list (curated Outreachy/GSoC/MLH).
+  enabled: ["greenhouse", "known_programs"]
+  greenhouse_boards: ["gitlab"]       # Greenhouse board tokens (public, no auth)
+  lever_sites: []                     # Lever site slugs, e.g. ["leverdemo"]
+  ashby_orgs: []                      # Ashby org slugs, e.g. ["ashby"]
+  adzuna_country: "gb"
+  adzuna_queries: ["software intern"]
+
+scoring:
+  # Calibrated to the observed MiniLM cosine range (real matches cluster ~0.36–0.43; genuine
+  # engineering roles separate from sales roles around 0.40). The library default is a more
+  # conservative 0.45 — see STATE.md §Live verification for the evidence behind this override.
+  relevance_threshold: 0.40
+  eligibility_disqualify_confidence: 0.75
+
+notify:
+  mode: "file"                        # "file" (zero-dep) | "email" (Gmail SMTP app password)
+  digest_path: "data/digest.html"

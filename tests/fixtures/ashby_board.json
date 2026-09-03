@@ -1,0 +1,42 @@
+{
+  "_recorded_from": "https://api.ashbyhq.com/posting-api/job-board/ashby?includeCompensation=true",
+  "org": "ashby",
+  "jobs": [
+    {
+      "id": "7458d4e9-da2e-47bd-98cb-adfda43d42b2",
+      "title": "Engineering Manager - EU",
+      "location": "Remote - European Union",
+      "employmentType": "FullTime",
+      "workplaceType": "Remote",
+      "isRemote": true,
+      "isListed": true,
+      "jobUrl": "https://jobs.ashbyhq.com/ashby/7458d4e9-da2e-47bd-98cb-adfda43d42b2",
+      "applyUrl": "https://jobs.ashbyhq.com/ashby/7458d4e9-da2e-47bd-98cb-adfda43d42b2/application",
+      "descriptionPlain": "Hi 👋 I’m Colin https://uk.linkedin.com/in/colinhoweuk, Director of Engineering, Europe. How do you feel about software engineers writing product specs, making product decisions, and not breaking down projects into individual tickets? If that sounds exciting (even if a bit scary), read on because I’m looking for an engineering manager to help us build a different type of engineering team and culture at Ashby.\n\nTo start, why do we need to be different? Time and again, I have witnessed engineers kn"
+    },
+    {
+      "id": "86a60834-ba64-484d-9658-afa1bc97a957",
+      "title": "Mid Market Account Executive - EMEA (French Speaking)",
+      "location": "France",
+      "employmentType": "FullTime",
+      "workplaceType": "Remote",
+      "isRemote": true,
+      "isListed": true,
+      "jobUrl": "https://jobs.ashbyhq.com/ashby/86a60834-ba64-484d-9658-afa1bc97a957",
+      "applyUrl": "https://jobs.ashbyhq.com/ashby/86a60834-ba64-484d-9658-afa1bc97a957/application",
+      "descriptionPlain": "ABOUT ASHBY\n\n - We’re building the next generation of enterprise software, starting with products that help talent leaders, recruiters, and managers unlock hiring excellence\n\n - Series D raised in 2025, and growing ARR >100% YoY\n\n - Have thousands of amazing customers including OpenAI, Deliveroo, Lemonade & Alan\n\n - Multiple products to win both land-and-expand and material new business deals\n\n - Rapidly moving up-market with no signs of slowing down\n\n - Implemented assistive AI https://www.ashb"
+    },
+    {
+      "id": "f40ef345-82a8-4956-9150-193b4fdf8183",
+      "title": "Senior Product Designer",
+      "location": "Remote - US",
+      "employmentType": "FullTime",
+      "workplaceType": "Remote",
+      "isRemote": true,
+      "isListed": true,
+      "jobUrl": "https://jobs.ashbyhq.com/ashby/f40ef345-82a8-4956-9150-193b4fdf8183",
+      "applyUrl": "https://jobs.ashbyhq.com/ashby/f40ef345-82a8-4956-9150-193b4fdf8183/application",
+      "descriptionPlain": "Hi! 👋 I'm Chris https://www.linkedin.com/in/chkrlee/, head of Product Design at Ashby.\n\nWe're looking for a versatile, intrinsically motivated designer who is excited to contribute to rethinking how modern software is designed. At Ashby, you'll be part designer, part product manager, part consultant, and part design system manager (or some combination of the 4!). We do design differently here, and if that excites you, read on.\n\nOur unique approach is working - we're growing >100% year-over-year "
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+# Copy to config/profile.yaml and edit. Secrets do NOT go here — they load from env / .env.
+profile:
+  target_roles: ["software engineer intern", "backend intern", "data engineer intern"]
+  target_technologies: ["python", "sql", "docker", "postgres"]
+  employment_types: ["internship", "stipend_program"]
+  experience_level: "entry"
+  location:
+    country_code: "ET"
+    country_name: "Ethiopia"
+    city: "Addis Ababa"
+    timezone: "Africa/Addis_Ababa"
+  remote_preference: "remote"
+  work_authorization: ["ET"]          # countries you are ALREADY authorized to work in
+  keywords_prioritize: ["open source", "mentorship"]
+  keywords_penalize: ["senior", "clearance", "lead"]
+  companies_prioritize: []
+
+sources:
+  enabled: ["greenhouse"]
+  greenhouse_boards: ["gitlab", "stripe"]   # board tokens (public, no auth)
+  lever_sites: []
+  adzuna_country: "gb"
+  adzuna_queries: ["software intern"]
+
+scoring:
+  relevance_threshold: 0.45
+  eligibility_disqualify_confidence: 0.75
+
+notify:
+  mode: "file"                        # "file" (zero-dep) | "email" (Gmail SMTP app password)
+  digest_path: "data/digest.html"
