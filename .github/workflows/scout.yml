@@ -1,0 +1,78 @@
+name: scout
+
+# Zero-cost scheduled run. Public repo → unlimited free Actions minutes (private → 2,000 free/mo).
+#
+# Activation (once, for a new repo): trigger this workflow manually from the Actions tab (the
+# `workflow_dispatch` below) — GitHub does not start `schedule:` triggers until the workflow has run
+# once on the default branch. Committing the DB back each run also keeps the schedule alive
+# (public-repo schedules auto-disable after 60 days of repo inactivity).
+
+on:
+  schedule:
+    # 04:00 UTC daily ≈ 07:00 EAT (Africa/Addis_Ababa, UTC+3). Cron is UTC and best-effort
+    # (15–60 min delays are normal — fine for a daily scout). To pin local time instead, GitHub
+    # supports a per-schedule timezone field: replace the line below with
+    #   - cron: "0 7 * * *"
+    #     timezone: Africa/Addis_Ababa
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+
+# Only one scout run at a time — it commits state back, so overlapping runs would race on push.
+concurrency:
+  group: scout
+  cancel-in-progress: false
+
+permissions:
+  contents: write  # needed to commit data/scout.db back to the repo
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"   # stable wheel availability (torch etc.); code targets >=3.10
+          cache: pip
+
+      # Cache the one-time MiniLM download so only the first run fetches it from HuggingFace.
+      - name: Cache embedding model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-minilm-all-MiniLM-L6-v2-v1
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          # The embedding model is optional by design: if the heavy install fails, the run still
+          # succeeds at $0 on the lexical fallback (load_model() returns None → rules-only scoring).
+          python -m pip install -e ".[embeddings]" || echo "::warning::embeddings unavailable — using lexical fallback ($0)"
+
+      - name: Run scout
+        run: python -m job_scout -c config/profile.yaml -v
+
+      # Surface the digest without committing it (it is gitignored) — downloadable from the run.
+      - name: Upload digest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest
+          path: data/digest.html
+          if-no-files-found: warn
+
+      # Persist the SQLite store back to the repo: it IS the cross-run state (NEW/UPDATED/ACTIVE,
+      # notified_at, gone-detection) and committing it also keeps the schedule alive.
+      - name: Commit state
+        run: |
+          git config user.name "job-scout[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/scout.db
+          if git diff --cached --quiet; then
+            echo "no state changes to commit"
+          else
+            git commit -m "scout: run $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
