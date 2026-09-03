@@ -4,8 +4,13 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from job_scout.models import Opportunity, RemoteStatus
-from job_scout.normalize import infer_remote_status, normalize, strip_tracking
+from job_scout.models import EmploymentType, Opportunity, RemoteStatus
+from job_scout.normalize import (
+    infer_employment_type,
+    infer_remote_status,
+    normalize,
+    strip_tracking,
+)
 
 
 def _opp(**kw) -> Opportunity:
@@ -55,3 +60,32 @@ def test_normalize_does_not_overwrite_existing_discovered_date():
     stamped = datetime(2020, 1, 1, tzinfo=timezone.utc)
     out = normalize(_opp(discovered_date=stamped))
     assert out.discovered_date == stamped
+
+
+def test_infer_employment_type_recognizes_internship_titles_from_unknown():
+    # The Greenhouse case: adapter emits UNKNOWN; an explicit intern title must be recognized.
+    for title in ("Software Engineering Intern", "Backend Internship - Summer 2027",
+                  "Data Science Interns", "Co-op Software Developer", "Coop, Platform"):
+        opp = _opp(title=title, employment_type=EmploymentType.UNKNOWN)
+        assert infer_employment_type(opp) == EmploymentType.INTERNSHIP, title
+
+
+def test_infer_employment_type_does_not_false_match_internal_or_international():
+    # The trap: "Internal"/"International" must NOT be read as an internship. (GitLab's real board
+    # has "Software Engineer (Internal Tooling)".)
+    for title in ("Software Engineer (Internal Tooling)", "International Growth Manager",
+                  "Senior Backend Engineer", "Staff SRE"):
+        opp = _opp(title=title, employment_type=EmploymentType.UNKNOWN)
+        assert infer_employment_type(opp) == EmploymentType.UNKNOWN, title
+
+
+def test_infer_employment_type_never_overrides_a_source_value():
+    # A structured source value (Lever/Ashby) is authoritative — inference must not touch it, even
+    # if the title would otherwise suggest something else.
+    opp = _opp(title="Engineering Intern", employment_type=EmploymentType.FULL_TIME)
+    assert infer_employment_type(opp) == EmploymentType.FULL_TIME
+
+
+def test_normalize_backfills_internship_type_end_to_end():
+    out = normalize(_opp(title="Backend Engineering Intern", employment_type=EmploymentType.UNKNOWN))
+    assert out.employment_type == EmploymentType.INTERNSHIP

@@ -17,12 +17,31 @@ profile:
   companies_prioritize: []
 
 sources:
-  # Available adapters: greenhouse, lever, ashby, known_programs. Add a name here AND fill its
-  # company list below to enable it. known_programs needs no list (curated Outreachy/GSoC/MLH).
-  enabled: ["greenhouse", "known_programs"]
-  greenhouse_boards: ["gitlab"]       # Greenhouse board tokens (public, no auth)
-  lever_sites: []                     # Lever site slugs, e.g. ["leverdemo"]
-  ashby_orgs: []                      # Ashby org slugs, e.g. ["ashby"]
+  # Available adapters: greenhouse, lever, ashby, known_programs. Enable a name here AND fill its
+  # company list. known_programs needs no list (curated Outreachy/GSoC/MLH).
+  #
+  # Seeding (2026-09-03): widen the single-board observation to a small, VERIFIED set of
+  # worldwide-remote companies (the best eligibility fit from Ethiopia). Optimized for high-value
+  # internship / early-career coverage, NOT company count. Every token below was verified to
+  # resolve to a live public board (provenance per line); unverified guesses were dropped, and
+  # verified-but-US-centric boards (ramp, plaid) were excluded as low Ethiopia-internship value.
+  # A bad token would be an isolated no-op anyway (per-source failure boundary).
+  #
+  # INTERNSHIP FIDELITY: worldwide-remote company internships open to Ethiopia are a thin, seasonal
+  # set — many company internships are region-locked and will be (correctly) dropped by eligibility.
+  # The highest-fidelity internship source for ET remains `known_programs` (Outreachy/GSoC/MLH),
+  # already enabled. These ATS boards add calibration breadth; expect modest raw internship yield.
+  # (Re-verify tokens any time with scripts/verify_boards.sh.)
+  enabled: ["greenhouse", "lever", "ashby", "known_programs"]
+  greenhouse_boards: ["gitlab", "sourcegraph91"]
+  #   gitlab        — verified live (project Gate-1 run fetched 234 jobs). All-remote, hires 65+ countries.
+  #   sourcegraph91 — verified via Sourcegraph's own job-board repo + live boards.greenhouse.io/sourcegraph91. All-remote.
+  lever_sites: []
+  #   Left empty: verified Lever accounts (Spotify, Palantir, Plaid, Zoox, WHOOP, Aircall, …) skew
+  #   US/hub-based; none was a clear worldwide-remote internship fit. Add a verified slug when one is.
+  ashby_orgs: ["posthog", "deel"]
+  #   posthog — verified 2026-07 vs api.ashbyhq.com/posting-api/job-board/posthog (19 roles). All-remote, global.
+  #   deel    — verified 2026-07 (live board; may be quiet). Global EoR, all-remote — strong Ethiopia fit.
   adzuna_country: "gb"
   adzuna_queries: ["software intern"]
 
