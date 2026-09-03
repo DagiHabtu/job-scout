@@ -4,15 +4,16 @@ Live cursor. Update at **every task boundary** — this is a deliverable of ever
 not an afterthought. This file, `PLAN.md`, `CLAUDE.md`, and the code are the source of truth —
 never the conversation.
 
-**Last updated:** **GATE 1 PASSED** (Claude Code, live). Built + registered the **Greenhouse
-adapter** (stdlib-only, injectable HTTP, recorded real fixture, 9 hermetic tests), installed and
-verified the **real MiniLM embedding model**, and executed a **real live end-to-end run at `$0`**
-against GitLab's public Greenhouse board. The live run exposed three real scoring/eligibility
-defects, all fixed in place with regression tests. **`pytest -q` → 57 passed.** See §Live
-verification for the executed evidence. Next: fan out more adapters + the `known_programs` source,
-then the scheduled workflow (Phase 2/3).
+**Last updated:** **DEPLOYED + VERIFIED at `$0`** (Claude Code). The project is live and running on
+GitHub Actions: `https://github.com/DagiHabtu/job-scout` (PUBLIC). A `workflow_dispatch` run
+succeeded end-to-end — real scout (233 jobs → 1 notified), digest artifact uploaded, `data/scout.db`
+committed back by the bot, daily schedule active. Phase-2 sources complete (greenhouse + lever +
+ashby + known_programs, all live-verified); **`pytest -q` → 85 passed**; spine unchanged. Adzuna
+deferred (needs a free API key; also a discovery-layer design piece, not a copy-paste adapter);
+hard-logic tuning deferred pending more real-run evidence (per user). See §Phase 3 and §Live
+verification for executed evidence.
 
-**Prior passes:** Gate 0 (spine frozen, fixtures slice green) → Gate-0 execution pass → recovery pass.
+**Prior passes:** Gate 1 (live model + greenhouse) → Gate 0 (spine frozen) → recovery.
 
 ---
 
@@ -20,11 +21,11 @@ then the scheduled workflow (Phase 2/3).
 
 | Field | Value |
 |---|---|
-| **Phase** | 2 — Breadth (entering) |
-| **Gate status** | **Gate 1 PASSED** — real live run at `$0`, correctly ranked, idempotent (evidence below) |
+| **Phase** | 3 — Operations (DEPLOYED); Phase-2 sources complete |
+| **Gate status** | **Deployed + verified at `$0`** — GitHub Actions run 33754711547 green; artifact + DB commit-back confirmed |
 | **Frozen-spine status** | **FROZEN** — unchanged since Gate 0; signatures in `CLAUDE.md` §Frozen spine |
-| **Fan-out** | **ACTIVE** — first adapter (greenhouse) done; more adapters + known_programs next |
-| **Environment** | Local (Claude Code). Python 3.14.6 venv at `job-scout/.venv`, installed `-e .[dev,embeddings]` (pydantic 2.13.5, pytest 9.1.1, torch 2.14.0, sentence-transformers 6.0.1). MiniLM cached under `~/.cache/huggingface`. |
+| **Live repo** | `https://github.com/DagiHabtu/job-scout` (PUBLIC, `main`); workflow `scout` state=active (daily 04:00 UTC ≈ 07:00 EAT) |
+| **Environment** | Local dev: Python 3.14.6 venv (`.[dev,embeddings]`). CI: ubuntu-latest, Python 3.12, model cached. |
 
 ### Frozen spine (FROZEN at Gate 0 — full signatures in `CLAUDE.md` §Frozen spine)
 
@@ -119,22 +120,22 @@ a second run marks records ACTIVE, not NEW.
 
 ## Single next action
 
-**Gate 1 passed; Phase-2 sources DONE** (greenhouse + lever + ashby + known_programs, all
-live-verified) **and the Actions workflow written.** Remaining work is blocked on user input or is
-optional tuning:
+**Deployed + verified at `$0`. The core project is COMPLETE and operating.** Remaining items are
+optional and were consciously deferred:
 
-1. **Activate the workflow on GitHub** (Phase 3, USER STEP): push the repo, run `scout` once via
-   `workflow_dispatch`, confirm the digest artifact uploads and `data/scout.db` commits back. Cannot
-   be done from this (non-git) environment.
-2. **Adzuna discovery layer** (BLOCKED on the user's free `app_id`/`app_key` secret): build
-   `adzuna.py` to FIND new company boards to poll via the ATS adapters (not a record source). It can
-   be written + unit-tested against a hand-made fixture, but not live-verified without the key.
-3. **Hard-logic follow-ups** (see §Live verification residuals + Known defects): GONE detection;
-   tighten single-foreign-city + boilerplate → UNKNOWN; decide digest-overwrite-on-quiet-run policy;
-   broaden relevance-threshold calibration across boards.
+1. **Observe scheduled runs** (no action needed): over the next days confirm the digest evolves and
+   NEW→ACTIVE reconciliation holds. The DB commits back each run.
+2. **Adzuna discovery layer — DEFERRED.** Blocked on the user's free `app_id`/`app_key` (so no real
+   recorded fixture, unlike every other adapter) AND it is a Mode-B *discovery* design piece
+   (find companies → feed the ATS adapters), not a record-source adapter (PLAN §4). Build it when a
+   key is provided, with a real fixture. Not built on a guessed shape.
+3. **Hard-logic tuning — DEFERRED per user** until more real-run evidence: GONE detection; tighten
+   single-foreign-city + boilerplate → UNKNOWN; digest-overwrite-on-quiet-run policy; threshold
+   calibration across more boards. (All logged in §Known defects / §Live verification residuals.)
+4. **More boards/sites/orgs**: the user can widen coverage by editing `config/profile.yaml`
+   (`greenhouse_boards`, `lever_sites`, `ashby_orgs`) and pushing — no code change.
 
-Each adapter touches only its own file + fixture + `_REGISTRY` entry. Do not edit the frozen spine
-without a spine-architect pass + a Decisions entry here.
+Do not edit the frozen spine without a spine-architect pass + a Decisions entry here.
 
 ## What was actually run
 
@@ -263,21 +264,37 @@ Decisions #3–6.)*
 - [ ] Adzuna discovery layer (blocked on the user's free API key)
 - [ ] Hard-logic follow-ups (GONE detection; eligibility precision; threshold calibration)
 
-## Phase 3 (operations) — STARTED
+## Phase 3 (operations) — DEPLOYED + VERIFIED ($0)
 
-- [x] GitHub Actions workflow written + validated (see inventory). **Not yet run on GitHub** — it
-  activates when the repo is pushed and the workflow is dispatched once (this environment is not a
-  git repo). Local `job-scout` runs are the executed evidence to date.
-- [ ] First `workflow_dispatch` on GitHub to activate the schedule; confirm the DB commits back.
+**Live:** `https://github.com/DagiHabtu/job-scout` (PUBLIC, `main`). Deployed and end-to-end verified
+2026-09-03.
+
+- [x] Safety audit clean — no secrets/keys/tokens, no personal email in tracked files; committed
+  with the GitHub noreply identity `142739733+DagiHabtu`; `.venv`/`.env`/egg-info excluded; seed DB
+  dropped so the first CI run started fresh; `.gitattributes` forces LF for the Linux runner.
+- [x] Code pushed (53 files); workflow pushed after the user granted the `workflow` OAuth scope
+  (`gh auth refresh -s workflow` — was blocked on `repo`-only scope).
+- [x] **`workflow_dispatch` run 33754711547 SUCCEEDED in 2m30s.** Executed evidence:
+  - Run scout: `greenhouse: board gitlab → 233 jobs; discovered=233 deduped=201 survived=23 new=23
+    notified=1` (model loaded in CI — matches the local model-backed result).
+  - **Digest artifact** `digest` uploaded (938 bytes).
+  - **DB committed back**: commit `scout: run 2026-09-03T12:23Z` by `job-scout[bot]`;
+    `data/scout.db` (258 KB) now on remote → persistence + schedule keepalive confirmed.
+  - `$0`: public repo (unlimited Actions minutes), local model, no paid services.
+- [x] Workflow `state: active` → daily cron (04:00 UTC ≈ 07:00 EAT) is live. Local synced to the
+  bot commit.
+- [ ] (ongoing) Observe the first few scheduled runs; confirm the digest evolves and NEW→ACTIVE
+  reconciliation holds across days.
 
 ## Resume note
 
 *(Written only when a checkpoint interrupts work mid-task. Empty = nothing in flight.)*
 
-**Nothing in flight.** Clean handoff at a task boundary — Gate 1 passed; all four Phase-2 sources
-built and live-verified (greenhouse + lever + ashby + known_programs); shared `_http`/`_text`
-helpers; the Actions workflow written + YAML-valid; a capstone 4-source live run evidenced;
-**85 tests pass**; spine unchanged. `data/scout.db` holds 23 records from the latest clean
-single-source live run. Next event needs the USER: push to GitHub + one `workflow_dispatch` to
-activate the schedule, and/or provide an Adzuna key for the discovery layer. Spine must not change
-without a spine-architect pass + a Decisions entry here.
+**Nothing in flight. DEPLOYED + VERIFIED.** The project is live at
+`https://github.com/DagiHabtu/job-scout` (PUBLIC) and running on a daily GitHub Actions schedule at
+`$0`; a `workflow_dispatch` run (33754711547) succeeded end-to-end (scout ran, digest artifact
+uploaded, `data/scout.db` committed back). Local `main` synced to the bot commit; **85 tests pass**;
+spine unchanged. Deferred (by choice): Adzuna (needs a key + discovery design), hard-logic tuning
+(needs more real-run evidence). Next event is optional — observe scheduled runs, widen coverage via
+`config/profile.yaml`, or build Adzuna once a key exists. Spine must not change without a
+spine-architect pass + a Decisions entry here.

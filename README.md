@@ -16,15 +16,17 @@ After any context reset, re-read `PLAN.md` and `STATE.md` before doing anything.
 
 ## Status
 
-**Gate 1 PASSED; Phase-2 sources complete.** Real live runs at `$0` produce correctly-ranked,
-idempotent digests. Four sources are live-verified — **Greenhouse**, **Lever**, **Ashby**, and a
-curated **known-programs** source (Outreachy / GSoC / MLH → structurally-worldwide stipend
-programs) — aggregating through one frozen pipeline with cross-source dedupe and an eligibility-first
-gate. The local MiniLM embedding model is wired (with a $0 lexical fallback), and a daily
-**GitHub Actions** workflow runs the scout, commits the SQLite state back (persistence + keepalive),
-and uploads the digest. `pytest -q` → **85 passing**. See `STATE.md` §Live verification for executed
-evidence and §Single next action for what remains (workflow activation on GitHub; Adzuna discovery
-layer, which needs a free API key).
+**Deployed and running at `$0`.** The scout runs daily on **GitHub Actions** — a dispatch run
+succeeded end-to-end (scout executed, digest artifact uploaded, `data/scout.db` committed back for
+persistence + schedule keepalive). Four sources are live-verified — **Greenhouse**, **Lever**,
+**Ashby**, and a curated **known-programs** source (Outreachy / GSoC / MLH → structurally-worldwide
+stipend programs) — aggregating through one frozen pipeline with cross-source dedupe and an
+eligibility-first gate. Relevance uses a local MiniLM model with a `$0` lexical fallback. `pytest -q`
+→ **85 passing**. See `STATE.md` §Phase 3 / §Live verification for executed evidence. Deferred:
+Adzuna discovery (needs a free API key) and hard-logic tuning (pending more real-run data).
+
+Widen coverage without touching code: add board tokens / site slugs / org slugs to
+`config/profile.yaml` (`greenhouse_boards`, `lever_sites`, `ashby_orgs`) and push.
 
 ## Run it
 

@@ -83,10 +83,12 @@ and the MiniLM model is wired. See STATE.md §Live verification for executed evi
 - **Sources (Phase 2, all live-verified):** `greenhouse`, `lever`, `ashby` (each with a recorded
   fixture + hermetic tests, sharing `sources/_http.py` + `_text.py`), and the curated
   `known_programs` (Outreachy/GSoC/MLH). Registered in `cli._REGISTRY`.
-- **Operations (Phase 3, written):** `.github/workflows/scout.yml` — daily $0 run, commit-DB-back
-  keepalive, digest artifact. Awaits activation on a real GitHub repo.
-- **Next:** Adzuna discovery layer (needs a free API key); hard-logic follow-ups (GONE detection,
-  eligibility precision, threshold calibration).
+- **Operations (Phase 3, DEPLOYED + VERIFIED at $0):** `.github/workflows/scout.yml` runs daily on
+  GitHub Actions at `https://github.com/DagiHabtu/job-scout` (public). A dispatch run succeeded
+  end-to-end — scout ran, digest artifact uploaded, `data/scout.db` committed back (persistence +
+  keepalive), schedule active. See STATE.md §Phase 3 for executed evidence.
+- **Deferred:** Adzuna discovery layer (needs a free API key + Mode-B discovery design); hard-logic
+  follow-ups (GONE detection, eligibility precision, threshold calibration) pending more real-run data.
 - **Replace (discard):** none.
 
 The freeze-before-fan-out rule has now been satisfied: the spine is frozen, so adapters and the
