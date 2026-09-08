@@ -54,6 +54,52 @@ calibration pass — do not act on them unilaterally.
 ### Observation log
 *(Append dated entries here as real-run evidence arrives. Empty = none recorded yet.)*
 - 2026-09-03 — Deployment run 33754711547 (dispatch): 233→201→23→1 notified. Baseline; see §Phase 3.
+- 2026-09-08 — **Diagnostic investigation of five consecutive "0 opportunities" reports (Sep 4–8).
+  Read-only; freeze respected (no dispatch, no new runs, no code/config change). Conclusion: the
+  pipeline is HEALTHY; the zeros are correct by design (case 3 + case 4 — state gate + scarcity).**
+  Evidence from Actions history + the committed `data/scout.db` `runs.summary` (funnel per run):
+
+  | run (UTC)   | run_id (Actions) | conclusion | discovered | deduped | survived | new | upd | active | notified |
+  |-------------|------------------|-----------|-----------|---------|----------|-----|-----|--------|----------|
+  | 09-03 disp. | 33754711547      | success   | 233       | 201     | 23       | 23  | 0   | 0      | 1        |
+  | 09-04 cron  | 33852625836      | success   | 249       | 219     | 31       | 10  | 0   | 21     | 0        |
+  | 09-05 cron  | 33953765898      | success   | 245       | 215     | 30       | 1   | 0   | 29     | 0        |
+  | 09-06 cron  | 34021097827      | success   | 247       | 217     | 30       | 0   | 0   | 30     | 0        |
+  | 09-07 cron  | 34101904712      | success   | 247       | 217     | 30       | 0   | 0   | 30     | 0        |
+  | 09-08 cron  | 34204180748      | success   | 245       | 215     | 29       | 0   | 0   | 29     | 0        |
+
+  - **Step 1 (ran?):** All 5 scheduled runs fired daily on `main`, all `conclusion=success`; each
+    committed `data/scout.db` back (bot commits `50ae69b`→`985d29b`→`2064562`→`ef5a935`→`30e97c1`,
+    Sep 4–8) → ran, succeeded, persisted. All used `config/profile.yaml` (workflow cmd
+    `python -m job_scout -c config/profile.yaml -v`). No failed/skipped/silently-green stage. (Local
+    `origin/main` ref was stale at `fe8a9fe` until a read-only `git fetch`; the bot commits were on
+    the remote all along.)
+  - **Step 2/3 (funnel):** Fetch is healthy and stable (~245 discovered, ~215 deduped, ~30 survivors
+    each day — greenhouse ~236–240, ashby 9, lever 0 [empty upstream, `ok=true`], known_programs 0).
+    Counts equal/exceed the Gate-1 baseline (234→201→23). **The count collapses only at the
+    NEW/UPDATED gate**, not at fetch/dedupe/eligibility/hard_filter/scoring.
+  - **Step 4 (state gate):** `opportunities` = 34 rows (32 ACTIVE, 2 stale NEW). Exactly **1** row
+    ever `notified_at` (the Sep-03 GitLab Intermediate Fullstack Engineer). `first_seen`: 23 on
+    Sep-03, 10 on Sep-04, 1 on Sep-05, then 0 new Sep 6–8. The ~30 daily survivors are the SAME
+    records, now ACTIVE + already-notified-gate-passed → 0 notifications is the diff notifier
+    working as designed (`notify.select_for_notification`: NEW/UPDATED ∧ not-notified ∧
+    (score≥threshold ∨ best-fit stipend)).
+  - **Step 5 (threshold/coverage/scarcity):** Only ONE opportunity has ever scored ≥ the 0.40
+    threshold (0.41). Max score among all records first-seen on the new days (Sep 4–5) = **0.3983**,
+    i.e. the Sep-04 (10) and Sep-05 (1) NEW survivors correctly failed the threshold — nothing to
+    notify even before the state gate. Survivors are overwhelmingly senior/sales/AE/manager roles
+    (`employment_type=unknown`, kept by hard_filter), NOT internships; the structurally best-fit
+    class `known_programs`=0 all week (Outreachy opens Dec 7 2026; GSoC 2027), exactly as predicted.
+  - **Classification:** case 3 (found-but-already-known / state gate) + case 4 (scarcity), with the
+    0.40 threshold and thin worldwide-remote-intern coverage as the secondary reason the low-churn
+    new arrivals don't clear the bar. NOT case 1/2/5 (fetch, filtering, runtime all healthy). Working
+    hypothesis CONFIRMED.
+  - **Warranted change:** NONE required — the scraper is healthy and the zeros are the correct output
+    of a working diff notifier against a low-churn, scarce board set. Candidate calibration items for
+    a LATER explicitly-instructed pass (do not act now): (a) split `hard_filter` telemetry into
+    location-reject vs type/experience-reject counts (currently only one post-filter "survived" count
+    is logged); (b) the digest overwrite-on-quiet-run (already logged §Known defects); (c) revisit
+    whether entry/intern coverage should widen — but that is a coverage decision, not a bug.
 
 ---
 
