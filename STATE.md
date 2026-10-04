@@ -1,12 +1,13 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: dfd37ec S1: workflow_dispatch 'seed' input for the delivery acceptance test
-Step in progress: S2
-  Sub-progress: [ ] _geo.py gazetteer  [ ] _classify_location + new decision order  [ ] step-1 known_programs rule (geo_verdict stub until S6) + delete text-mention path  [ ] table-driven tests + existing-test updates w/ justification  [ ] re-classify stored rows (acceptance)  [ ] independent review
+Branch: next-iteration      Last commit: 613e2a1 S2: eligibility — the location field decides first (gazetteer, _classify_location)
+Step in progress: S2 (review open) + S3
+  Sub-progress S2: [x] _geo.py gazetteer  [x] _classify_location + new decision order  [x] step-1 known_programs rule (geo_verdict stub until S6) + text-mention path deleted  [x] tests  [x] re-classify stored rows: 0 bad  [ ] independent review (launched on ef3615d..613e2a1) → findings → tests/fixes
+  Sub-progress S3: [ ] regexes in normalize.py  [ ] infer_employment_type NEW_GRAD  [ ] profile.yaml + example  [ ] title-table tests
 Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending)
-Reviews: S2 open, S5 open, S6 open, final open
-Next action: implement S2 (_geo.py + eligibility by location field).
+Reviews: S2 open (reviewer running; if context was cleared, re-launch it per §11), S5 open, S6 open, final open
+Next action: S3 (type/level inference) while the S2 review runs; then close the S2 review.
 Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up.
 Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC).
 Unverified facts still in code: none yet
@@ -63,6 +64,25 @@ Unverified facts still in code: none yet
   otherwise; workflow: `issues: write`, deliver step before "Commit state" (failure → replay),
   Monday heartbeat issue; `.gitignore` adds `notify.md`, `funnel.md`, `heartbeat.md`. Tests: 4 new
   (`tests/test_delivery.py`) → **100 passed**. Workflow YAML parsed OK. Not pushed, not dispatched.
+- 2026-10-04 — **S2 acceptance passed** (`613e2a1`; review pending). `_geo.py` (countries,
+  regions in/excluding Africa, worldwide tokens, cities, US-state pattern); `_classify_location`
+  labels each `;|/ or and`-separated segment USER/WORLD/BARE/ELSEWHERE/OTHER plus a title region
+  marker. Re-classification of the 50 stored rows (`scripts/reclassify_stored.py`): 24
+  worldwide→excluded, 13 region_includes→excluded, 4 worldwide→unknown, 9 stay worldwide;
+  **positive rows whose location names only non-user places: 0** (was 37). The 9 remaining
+  positives are all Sourcegraph `Remote` rows whose body says "we hire almost anywhere in the
+  world" (the spec's own added phrase) → `WORLDWIDE_REMOTE` 0.7, or 0.5 where US hours are stated.
+  The spec predicted UNKNOWN 0.5 for these; the difference is a fact about Sourcegraph's text, not a
+  rule change. Tests: 34 new → **134 passed**. Updated existing tests (justified inline):
+  `test_stipend_program_is_globally_eligible` (now via `geo_verdict`), text-mention test inverted,
+  `test_known_programs::test_program_ranks_top_tier…` pins `geo_verdict="eligible"`, gate0
+  stipend fixture gains `location_raw="Worldwide"`.
+  Interpretations: (i) a named place beats a worldwide word in the SAME segment ("Anywhere in the
+  US" → excluded); (ii) an ELSEWHERE title marker qualifies a bare "Remote" (needed for the spec's
+  "`Remote` + '…, US [IC5]' → excludes" case); (iii) the step-4 body exclusion rule is kept verbatim
+  incl. its old guard (the spec's own `us-hours` test needs it); (iv) USER + ONSITE/HYBRID in the
+  user's own country/city stays `UNKNOWN 0.4` (Gate-0 Decision #1); (v) "remote" in the location
+  field counts as remote for REMOTE_EXCLUDES_USER vs ONSITE_FOREIGN (both disqualifying).
 
 ---
 
