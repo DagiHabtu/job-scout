@@ -21,16 +21,29 @@ def _opp(**kw) -> Opportunity:
 PROFILE = UserProfile()  # ET-resident, authorized only in ET — the configured default
 
 
-def test_stipend_program_is_globally_eligible():
-    e = classify_eligibility(_opp(employment_type=EmploymentType.STIPEND_PROGRAM,
-                                  description="Outreachy paid open source internship."), PROFILE)
+def test_stipend_program_is_globally_eligible(monkeypatch):
+    # Updated (S2): a curated program round is eligible only on its program's own verified rule
+    # (geo_verdict), not because it is a stipend program.
+    import job_scout.sources.known_programs as kp
+
+    monkeypatch.setattr(kp, "geo_verdict", lambda job_id, country: "eligible")
+    e = classify_eligibility(_opp(employment_type=EmploymentType.STIPEND_PROGRAM, ats_provider="known_programs",
+                                  ats_job_id="x@open", description="Outreachy paid open source internship."), PROFILE)
     assert e.category == EC.STIPEND_PROGRAM_GLOBAL
     assert e.confidence >= 0.85
 
 
-def test_stipend_detected_from_program_name_in_text():
+def test_stipend_program_from_another_source_uses_location_rules():
+    # Updated (S2): "stipend ⇒ worldwide" is no longer assumed outside the curated table.
+    e = classify_eligibility(_opp(employment_type=EmploymentType.STIPEND_PROGRAM,
+                                  description="Outreachy paid open source internship."), PROFILE)
+    assert e.category == EC.UNKNOWN
+
+
+def test_program_name_in_text_is_not_a_program_round():
+    # Inverted (S2): a posting that mentions GSoC is not a GSoC round — the same boilerplate defect as C4.
     e = classify_eligibility(_opp(description="Apply to Google Summer of Code (GSoC) this year."), PROFILE)
-    assert e.category == EC.STIPEND_PROGRAM_GLOBAL
+    assert e.category != EC.STIPEND_PROGRAM_GLOBAL
 
 
 def test_requires_work_auth_is_a_confident_disqualifier():

@@ -91,7 +91,12 @@ def test_best_fit_stipend_surfaces_below_threshold_but_unknown_does_not():
     assert unknown not in picked                      # a low-relevance UNKNOWN does not
 
 
-def test_program_ranks_top_tier_and_notifies_through_the_pipeline(tmp_path):
+def test_program_ranks_top_tier_and_notifies_through_the_pipeline(tmp_path, monkeypatch):
+    # Updated (S2): eligibility now comes from the program's verified rule (geo_verdict); this test
+    # pins the eligible case so it keeps testing ranking + notification.
+    import job_scout.sources.known_programs as kp
+
+    monkeypatch.setattr(kp, "geo_verdict", lambda job_id, country: "eligible")
     cfg = AppConfig()
     cfg.db_path = str(tmp_path / "scout.db")
     cfg.notify.digest_path = str(tmp_path / "digest.html")

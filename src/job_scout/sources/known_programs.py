@@ -106,6 +106,20 @@ _PROGRAMS: tuple[_Program, ...] = (
 )
 
 
+def geo_verdict(ats_job_id: str | None, country: str) -> str:
+    """Geographic eligibility of a program round for `country`: "eligible" | "excluded" | "unknown".
+
+    S2 placeholder: the table does not yet carry dated geographic evidence (added in S6), so every
+    program is "unknown" — surfaced with its uncertainty, never assumed eligible.
+    """
+    return "unknown"
+
+
+def geo_evidence(ats_job_id: str | None) -> list[str]:
+    """The program's quoted rule, URL and check date, for eligibility evidence (S6)."""
+    return []
+
+
 def _active_round(prog: _Program, today: date) -> _Round | None:
     """The earliest round that is open or opening within LEAD_DAYS and not past its deadline."""
     upcoming = sorted((r for r in prog.rounds if today <= r.apply_deadline), key=lambda r: r.apply_deadline)
