@@ -1,7 +1,7 @@
 # STATE
 
 ## RESUME — iteration-2
-Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last commit: e6b94e4 S11: interests / not_interested / strong_interest_terms …
+Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last code commit: e6b94e4 S11 (followed only by STATE-only commits)
 Step in progress: S11 done (acceptance) → final review
   Sub-progress S11: [x] tests first  [x] profile interests / not_interested / strong_interest_terms (target_roles alias)  [x] `qa` out of the role family; golden set re-reported  [x] interest_veto + note  [x] sections + cap 5  [x] commit e6b94e4  [x] final fresh-context review run on bc4154c..e6b94e4 — report RECORDED below ("Final review findings — iteration 2"); do NOT re-run it  [ ] findings → tests first → fix or refute → record outcomes  [ ] end-of-pass STATE  [ ] push iteration-2
 Steps done and verified: S9 (1608ab3 — unit level; email arrival = pending human check 1), S10 (69df1b3, 1213ac8 — review closed). Baseline: spec §12 43422e0; c54fe46.
