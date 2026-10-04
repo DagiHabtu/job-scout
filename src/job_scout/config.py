@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .models import EmploymentType, RemoteStatus
 
@@ -37,7 +37,16 @@ class UserProfile(BaseModel):
     """What the user is looking for and what they are eligible for. All of this is configurable."""
 
     # what they want
-    target_roles: list[str] = Field(default_factory=lambda: ["software engineer intern", "backend intern"])
+    # What the user wants to work on (§12 S11); the title is compared against these. `target_roles` is
+    # accepted as an alias so older configs load.
+    interests: list[str] = Field(default_factory=lambda: ["software engineer intern", "backend intern"])
+    # Current preference, not an absolute exclusion: a title matching one of these is still delivered,
+    # in "Eligible, outside your stated interests" — unless it also names a strong-interest term.
+    not_interested: list[str] = Field(default_factory=lambda: [
+        "qa", "qc", "quality assurance", "manual testing", "crm", "salesforce"])
+    strong_interest_terms: list[str] = Field(default_factory=lambda: [
+        "linux", "kernel", "systems", "infrastructure", "compiler", "embedded", "distributed",
+        "machine learning", "ml", "ai", "research", "open source"])
     target_technologies: list[str] = Field(default_factory=lambda: ["python", "sql", "docker"])
     preferred_industries: list[str] = Field(default_factory=list)
     employment_types: list[EmploymentType] = Field(
@@ -45,6 +54,20 @@ class UserProfile(BaseModel):
     )
     experience_level: str = "entry"          # free text used as an embedding signal
     education: Education = Field(default_factory=lambda: Education())
+
+    @model_validator(mode="before")
+    @classmethod
+    def _target_roles_alias(cls, data):
+        if isinstance(data, dict) and "target_roles" in data:
+            data = dict(data)
+            roles = data.pop("target_roles")
+            data.setdefault("interests", roles)
+        return data
+
+    @property
+    def target_roles(self) -> list[str]:
+        """Old name of `interests` (read-only alias)."""
+        return self.interests
 
     @field_validator("education", mode="before")
     @classmethod

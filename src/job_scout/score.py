@@ -60,12 +60,12 @@ def load_model(model_id: str):
 def embed_similarity(opp: Opportunity, profile: UserProfile, model) -> float | None:
     """Max cosine between the TITLE and each target role. Title only: descriptions start with
     employer boilerplate that the model's 256-token window never gets past (C3)."""
-    if model is None or not profile.target_roles:
+    if model is None or not profile.interests:
         return None
     try:  # pragma: no cover - only where a real model is present
         import numpy as np
 
-        vecs = model.encode([opp.title, *profile.target_roles], normalize_embeddings=True)
+        vecs = model.encode([opp.title, *profile.interests], normalize_embeddings=True)
         return float(np.max(vecs[1:] @ vecs[0]))
     except Exception:
         return None
@@ -90,6 +90,9 @@ def _wb(term: str, text: str) -> bool:
     return bool(term) and re.search(rf"\b{re.escape(term)}\b", text) is not None
 
 
+_STOPWORDS = frozenset({"or", "and", "a", "an", "the", "of", "for", "in"})
+
+
 def lexical_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], list[str], float]:
     title = opp.title.lower()
     hay = f"{opp.title} {opp.description} {' '.join(opp.technologies)}".lower()
@@ -99,7 +102,9 @@ def lexical_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], 
     # Positive signals are FEATURES that can legitimately appear anywhere (a tech named deep in the
     # description is a real match) → scan the whole text, word-boundaried.
     tech_hits = [t for t in profile.target_technologies if _wb(t, hay)]
-    role_hits = [r for r in profile.target_roles if all(_wb(w, hay) for w in r.lower().split())]
+    # interests are phrases ("systems, infrastructure, cloud or DevOps engineering"): every content word
+    role_hits = [r for r in profile.interests
+                 if all(_wb(w, hay) for w in re.findall(r"[a-z0-9+#-]+", r.lower()) if w not in _STOPWORDS)]
     kw_hits = [k for k in profile.keywords_prioritize if _wb(k, hay)]
     matched += [f"tech: {t}" for t in tech_hits]
     matched += [f"role match: {r}" for r in role_hits]
@@ -112,7 +117,7 @@ def lexical_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], 
     concerns += [f"penalized keyword: {k}" for k in penalties]
 
     # Normalize to 0..1: reward overlap breadth, dampened; subtract penalties.
-    want = max(1, len(profile.target_technologies) + len(profile.target_roles))
+    want = max(1, len(profile.target_technologies) + len(profile.interests))
     raw = (len(tech_hits) + 2 * len(role_hits) + len(kw_hits)) / (want + 1)
     score = max(0.0, min(1.0, raw) - 0.15 * len(penalties))
     return matched, concerns, score
@@ -296,6 +301,9 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
     stage_matched, stage_concerns = stage_signals(opp, profile)
     matched += stage_matched
     concerns += stage_concerns
+    interest_matched, interest_concerns = interest_signals(opp, profile)
+    matched += interest_matched
+    concerns += interest_concerns
 
     return Relevance(score=round(final, 4), matched_signals=matched, concerns=concerns, semantic_similarity=sim)
 
@@ -311,7 +319,7 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
 _ROLE_FAMILY = re.compile(
     r"\b(engineer(ing)?|developer|programmer|software|data|machine learning|ml|ai|devops|sre|"
     r"site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|analyst|analytics|"
-    r"scientist|security|qa|research|"
+    r"scientist|security|research|"            # `qa` removed (§12 S11): taste lives in the profile
     r"embedded|computer vision|database)\b",
     re.IGNORECASE,
 )
@@ -336,18 +344,58 @@ _DISCIPLINE_VETO = re.compile(
 _TITLE_QUALIFIER = re.compile(r",\s|\s[-–—|]\s|\(|:\s")
 
 
-def role_family_ok(title: str) -> bool:
+def role_family_ok(title: str, *, family_required: bool = True) -> bool:
     """True when the title names a technical role family and no non-technical veto word.
 
     The role head (text before the first ", " / " - " / "(") is judged on its own when it names a
     family, so a team-name suffix cannot veto it ("Backend Engineer Intern, People Platform" — final
     review M4). A head with no family word ("Intern, Software Engineering") falls back to the whole title.
+    `family_required=False` checks only the vetoes — used for a title that names a technical direction
+    the user listed as not interested ("QA/QC Intern"), so it reaches its own section (§12 S11).
     """
     title = title or ""
     head = _TITLE_QUALIFIER.split(title, maxsplit=1)[0]
     text = head if _ROLE_FAMILY.search(head) else title
-    return (bool(_ROLE_FAMILY.search(text)) and not _ROLE_VETO.search(text)
-            and not _DISCIPLINE_VETO.search(title))
+    family = bool(_ROLE_FAMILY.search(text)) or not family_required
+    return family and not _ROLE_VETO.search(text) and not _DISCIPLINE_VETO.search(title)
+
+
+# --------------------------------------------------------------------------------------------- #
+# Interest (§12 S11) — the user's stated taste, read from the TITLE only (a coarse proxy; the
+# "outside your stated interests" section is the safety net). Carried in Relevance as "interest:".
+# --------------------------------------------------------------------------------------------- #
+
+
+def interest_veto(opp: Opportunity, profile: UserProfile) -> tuple[str | None, str | None]:
+    """(veto term, note): the first `not_interested` term in the title on a word boundary — unless the
+    title also names a `strong_interest_terms` entry, in which case there is no veto and the note says
+    "matches '<term>' but also '<strong term>'"."""
+    title = (opp.title or "").lower()
+    term = next((t for t in profile.not_interested if _wb(t, title)), None)
+    if term is None:
+        return None, None
+    strong = next((t for t in profile.strong_interest_terms if _wb(t, title)), None)
+    if strong:
+        return None, f"matches '{term}' but also '{strong}'"
+    return term, None
+
+
+def interest_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], list[str]]:
+    """(matched, concerns): 'interest:note: …' (kept, with the note) or 'interest:veto: <term>'."""
+    veto, note = interest_veto(opp, profile)
+    if veto:
+        return [], [f"interest:veto: {veto}"]
+    return ([f"interest:note: {note}"] if note else []), []
+
+
+def interest_of(opp: Opportunity) -> tuple[str | None, str | None]:
+    """Read (veto term, note) back from `opp.relevance`."""
+    r = opp.relevance
+    if r is None:
+        return None, None
+    veto = next((x[len("interest:veto: "):] for x in r.concerns if x.startswith("interest:veto: ")), None)
+    note = next((x[len("interest:note: "):] for x in r.matched_signals if x.startswith("interest:note: ")), None)
+    return veto, note
 
 
 # --------------------------------------------------------------------------------------------- #

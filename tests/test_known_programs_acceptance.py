@@ -72,7 +72,7 @@ def test_case_a_qualifying_round(env):
     assert s.notified == 1
     md = _md()
     assert all(x in md for x in (o.title, A[0].url, A[0].geo_quote, *A[0].conditions))
-    assert md.index("Actionable") < md.index(o.title)
+    assert md.index("Apply") < md.index(o.title)          # "Actionable" renamed "Apply" (§12 S11)
     s2 = run_once(cfg, [KnownProgramsSource(today=T, programs=A)], today=T, conn=db)
     assert s2.notified == 0 and s2.gate["already_notified"] == 1
 

@@ -20,7 +20,7 @@ from pathlib import Path
 
 from .config import AppConfig
 from .models import EligibilityCategory, EmploymentType, Lifecycle, Opportunity
-from .score import role_family_ok, stage_of
+from .score import interest_of, role_family_ok, stage_of
 
 # Statuses that are worth telling the user about. ACTIVE (seen again, unchanged) is deliberately
 # excluded — re-announcing an unchanged posting is exactly the noise we are avoiding.
@@ -28,6 +28,7 @@ _NOTIFIABLE = frozenset({Lifecycle.NEW, Lifecycle.UPDATED})
 
 UNKNOWN_INTERN_CAP = 5     # "Check eligibility" internships per run (stipend programs are outside it)
 ASPIRATIONAL_CAP = 2       # advanced-degree (MSc/PhD) roles per run (§12 S10)
+OUTSIDE_INTERESTS_CAP = 5  # title-and-link lines for eligible roles outside the stated interests (§12 S11)
 _TARGET_CLASS = frozenset({EmploymentType.INTERNSHIP, EmploymentType.NEW_GRAD})
 
 
@@ -54,7 +55,9 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
         return None if cat in _POSITIVE or cat == EligibilityCategory.UNKNOWN else "eligibility_negative"
     if opp.employment_type not in _TARGET_CLASS:
         return "not_target_class"
-    if not role_family_ok(opp.title):
+    # A title naming a not-interested technical direction ("QA/QC Intern") is checked only for the
+    # non-technical vetoes, so it reaches "Eligible, outside your stated interests" (§12 S11).
+    if not role_family_ok(opp.title, family_required=interest_of(opp)[0] is None):
         return "role_family"
     # Stage fit (§12 S10): stated conditions a current student cannot meet now. An advanced-degree
     # role with positive eligibility is selected into "Aspirational" (capped in `gate_reasons`).
@@ -84,6 +87,9 @@ def gate_reasons(opps: list[Opportunity], threshold: float) -> list[str | None]:
     aspirational = [i for i, (o, r) in enumerate(zip(opps, out)) if r is None and section_of(o) == ASPIRATIONAL]
     for i in sorted(aspirational, key=lambda i: -_title_fit(opps[i]))[ASPIRATIONAL_CAP:]:
         out[i] = "stage:advanced_cap"
+    outside = [i for i, (o, r) in enumerate(zip(opps, out)) if r is None and section_of(o) == OUTSIDE_INTERESTS]
+    for i in sorted(outside, key=lambda i: -_title_fit(opps[i]))[OUTSIDE_INTERESTS_CAP:]:
+        out[i] = "interest:cap"
     return out
 
 
@@ -194,9 +200,11 @@ def write_digest(digest_html: str, cfg: AppConfig) -> str:
 # Issue body (Markdown) — the push channel: the workflow posts it as a GitHub Issue
 # --------------------------------------------------------------------------------------------- #
 
-ACTIONABLE = "Actionable"
+ACTIONABLE = "Apply"       # §12 S11 (was "Actionable")
 CHECK_ELIGIBILITY = "Check eligibility"
 ASPIRATIONAL = "Aspirational"
+OUTSIDE_INTERESTS = "Eligible, outside your stated interests"
+SECTIONS = (ACTIONABLE, CHECK_ELIGIBILITY, ASPIRATIONAL, OUTSIDE_INTERESTS)
 _POSITIVE = frozenset({
     EligibilityCategory.STIPEND_PROGRAM_GLOBAL,
     EligibilityCategory.WORLDWIDE_REMOTE,
@@ -205,12 +213,17 @@ _POSITIVE = frozenset({
 
 
 def section_of(opp: Opportunity) -> str:
-    """A positive eligibility verdict is actionable — or aspirational when the role states an MSc/PhD
-    requirement (stipend programs never are); anything else is surfaced with its doubt."""
+    """A positive eligibility verdict → "Apply", unless the role states an MSc/PhD requirement
+    ("Aspirational") or its title names a not-interested direction ("Eligible, outside your stated
+    interests"); stipend programs are always "Apply". Anything else is surfaced with its doubt."""
     if not (opp.eligibility and opp.eligibility.category in _POSITIVE):
         return CHECK_ELIGIBILITY
-    if opp.employment_type != EmploymentType.STIPEND_PROGRAM and stage_of(opp)[0] == "advanced_degree":
+    if opp.employment_type == EmploymentType.STIPEND_PROGRAM:
+        return ACTIONABLE
+    if stage_of(opp)[0] == "advanced_degree":
         return ASPIRATIONAL
+    if interest_of(opp)[0]:
+        return OUTSIDE_INTERESTS
     return ACTIONABLE
 
 
@@ -228,7 +241,13 @@ def _issue_item(opp: Opportunity) -> str:
     if stage and opp.employment_type != EmploymentType.STIPEND_PROGRAM:
         lines.append(f"  - stage: **{stage}**")
         lines += [f"    - {x}" for x in stage_ev]
-    matched = [x for x in (opp.relevance.matched_signals if opp.relevance else []) if not x.startswith("stage:")]
+    veto, note = interest_of(opp)
+    if veto:
+        lines.append(f"  - outside your stated interests ('{veto}')")
+    if note:
+        lines.append(f"  - interest: {note}")
+    matched = [x for x in (opp.relevance.matched_signals if opp.relevance else [])
+               if not x.startswith(("stage:", "interest:"))]
     if matched:
         lines.append(f"  - matched: {', '.join(matched)}")
     if opp.ats_provider == "himalayas":
@@ -246,14 +265,21 @@ def _title_fit(opp: Opportunity) -> float:
 
 
 def render_issue_md(opps: list[Opportunity], cfg: AppConfig) -> str:
-    """One task-list line per item (tick the ones worth applying to), grouped into "Actionable" and
-    "Check eligibility", each with its eligibility evidence and matched signals."""
+    """One task-list line per item (tick the ones worth applying to), in the sections "Apply" (ordered
+    by relevance score) · "Check eligibility" · "Aspirational" · "Eligible, outside your stated
+    interests" (title-and-link lines only), each detailed item with its eligibility and stage
+    evidence. Empty sections are omitted."""
     out = [f"Job Scout — {len(opps)} new for {cfg.profile.location.country_name}. "
            "Tick the items worth applying to.\n"]
-    for section in (ACTIONABLE, CHECK_ELIGIBILITY, ASPIRATIONAL):
-        items = sorted((o for o in opps if section_of(o) == section), key=_title_fit, reverse=True)
-        if items:
-            out.append(f"## {section}\n")
+    for section in SECTIONS:
+        key = (lambda o: o.relevance.score if o.relevance else 0.0) if section == ACTIONABLE else _title_fit
+        items = sorted((o for o in opps if section_of(o) == section), key=key, reverse=True)
+        if not items:
+            continue
+        out.append(f"## {section}\n")
+        if section == OUTSIDE_INTERESTS:      # title-and-link lines only (§12 S11)
+            out.append("\n".join(f"- [ ] [{o.title}]({o.canonical_url or o.apply_url})" for o in items) + "\n")
+        else:
             out.append("\n".join(_issue_item(o) for o in items) + "\n")
     return _with_cc("\n".join(out))
 
