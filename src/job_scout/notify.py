@@ -14,18 +14,21 @@ dependency; the file digest is the always-available default.
 
 from __future__ import annotations
 
+import os
 from html import escape
 from pathlib import Path
 
 from .config import AppConfig
 from .models import EligibilityCategory, EmploymentType, Lifecycle, Opportunity
-from .score import role_family_ok
+from .score import interest_of, role_family_ok, stage_of
 
 # Statuses that are worth telling the user about. ACTIVE (seen again, unchanged) is deliberately
 # excluded — re-announcing an unchanged posting is exactly the noise we are avoiding.
 _NOTIFIABLE = frozenset({Lifecycle.NEW, Lifecycle.UPDATED})
 
 UNKNOWN_INTERN_CAP = 5     # "Check eligibility" internships per run (stipend programs are outside it)
+ASPIRATIONAL_CAP = 2       # advanced-degree (MSc/PhD) roles per run (§12 S10)
+OUTSIDE_INTERESTS_CAP = 5  # title-and-link lines for eligible roles outside the stated interests (§12 S11)
 _TARGET_CLASS = frozenset({EmploymentType.INTERNSHIP, EmploymentType.NEW_GRAD})
 
 
@@ -52,8 +55,17 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
         return None if cat in _POSITIVE or cat == EligibilityCategory.UNKNOWN else "eligibility_negative"
     if opp.employment_type not in _TARGET_CLASS:
         return "not_target_class"
-    if not role_family_ok(opp.title):
+    # Role family before interest: a non-technical title is never selected, whatever its taste verdict
+    # ("CRM Assistant" → role_family); a technical not-interested one goes to its own section (§12 S11).
+    if not role_family_ok(opp.title, opp.description):
         return "role_family"
+    # Stage fit (§12 S10): stated conditions a current student cannot meet now. An advanced-degree
+    # role with positive eligibility is selected into "Aspirational" (capped in `gate_reasons`).
+    stage, _ = stage_of(opp)
+    if stage == "graduate_only":
+        return "stage:graduate_only"
+    if stage == "experience_required":
+        return "stage:experience"
     if cat in _POSITIVE:
         return None
     if cat == EligibilityCategory.UNKNOWN:
@@ -62,16 +74,22 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
 
 
 def gate_reasons(opps: list[Opportunity], threshold: float) -> list[str | None]:
-    """`gate_reason` for each record in order, plus the per-run cap on UNKNOWN-eligibility
-    internships: the best title matches are kept, the overflow gets `unknown_cap`."""
+    """`gate_reason` for each record in order, plus the per-run caps, one per section: UNKNOWN-eligibility
+    internships in "Check eligibility" (`unknown_cap`), "Aspirational" (`stage:advanced_cap`), "Eligible,
+    outside your stated interests" (`interest:cap`). The best title matches are kept."""
     out = [gate_reason(o, threshold) for o in opps]
     capped = [
         i for i, (o, r) in enumerate(zip(opps, out))
-        if r is None and o.employment_type == EmploymentType.INTERNSHIP
-        and (o.eligibility is None or o.eligibility.category == EligibilityCategory.UNKNOWN)
+        if r is None and o.employment_type == EmploymentType.INTERNSHIP and section_of(o) == CHECK_ELIGIBILITY
     ]
     for i in sorted(capped, key=lambda i: -_title_fit(opps[i]))[UNKNOWN_INTERN_CAP:]:
         out[i] = "unknown_cap"
+    aspirational = [i for i, (o, r) in enumerate(zip(opps, out)) if r is None and section_of(o) == ASPIRATIONAL]
+    for i in sorted(aspirational, key=lambda i: -_title_fit(opps[i]))[ASPIRATIONAL_CAP:]:
+        out[i] = "stage:advanced_cap"
+    outside = [i for i, (o, r) in enumerate(zip(opps, out)) if r is None and section_of(o) == OUTSIDE_INTERESTS]
+    for i in sorted(outside, key=lambda i: -_title_fit(opps[i]))[OUTSIDE_INTERESTS_CAP:]:
+        out[i] = "interest:cap"
     return out
 
 
@@ -103,8 +121,12 @@ def _fmt_relevance(opp: Opportunity) -> str:
     r = opp.relevance
     if r is None:
         return ""
-    matched = "".join(f"<li>{escape(x)}</li>" for x in r.matched_signals)
-    concerns = "".join(f"<li class='concern'>{escape(x)}</li>" for x in r.concerns)
+    matched = "".join(f"<li>{escape(x)}</li>" for x in r.matched_signals if not x.startswith("stage:"))
+    concerns = "".join(f"<li class='concern'>{escape(x)}</li>" for x in r.concerns if not x.startswith("stage:"))
+    stage, stage_ev = stage_of(opp)
+    if stage and opp.employment_type != EmploymentType.STIPEND_PROGRAM:
+        quotes = "; ".join(stage_ev)
+        concerns += f"<li class='concern'>stage: <b>{escape(stage)}</b> — {escape(quotes)}</li>"
     sim = f" · semantic {r.semantic_similarity:.2f}" if r.semantic_similarity is not None else ""
     return (
         f"<div class='rel'>relevance: <b>{r.score:.2f}</b>{sim}"
@@ -178,8 +200,11 @@ def write_digest(digest_html: str, cfg: AppConfig) -> str:
 # Issue body (Markdown) — the push channel: the workflow posts it as a GitHub Issue
 # --------------------------------------------------------------------------------------------- #
 
-ACTIONABLE = "Actionable"
+ACTIONABLE = "Apply"       # §12 S11 (was "Actionable")
 CHECK_ELIGIBILITY = "Check eligibility"
+ASPIRATIONAL = "Aspirational"
+OUTSIDE_INTERESTS = "Eligible, outside your stated interests"
+SECTIONS = (ACTIONABLE, CHECK_ELIGIBILITY, ASPIRATIONAL, OUTSIDE_INTERESTS)
 _POSITIVE = frozenset({
     EligibilityCategory.STIPEND_PROGRAM_GLOBAL,
     EligibilityCategory.WORLDWIDE_REMOTE,
@@ -187,9 +212,24 @@ _POSITIVE = frozenset({
 })
 
 
+_UNCONFIRMED = "eligibility not confirmed — check it before applying"
+
+
+def _positive(opp: Opportunity) -> bool:
+    return bool(opp.eligibility and opp.eligibility.category in _POSITIVE)
+
+
 def section_of(opp: Opportunity) -> str:
-    """A positive eligibility verdict is actionable; anything else is surfaced with its doubt."""
-    return ACTIONABLE if opp.eligibility and opp.eligibility.category in _POSITIVE else CHECK_ELIGIBILITY
+    """The least actionable section wins (Dagi, 2026-10-04): a title naming a not-interested direction →
+    "Eligible, outside your stated interests"; an MSc/PhD requirement → "Aspirational" — both whatever
+    the eligibility (UNKNOWN is noted on the item). "Check eligibility" holds only roles that would
+    otherwise be in "Apply". Stipend programs: positive → "Apply", else "Check eligibility"."""
+    if opp.employment_type != EmploymentType.STIPEND_PROGRAM:
+        if interest_of(opp)[0]:
+            return OUTSIDE_INTERESTS
+        if stage_of(opp)[0] == "advanced_degree":
+            return ASPIRATIONAL
+    return ACTIONABLE if _positive(opp) else CHECK_ELIGIBILITY
 
 
 def _issue_item(opp: Opportunity) -> str:
@@ -202,8 +242,21 @@ def _issue_item(opp: Opportunity) -> str:
     if e is not None:
         lines.append(f"  - eligibility: **{e.category.value}** (confidence {e.confidence:.2f})")
         lines += [f"    - {x}" for x in e.evidence]
-    if opp.relevance and opp.relevance.matched_signals:
-        lines.append(f"  - matched: {', '.join(opp.relevance.matched_signals)}")
+    if not _positive(opp) and section_of(opp) != CHECK_ELIGIBILITY:
+        lines.append(f"  - {_UNCONFIRMED}")
+    stage, stage_ev = stage_of(opp)
+    if stage and opp.employment_type != EmploymentType.STIPEND_PROGRAM:
+        lines.append(f"  - stage: **{stage}**")
+        lines += [f"    - {x}" for x in stage_ev]
+    veto, note = interest_of(opp)
+    if veto:
+        lines.append(f"  - outside your stated interests ('{veto}')")
+    if note:
+        lines.append(f"  - interest: {note}")
+    matched = [x for x in (opp.relevance.matched_signals if opp.relevance else [])
+               if not x.startswith(("stage:", "interest:"))]
+    if matched:
+        lines.append(f"  - matched: {', '.join(matched)}")
     if opp.ats_provider == "himalayas":
         listing = opp.ats_job_id if (opp.ats_job_id or "").startswith("http") else url
         lines.append(f"  - via [Himalayas]({listing})")
@@ -219,16 +272,32 @@ def _title_fit(opp: Opportunity) -> float:
 
 
 def render_issue_md(opps: list[Opportunity], cfg: AppConfig) -> str:
-    """One task-list line per item (tick the ones worth applying to), grouped into "Actionable" and
-    "Check eligibility", each with its eligibility evidence and matched signals."""
+    """One task-list line per item (tick the ones worth applying to), in the sections "Apply" (ordered
+    by relevance score) · "Check eligibility" · "Aspirational" · "Eligible, outside your stated
+    interests" (title-and-link lines only), each detailed item with its eligibility and stage
+    evidence. Empty sections are omitted."""
     out = [f"Job Scout — {len(opps)} new for {cfg.profile.location.country_name}. "
            "Tick the items worth applying to.\n"]
-    for section in (ACTIONABLE, CHECK_ELIGIBILITY):
-        items = sorted((o for o in opps if section_of(o) == section), key=_title_fit, reverse=True)
-        if items:
-            out.append(f"## {section}\n")
+    for section in SECTIONS:
+        key = (lambda o: o.relevance.score if o.relevance else 0.0) if section == ACTIONABLE else _title_fit
+        items = sorted((o for o in opps if section_of(o) == section), key=key, reverse=True)
+        if not items:
+            continue
+        out.append(f"## {section}\n")
+        if section == OUTSIDE_INTERESTS:      # title-and-link lines only (§12 S11)
+            out.append("\n".join(f"- [ ] [{o.title}]({o.canonical_url or o.apply_url})"
+                                 + ("" if _positive(o) else f" — {_UNCONFIRMED}") for o in items) + "\n")
+        else:
             out.append("\n".join(_issue_item(o) for o in items) + "\n")
-    return "\n".join(out)
+    return _with_cc("\n".join(out))
+
+
+def _with_cc(body: str) -> str:
+    """End an issue body with `cc @<owner>` (S9): a mention is a "participating" notification, which
+    GitHub sends even when the owner does not watch the repository. Omitted when the env var is
+    unset (local runs)."""
+    owner = os.environ.get("GITHUB_REPOSITORY_OWNER", "").strip()
+    return f"{body.rstrip()}\n\ncc @{owner}\n" if owner else body
 
 
 # --------------------------------------------------------------------------------------------- #
@@ -277,15 +346,11 @@ def render_funnel_md(rec: dict) -> str:
     out.append(_counts_table("Eligibility (after classify)", rec.get("by_eligibility", {}), "category"))
 
     f = rec.get("internship_funnel", {})
-    out.append(f"**Internship / stipend-program funnel:** fetched {f.get('fetched', 0)}\n")
+    out.append(f"**Target-class funnel (internship / new grad / stipend program):** fetched {f.get('fetched', 0)}\n")
     if f.get("outcomes"):
         out.append(_counts_table("Internship outcomes", f["outcomes"]))
     if f.get("rejected_samples"):
-        rows = "".join(
-            f"| {_md(s['title'])} | {_md(s['company'])} | {_md(s['location'])} | {_md(s['reason'])} | {_md(s['evidence'])} |\n"
-            for s in f["rejected_samples"]
-        )
-        out.append("| title | company | location | reason | evidence |\n|---|---|---|---|---|\n" + rows)
+        out.append(_samples_table(f["rejected_samples"]))
 
     nm = rec.get("near_misses", [])
     if nm:
@@ -300,6 +365,27 @@ def render_funnel_md(rec: dict) -> str:
             "|---|---|---|---|---|--:|---|\n" + rows
         )
     return "\n".join(out)
+
+
+MAX_SAMPLES = 5
+STAGE_SAMPLE_RESERVE = 2
+_STAGE_REJECTIONS = frozenset({"stage:graduate_only", "stage:experience"})   # judgements, not cap overflows
+
+
+def pick_samples(cands: list[dict], n: int = MAX_SAMPLES, reserve: int = STAGE_SAMPLE_RESERVE) -> list[dict]:
+    """Up to `n` rejected samples in their original order, at least `reserve` of them stage rejections
+    when that many exist, so a wrong stage rejection is visible (§12; final review M6)."""
+    stage = [i for i, c in enumerate(cands) if c["reason"] in _STAGE_REJECTIONS][:reserve]
+    rest = [i for i in range(len(cands)) if i not in stage][: n - len(stage)]
+    return [cands[i] for i in sorted(stage + rest)]
+
+
+def _samples_table(samples: list[dict]) -> str:
+    rows = "".join(
+        f"| {_md(s['title'])} | {_md(s['company'])} | {_md(s['location'])} | {_md(s['reason'])} | {_md(s['evidence'])} |\n"
+        for s in samples
+    )
+    return "| title | company | location | reason | evidence |\n|---|---|---|---|---|\n" + rows
 
 
 def _sum_counts(dicts) -> dict[str, int]:
@@ -326,9 +412,15 @@ def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> 
         out.append(_counts_table("Hard-filter rejects (7 runs)", _sum_counts(r.get("rejects") for r in records)))
         out.append(_counts_table("Notify-gate reasons (7 runs)", _sum_counts(r.get("gate") for r in records)))
         f_fetched = sum(r.get("internship_funnel", {}).get("fetched", 0) for r in records)
-        out.append(f"**Internship / stipend-program records fetched (7 runs):** {f_fetched}\n")
+        out.append(f"**Target-class records fetched — internship / new grad / stipend program (7 runs):** {f_fetched}\n")
         out.append(_counts_table("Internship outcomes (7 runs)",
                                  _sum_counts(r.get("internship_funnel", {}).get("outcomes") for r in records)))
+        seen: dict[tuple, dict] = {}
+        for r in records:
+            for s in r.get("internship_funnel", {}).get("rejected_samples", []):
+                seen.setdefault((s["title"], s["company"]), s)
+        if seen:
+            out.append("**Rejected target-class samples (7 runs)**\n\n" + _samples_table(pick_samples(list(seen.values()))))
         best: dict[tuple, dict] = {}
         for r in records:
             for n in r.get("near_misses", []):
@@ -348,4 +440,4 @@ def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> 
             )
     if extra:
         out.append("\n".join(extra) + "\n")
-    return "\n".join(out)
+    return _with_cc("\n".join(out))

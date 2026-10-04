@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Literal
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .models import EmploymentType, RemoteStatus
 
@@ -24,18 +25,55 @@ class Location(BaseModel):
     timezone: str = "Africa/Addis_Ababa"     # EAT, UTC+3 — used for scheduling and TZ-overlap scoring
 
 
+class Education(BaseModel):
+    """Candidate stage (spec §12 S10): decides which stated requirements the user can meet now."""
+
+    status: Literal["undergraduate", "graduate"] = "undergraduate"
+    accept_graduate_programs: bool = False     # graduate-only roles (completed degree required)
+    max_required_years: int = 2                # roles demanding more years of experience are not surfaced
+
+
 class UserProfile(BaseModel):
     """What the user is looking for and what they are eligible for. All of this is configurable."""
 
     # what they want
-    target_roles: list[str] = Field(default_factory=lambda: ["software engineer intern", "backend intern"])
+    # What the user wants to work on (§12 S11); the title is compared against these. `target_roles` is
+    # accepted as an alias so older configs load.
+    interests: list[str] = Field(default_factory=lambda: ["software engineer intern", "backend intern"])
+    # Current preference, not an absolute exclusion: a title matching one of these is still delivered,
+    # in "Eligible, outside your stated interests" — unless it also names a strong-interest term.
+    not_interested: list[str] = Field(default_factory=lambda: [
+        "qa", "qc", "quality assurance", "manual testing", "crm", "salesforce"])
+    strong_interest_terms: list[str] = Field(default_factory=lambda: [
+        "linux", "kernel", "systems", "infrastructure", "compiler", "embedded", "distributed",
+        "machine learning", "ml", "ai", "research", "open source"])
     target_technologies: list[str] = Field(default_factory=lambda: ["python", "sql", "docker"])
     preferred_industries: list[str] = Field(default_factory=list)
     employment_types: list[EmploymentType] = Field(
         default_factory=lambda: [EmploymentType.INTERNSHIP, EmploymentType.STIPEND_PROGRAM]
     )
     experience_level: str = "entry"          # free text used as an embedding signal
-    education: str | None = None
+    education: Education = Field(default_factory=lambda: Education())
+
+    @model_validator(mode="before")
+    @classmethod
+    def _target_roles_alias(cls, data):
+        if isinstance(data, dict) and "target_roles" in data:
+            data = dict(data)
+            roles = data.pop("target_roles")
+            data.setdefault("interests", roles)
+        return data
+
+    @property
+    def target_roles(self) -> list[str]:
+        """Old name of `interests` (read-only alias)."""
+        return self.interests
+
+    @field_validator("education", mode="before")
+    @classmethod
+    def _legacy_education(cls, v):
+        # the old field was free text and unused; a string (or null) loads as the defaults
+        return {} if v is None or isinstance(v, str) else v
 
     # where they are / what they can take (drives eligibility — see eligibility.py)
     location: Location = Field(default_factory=Location)

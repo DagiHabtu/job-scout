@@ -33,7 +33,8 @@ def test_issue_md_sections_links_and_attribution():
     good = _opp("Good Intern", EligibilityCategory.WORLDWIDE_REMOTE, "himalayas", "https://himalayas.app/companies/co/jobs/good")
     doubt = _opp("Doubt Intern", EligibilityCategory.UNKNOWN)
     md = render_issue_md([doubt, good], AppConfig())
-    assert md.index("## Actionable") < md.index("Good Intern") < md.index("## Check eligibility") < md.index("Doubt Intern")
+    # "Actionable" renamed "Apply" (§12 S11)
+    assert md.index("## Apply") < md.index("Good Intern") < md.index("## Check eligibility") < md.index("Doubt Intern")
     assert "- [ ] [Good Intern](https://x/Good Intern) — Co · internship · Remote" in md
     assert "eligibility: **worldwide_remote** (confidence 0.85)" in md
     assert "evidence for Good Intern" in md and "matched: tech: python" in md

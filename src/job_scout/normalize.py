@@ -28,8 +28,14 @@ def strip_tracking(url: str) -> str:
 _INTERN_TITLE = re.compile(
     r"\b(intern(ship)?s?|co-?ops?|working student|werkstudent(in)?|trainee|apprentice(ship)?)\b", re.IGNORECASE
 )
+# S10 split: "graduate / new grad" titles mean a completed degree, so they are not the same stage as
+# junior / early-career for a current student. Both are typed NEW_GRAD; stage_fit marks the former.
+_GRAD_PROGRAM_TITLE = re.compile(
+    r"\b(graduate|new[- ]grad(uate)?|recent graduate)\b(?!\s+(student|degree|research|teaching|assistant))",
+    re.IGNORECASE
+)
 _ENTRY_TITLE = re.compile(
-    r"\b(junior|jr\.?|entry[- ]level|new[- ]grad(uate)?|graduate|early[- ]career|associate (software|data|ml|"
+    r"\b(junior|jr\.?|entry[- ]level|early[- ]career|associate (software|data|ml|"
     r"machine learning|devops|platform|cloud|security|qa|site reliability) (engineer|developer|analyst|scientist))\b",
     re.IGNORECASE,
 )
@@ -56,7 +62,7 @@ def infer_employment_type(opp: Opportunity) -> EmploymentType:
         return EmploymentType.INTERNSHIP
     if (
         opp.employment_type in (EmploymentType.UNKNOWN, EmploymentType.FULL_TIME)
-        and _ENTRY_TITLE.search(title)
+        and (_ENTRY_TITLE.search(title) or _GRAD_PROGRAM_TITLE.search(title))
         and not _SENIOR_TITLE.search(title)
     ):
         return EmploymentType.NEW_GRAD

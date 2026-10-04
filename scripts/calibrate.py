@@ -42,7 +42,7 @@ def main() -> None:
         return
     import numpy as np
 
-    roles = model.encode(cfg.profile.target_roles, normalize_embeddings=True)
+    roles = model.encode(cfg.profile.interests, normalize_embeddings=True)
 
     def sim(texts):
         v = model.encode(texts, normalize_embeddings=True)
@@ -56,7 +56,7 @@ def main() -> None:
     db = sqlite3.connect(ROOT / "data/scout.db")
     gl = [json.loads(r[0]) for r in db.execute("SELECT raw FROM opportunities WHERE company='GitLab'")][:10]
     if gl:
-        blob = " ".join([*cfg.profile.target_roles, *cfg.profile.target_technologies])
+        blob = " ".join([*cfg.profile.interests, *cfg.profile.target_technologies])
         b = model.encode([blob], normalize_embeddings=True)[0]
         full = model.encode([f"{d['title']}. {d['description']}" for d in gl], normalize_embeddings=True) @ b
         title = sim([d["title"] for d in gl])

@@ -58,16 +58,20 @@ def test_unknown_internship_cap():
     assert rs[-1] is None and rs[-2] is None
 
 
-def test_issue_sections_order_by_title_similarity():
-    # score and similarity disagree, so only a sort by title similarity passes (S5 review M2)
+def test_issue_sections_order():
+    # §12 S11: "Apply" is ordered by relevance score; other sections keep title similarity (S5 review M2).
+    # Score and similarity disagree, so each section's sort key is pinned.
     low = _o(title="Data Engineer Intern", sim=0.3)
     low.relevance.score = 0.9
     high = _o(title="Software Engineer Intern", sim=0.7)
     high.relevance.score = 0.1
-    doubt = _o(title="Backend Intern", cat=EC.UNKNOWN, sim=0.9)
-    md = render_issue_md([low, doubt, high], AppConfig())
-    assert md.index("Software Engineer Intern") < md.index("Data Engineer Intern") < md.index("Check eligibility")
-    assert md.index("Check eligibility") < md.index("Backend Intern")
+    d1 = _o(title="Backend Intern", cat=EC.UNKNOWN, sim=0.9)
+    d1.relevance.score = 0.1
+    d2 = _o(title="Platform Intern", cat=EC.UNKNOWN, sim=0.2)
+    d2.relevance.score = 0.9
+    md = render_issue_md([low, d2, d1, high], AppConfig())
+    assert md.index("Data Engineer Intern") < md.index("Software Engineer Intern") < md.index("Check eligibility")
+    assert md.index("Check eligibility") < md.index("Backend Intern") < md.index("Platform Intern")
 
 
 def test_role_family_golden_precision_and_recall():

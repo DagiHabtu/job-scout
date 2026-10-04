@@ -1,0 +1,472 @@
+{
+ "_about": "The 9 records delivered by run 37200027560 on 2026-10-04, copied verbatim (column `raw`) from data/scout.db at origin/main bc4154c, with Dagi's labels and the section placements he confirmed (spec §12 'Acceptance for iteration 2'). Fitted to these nine items: a regression guard, not a measure of generalisation.",
+ "records": [
+  {
+   "key": "greenhouse:5370815",
+   "dagi_label": "apply — genuinely interesting, a stretch",
+   "expected": "Apply",
+   "record": {
+    "title": "Junior Linux Kernel Engineer - Ubuntu",
+    "company": "Canonical",
+    "apply_url": "https://job-boards.greenhouse.io/canonical/jobs/5370815",
+    "canonical_url": "https://job-boards.greenhouse.io/canonical/jobs/5370815",
+    "ats_provider": "greenhouse",
+    "ats_job_id": "5370815",
+    "content_fingerprint": "6fee003c7b41de89",
+    "location_raw": "Home based - Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Canonical is a leading provider of open source software and operating systems to the global enterprise and technology markets. Our platform, Ubuntu, is very widely used in breakthrough enterprise initiatives such as public cloud, data science, AI, engineering innovation, and IoT. Our customers include the world's leading public cloud and silicon providers, and industry leaders in many sectors. The company is a pioneer of global distributed collaboration, with 1200+ colleagues in 75+ countries and very few office-based roles. Teams meet two to four times yearly in person, in interesting locations around the world, to align on strategy and execution. The company is founder-led, profitable, and growing. Every year we select new junior professionals into the Canonical Kernel Team, to work on the Linux kernel for Ubuntu. If you’ve enjoyed operating systems in your coursework or current role, you are confident in your ability to write high quality C and possibly Rust, and are ready to take the plunge and see how it all works, then this would be a great place to pursue your next career stage. We are a global team working to ship the world's most widely used Linux kernel, across the very latest silicon and cloud, where you can apply and grow your software engineering skills. The Canonical Kernel Team builds and maintains all supported Ubuntu Linux kernels for a variety of platforms and architectures from small embedded devices to standard desktop/server systems to large-scale cloud environments. In your first year you will tackle serious initiatives, which include but are not limited to: Optimized solutions for key Silicon and Cloud partner platforms Developer platforms such as Raspberry Pi and RISC-V Enabling Ubuntu on a wide range of embedded systems Security hardening and exploit mitigation Third-party driver integration and distribution, such as graphics Expanded driver support for bleeding-edge PC platforms We select candidates that are recent university graduates or early career professionals who are enthusiastic to develop kernel-level software in multiple areas including security updates, patching, and testing. The successful candidate will have a background in software engineering, be motivated to work in a distributed team and willing and able to travel globally twice a year for company engineering events. These are full-time positions available to prospective or recently graduated students. Location: We have home-based Kernel Teams in every timezone. The role entails Collaborate regularly and proactively with a globally distributed team Learn from senior mentors to demystify the inner workings of the Linux kernel and how it is distributed Work closely with external silicon, cloud, or hardware manufacturer delivery teams on bleeding-edge platforms Diagnose and resolve issues in the kernel reported by customers, the community, and discovered by your own rigorous testing Take personal responsibility for the delivery of various flavors of the Ubuntu Linux kernel Improve tooling and automation for delivery and test of Ubuntu Linux kernels Submit, review, and apply kernel patches, working with both internal and external upstream maintainers What we are looking for in you Well-organized and motivated self-starter able to thrive in a remote work environment Professional manner with colleagues, business partners, and the open-source community Ability to communicate effectively in English, both written and verbal Programming experience in C and/or Rust Familiarity with version control practices, ideally with git Understanding of operating system kernel fundamentals Ability to travel twice a year for company events of up to two weeks length Nice-to-have skills Interest and experience in Rust Python and Bash scripting ability Prior experience with Ubuntu/Debian/Snap packaging Demonstrated experience with kernel patching and debugging Strong grasp of device drivers, BSP’s, and other low level system engineering What we offer colleagues We consider geographical location, experience, and performance in shaping compensation worldwide. We revisit compensation annually (and more often for graduates and associates) to ensure we recognize outstanding performance. In addition to base pay, we offer a performance-driven annual bonus or commission. We provide all team members with additional benefits which reflect our values and ideals. We balance our programs to meet local needs and ensure fairness globally. Distributed work environment with twice-yearly team sprints in person Personal learning and development budget of USD 2,000 per year Annual compensation review Recognition rewards Annual holiday leave Maternity and paternity leave Team Member Assistance Program & Wellness Platform Opportunity to travel to new locations to meet colleagues Priority Pass and travel upgrades for long-haul company events About Canonical Canonical is a pioneering tech firm at the forefront of the global move to open source. As the company that publishes Ubuntu, one of the most important open-source projects and the platform for AI, IoT, and the cloud, we are changing the world of software. We recruit on a global basis and set a very high standard for people joining the company. We expect excellence; in order to succeed, we need to be the best at what we do. Most colleagues at Canonical have worked from home since our inception in 2004.​ Working here is a step into the future and will challenge you to think differently, work smarter, learn new skills, and raise your game. Canonical is an equal opportunity employer We are proud to foster a workplace free from discrimination. Diversity of experience, perspectives, and background create a better work environment and better products. Whatever your identity, we will give your application fair consideration. #LI-remote",
+    "technologies": [],
+    "posting_date": null,
+    "deadline": null,
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Home based - Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.8219,
+     "matched_signals": [
+      "tech: python",
+      "role match: junior data engineer",
+      "role match: junior software engineer",
+      "role match: junior platform engineer",
+      "keyword: open source",
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.5993820428848267
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/canonical/jobs/5370815",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.830639+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  },
+  {
+   "key": "greenhouse:6707669",
+   "dagi_label": "relevant (reasonable stretch)",
+   "expected": "Apply",
+   "record": {
+    "title": "Junior Ubuntu Software Engineer",
+    "company": "Canonical",
+    "apply_url": "https://job-boards.greenhouse.io/canonical/jobs/6707669",
+    "canonical_url": "https://job-boards.greenhouse.io/canonical/jobs/6707669",
+    "ats_provider": "greenhouse",
+    "ats_job_id": "6707669",
+    "content_fingerprint": "6a6d3a1f4797d4ad",
+    "location_raw": "Home based - Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Canonical is a leading provider of open source software and operating systems to the global enterprise and technology markets. Our platform, Ubuntu, is very widely used in breakthrough enterprise initiatives such as public cloud, data science, AI, engineering innovation and IoT. Our customers include the world's leading public cloud and silicon providers, and industry leaders in many sectors. The company is a pioneer of global distributed collaboration, with 1200+ colleagues in 75+ countries and very few office based roles. Teams meet two to four times yearly in person, in interesting locations around the world, to align on strategy and execution. The company is founder led, profitable and growing. We are hiring junior engineers to work across the breadth of our Ubuntu Engineering organisation - engineers who care deeply for quality, performance and resilience in software, engineers who are just as comfortable designing and engineering new software as they are packaging, integrating, testing and shipping the incredible catalog of open source software provided by the Ubuntu repositories. Our engineers integrate the freshest open source software, provide robust upgrade paths and engineer the future of Ubuntu. Ubuntu is not just the world’s most deployed open source operating system, it's a platform that enables innovation for millions of users across the globe. Our community represents the full breadth of the developer experience; from students, hobbyists and freelancers to high performance engineering and creative teams in corporate and academic environments. The four key teams that ship Ubuntu are Foundations : maintaining foundational software: architectures, package managers, compilers, toolchains, bootloaders, filesystems and core utilities Server: leading the design, evolution and future of our Ubuntu Server distribution Desktop: driving Ubuntu Desktop, our future immutable desktop: Ubuntu Core Desktop, WSL, gaming technology, and a suite of modern applications for the desktop crafted with Flutter Debcrafters: a new team responsible for the forward movement, maintenance and overall health of the Ubuntu archive: one of the most abundant repositories of open source software available today Bring your existing expertise and learn new skills by working on one of the most prolific pieces of open source software. As an engineer working on Ubuntu you could work on any or all of the following categories: Development : design, build and ship new foundational systems software and applications in Rust, Go, Flutter, and Python Architecture : engineer the integration of open source from boot firmware to cloud applications deployment Packaging : a combination of Debian and Snap packaging to ship software in the distribution Automation : build and maintain the machinery responsible for building, testing and shipping Ubuntu Distro Engineering : the maintenance and evolution of a Linux distribution and its repositories If you have skills in those areas, or you have other skills you believe could contribute to Ubuntu, and you're keen to get started building your career in open source, then this is the role for you. Our junior career path caters for both new graduates and early careers engineers. At Canonical, you will have the opportunity to engage with and contribute to the broader open source community. We're looking for individuals who can help build a thriving community and contribute with enthusiasm and precision to a broad range of technologies. Location : We have remote roles open in every time zone. The role entails Based on the first round of interviews, we identify specific teams where you might be an excellent fit and conduct second-round interviews with those teams. Our engineers are: Designing, building and shipping software in Rust, Go, Python and C/C++ Packaging, integrating, testing and uploading open source software to the Ubuntu repositories Debugging issues, then designing and delivering robust solutions Authoring and improving technical and community documentation Contributing to upstream and neighboring open source projects Collaborating as part of a globally distributed team Continuously learning and progressing their technical and professional skills What we are looking for in you An exceptional academic track record from both high school and university Undergraduate degree in Computer Science or STEM, or a compelling narrative about your alternative path Drive and a track record of going above and beyond expectations A passion for open source software Experience with Rust, Go, Python, Flutter or C/C++ Professional written and spoken English Excellent communication and interpersonal skills Ability to travel twice a year, for company events up to two weeks each Nice-to-have skills Familiarity with Linux distributions Familiarity with system debugging tools and techniques Familiarity with automation tooling and CI/CD systems Experience contributing to open source projects What we offer you We consider geographical location, experience, and performance in shaping compensation worldwide. We revisit compensation annually (and more often for graduates and associates) to ensure we recognize outstanding performance. In addition to base pay, we offer a performance-driven annual bonus. We provide all team members with additional benefits, which reflect our values and ideals. We balance our programs to meet local needs and ensure fairness globally. Distributed work environment with twice-yearly team sprints in person Personal learning and development budget of USD 2,000 per year Annual compensation review Recognition rewards Annual holiday leave Maternity and paternity leave Team Member Assistance Program & Wellness Platform Opportunity to travel to new locations to meet colleagues Priority Pass, and travel upgrades for long haul company events About Canonical Canonical is a pioneering tech firm at the forefront of the global move to open source. As the company that publishes Ubuntu, one of the most important open source projects and the platform for AI, IoT and the cloud, we are changing the world on a daily basis. We recruit on a global basis and set a very high standard for people joining the company. We expect excellence - in order to succeed, we need to be the best at what we do. Canonical has been a remote-first company since its inception in 2004.​ Working here is a step into the future, and will challenge you to think differently, work smarter, learn new skills, and raise your game. Canonical is an equal opportunity employer We are proud to foster a workplace free from discrimination. Diversity of experience, perspectives, and background create a better work environment and better products. Whatever your identity, we will give your application fair consideration.",
+    "technologies": [],
+    "posting_date": null,
+    "deadline": null,
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Home based - Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 1.0,
+     "matched_signals": [
+      "tech: python",
+      "tech: go",
+      "role match: junior data engineer",
+      "role match: junior software engineer",
+      "role match: junior platform engineer",
+      "keyword: open source",
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.8843115568161011
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/canonical/jobs/6707669",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.830846+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  },
+  {
+   "key": "greenhouse:8142329",
+   "dagi_label": "ineligible (graduate requirement)",
+   "expected": "not selected: stage:graduate_only",
+   "record": {
+    "title": "Graduate Software Engineer, Open Source and Linux, Canonical Ubuntu",
+    "company": "Canonical",
+    "apply_url": "https://job-boards.greenhouse.io/canonical/jobs/8142329",
+    "canonical_url": "https://job-boards.greenhouse.io/canonical/jobs/8142329",
+    "ats_provider": "greenhouse",
+    "ats_job_id": "8142329",
+    "content_fingerprint": "381962dbbb446cee",
+    "location_raw": "Home based - Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Canonical is a leading provider of open source software and operating systems to the global enterprise and technology markets. Our platform, Ubuntu, is very widely used in breakthrough enterprise initiatives such as public cloud, data science, AI, engineering innovation, and IoT. Our customers include the world's leading public cloud and silicon providers, and industry leaders in many sectors. The company is a pioneer of global distributed collaboration, with 1200+ colleagues in 75+ countries and very few office-based roles. Teams meet two to four times yearly in person, in interesting locations around the world, to align on strategy and execution. The company is founder led, profitable and growing. We are hiring 2025 and 2026 Graduate Software Engineers into engineering teams around the world. As a global platform company we offer a wide range of software engineering challenges, in both open source products and commercial business systems. We have teams that work in a variety of languages, typically Python, Golang, Rust, C/C++, JavaScript and of course... Bash. We work from the very lowest levels of the Linux system - BIOS and boot loaders, firmware, kernel and drivers, all the way up to desktop applications and containers. We work on tiny devices like the Raspberry Pi and new RISC-V boards, all the way up to supercomputers, clouds and Kubernetes clusters. We work on compilers and toolchains, and we work on security, cryptography, performance and documentation. Some of our teams focus on packaging thousands of pieces of software, others focus on deep contributions to a single body of code. If you are excited about the potential that open source has for humanity and the enterprise, you have outstanding results in your academic career, and you are excited to contribute to the open source stack, this is the best way to apply to Canonical. We will work with you to identify teams and projects that would be interesting and a good fit for your skills and motivations. The process is highly competitive, it will require effort and excellence to succeed if you apply here. Most of our engineering teams work from home. We try to align a single team in a single time zone - EMEA (Europe, Middle East and Africa), APAC (Asia Pacific and Indian Ocean), and AMER (North, South and Central Americas). Even though you work from home, we try to ensure you always have colleagues alongside to coach and mentor you, and for the companionship of shared problem solving and pair programming. Larger projects have multiple teams and might span the globe. We work with the open source community and specialize in building teams that work well in the 'fishbowl' of open source engineering. This is full time work, five days a week, often solving hard problems with significant responsibility. We don't generally work weekends and nights and we do enjoy good holidays but we also expect productive and intense engagement Monday to Friday. We bring all our engineering teams together in person twice a year for a deep 'sprint' with other teams to stimulate discussion and enable a wide range of career development paths. This is a fantastic way to demonstrate and develop your skill in software, learn about a wide range of technologies, make a meaningful impact to open source, and see some very interesting new cities that you might never otherwise get to visit. If you find the open source stack amazing, and you have been a consistent high-performing student in your school and university, then this will be a challenging and exciting start to your career. Location: This is a Globally remote role. The role entails Shaping the roadmap for your product at global sprints every six months Focusing on design and user experience, even for developer tooling and command line apps Writing high quality, resilient and performant code, potentially serving millions of demanding daily users Working towards mastery of key programming languages and Linux system knowledge Engaging with users and the open source community through code reviews and issue trackers Responding to customer issues as a priority, develop an understanding of enterprise requirements Developing skills and awareness of security in software design and implementation What we are looking for in you Exceptional academic track record from both high school and university Undergraduate degree in Computer Science, Business Informatics, Mathematics or another STEM discipline with programming courses Confidence to get started and deliver high quality code in one of Python, Rust, C/C++, Golang, JavaScript or Java Experience with Ubuntu or another Linux distribution Track record of going above-and-beyond expectations to achieve outstanding results Result-oriented and organized, with the drive to meet commitments Personal projects in technology and software engineering beyond the curriculum Professional written and spoken English Excellent interpersonal skills, curiosity, flexibility, and accountability Personal responsibility and accountability Thoughtfulness, self-awareness and the ability to reflect and develop Ability to travel internationally twice a year for company events up to two weeks long Nice-to-have skills Upstream open source contributions Packaging and Linux distribution contributions - Debian, Fedora, Arch, Nix or another Leadership and organization skills Presentation and writing skills Business and commercial interests What we offer colleagues We consider geographical location, experience, and performance in shaping compensation worldwide. We revisit compensation annually (and more often for graduates and associates) to ensure we recognize outstanding performance. In addition to base pay, we offer a performance-driven annual bonus or commission. We provide all team members with additional benefits which reflect our values and ideals. We balance our programs to meet local needs and ensure fairness globally. Distributed work environment with twice-yearly team sprints in person Personal learning and development budget of USD 2,000 per year Annual compensation review Recognition rewards Annual holiday leave Maternity and paternity leave Team Member Assistance Program & Wellness Platform Opportunity to travel to new locations to meet colleagues Priority Pass and travel upgrades for long-haul company events About Canonical Canonical is a pioneering tech firm at the forefront of the global move to open source. As the company that publishes Ubuntu, one of the most important open source projects and the platform for AI, IoT and the cloud, we are changing the world of software. We recruit on a global basis and set a very high standard for people joining the company. We expect excellence - in order to succeed, we need to be the best at what we do. Most colleagues at Canonical have worked from home since its inception in 2004.​ Working here is a step into the future, and will challenge you to think differently, work smarter, learn new skills, and raise your game. Canonical is an equal opportunity employer We are proud to foster a workplace free from discrimination. Diversity of experience, perspectives, and background create a better work environment and better products. Whatever your identity, we will give your application fair consideration. #LI-remote",
+    "technologies": [],
+    "posting_date": null,
+    "deadline": null,
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Home based - Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.6754,
+     "matched_signals": [
+      "tech: python",
+      "tech: kubernetes",
+      "keyword: open source",
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.42291390895843506
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/canonical/jobs/8142329",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.829769+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  },
+  {
+   "key": "himalayas:https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+   "dagi_label": "interesting",
+   "expected": "Apply",
+   "record": {
+    "title": "Junior DevOps / Cloud Engineer",
+    "company": "CloudCops GmbH",
+    "apply_url": "https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+    "canonical_url": "https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+    "content_fingerprint": "b62755bd1a66c286",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "deine aufgaben Bau und Pflege von CI/CD-Pipelines in GitHub Actions und / oder GitLab CI Infrastructure-as-Code mit Terraform / Terragrunt – von Green-field bis Brown-field Betrieb & Tuning von Kubernetes-Clustern (AWS EKS, GKE, AKS oder on-prem) Einführung von GitOps-Workflows mit ArgoCD oder FluxCD Aufbau eines durchgängigen Observability-Stacks (Prometheus, Grafana, Loki, Tempo, OpenTelemetry) Betrieb verteilter Dienste wie Kafka, RabbitMQ, Redis innerhalb von Kubernetes Enge Zusammenarbeit mit unseren Kund:innen – von Architekturdiskussion bis Incident-Debugging Zwischendurch Hacktime für unsere eigenen Startup-Projekte, an denen du direkt mitbaust Regelmäßige Up-/Crossgrades entlang der CNCF-Landscape – wir probieren neue Projekte gern aus dein profil Leidenschaft für Cloud-Technologien & Automatisierung; du verstehst unseren Ethos \"Everything-as-Code\". Erste Hands-on-Erfahrung mit einer großen Cloud (AWS, GCP, Azure o. Ä.) Solides Git-, Linux- und Shell-Know-how Lernhunger & Neugier: Du probierst gern neue Tools aus und teilst dein Wissen offen Teamspirit, Kommunikationsfreude (Deutsch oder Englisch) und den Mut, Fragen zu stellen warum wir? Remote-first – work from anywhere Output-orientierte Kultur: Wir zählen Ergebnisse, nicht Stunden Kurze Wege, wenig Hierarchie, viel Gestaltungsfreiheit bei Tools & Tech Jahresbudget für Konferenzen, Zertifizierungen (CKA/CKAD etc.) & Hardware deiner Wahl Freie Mitgestaltung deines Vertrages: Bei Arbeitszeit, Urlaub, etc. sind wir flexibel. DU stehst bei uns im Vordergrund Ein Team, das DevOps atmet Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-02",
+    "deadline": "2026-12-01",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.8733,
+     "matched_signals": [
+      "tech: kubernetes",
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.650750458240509
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.843908+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  },
+  {
+   "key": "himalayas:https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+   "dagi_label": "accessible, not interested in the work",
+   "expected": "Eligible, outside your stated interests",
+   "record": {
+    "title": "QA/QC Intern",
+    "company": "Flowmingo",
+    "apply_url": "https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+    "canonical_url": "https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+    "content_fingerprint": "1209ec8d4d34c2fd",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "About Flowmingo AI Flowmingo is a Y Combinator-backed startup (plus VinaCapital & top global investors) on a mission to democratize hiring. We believe the current hiring model is broken: recruiters only have time to interview 5% of applicants, leaving 95% of talent—the \"hidden gems\"—undiscovered. We are fixing this with an AI-native, high-volume interviewing platform. Our model is unique: we offer our tool for free to recruiters to capture the massive, uncontested markets of Southeast Asia, LATAM, and Africa. This allows us to process massive volumes of candidates that traditional, expensive platforms cannot touch. The QA Challenge This is not a typical \"click around and find bugs\" internship. You are the last line of defense for a platform used by millions of candidates in high-stakes situations (getting a job). You will face the \"Device Fragmentation\" challenge: How do we ensure our AI Speech-to-Text works on a budget phone in Jakarta just as well as it does on a MacBook in Singapore? You will help us answer that. What You Will Do Rigorous Testing: You will test our AI interview flow across a massive variety of mobile devices and browsers, identifying edge cases that only happen in the real world. \"Breaker\" Mindset: You will try to break the platform before our users do. What happens if the internet cuts out mid-interview? What if the user denies camera permissions? You find out. Release Management: You will work directly with the Engineering and Product team to green-light releases. If you say \"No,\" we don't ship. Process Improvement: You will proactively identify gaps in our testing workflow and suggest better ways to catch bugs early, using data from user reports. Quality Documentation: You will translate messy bug reports into clear, actionable engineering tickets with precise reproduction steps. Who You Are Detail-Obsessed: You notice when a button is 2 pixels off or when a loading spinner spins for too long. Tech-Savvy: You know how to open the Browser Console (Inspect Element) and look at network errors. Empathy for the User: You understand that a bug isn't just an error; it's a candidate losing a job opportunity. Logical Thinker: You can isolate variables to find the root cause of a bug, not just the symptom. Bonus: A strong interest in tech products, data analytics, or coding, with deep curiosity about how things work \"under the hood\" is a huge plus. Compensation & Benefits Competitive Remuneration: Monthly compensation tailored to your experience level. The YC Playbook: Learn how Silicon Valley startups build and scale products. Real Impact: You will see your ideas go live and directly affect the user experience for thousands of people. Mentorship: Work closely with the Founder and Product team. Application Process Please fill out the form on the right and submit your CV, a 30-minute AI interview will appear on the next screen. Completing the interview is mandatory. You can do it immediately or save the link for later, but early submissions receive priority processing. Location: Remote (Global) Employment type: Internship Compensation: Stipend + potential full-time offer How to apply Apply here: Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-09-15",
+    "deadline": "2026-10-14",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.7224,
+     "matched_signals": [
+      "tech: go",
+      "keyword: mentorship",
+      "keyword: remote",
+      "employment type wanted: internship"
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.49994659423828125
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.843153+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  },
+  {
+   "key": "himalayas:https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+   "dagi_label": "outside his interests (no CRM/Salesforce work)",
+   "expected": "Eligible, outside your stated interests",
+   "record": {
+    "title": "CRM Developer",
+    "company": "NightOwl Consulting",
+    "apply_url": "https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+    "canonical_url": "https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+    "content_fingerprint": "f65768b30cd1e287",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "We are seeking a CRM Developer with a focus on Salesforce to support the design, development, and optimization of our CRM systems. The ideal candidate has hands-on Salesforce experience, is detail-oriented, and can deliver efficient solutions that improve system performance and user experience. Key Responsibilities Build and manage custom fields, objects, and page layouts within Salesforce. Design and maintain automation flows, validation rules, and process builders. Develop and implement email templates, reports, and dashboards. Customize Lightning pages and build custom-coded components when needed. Research and recommend new Salesforce features, apps, or integrations to improve workflow efficiency. Troubleshoot and resolve system issues in a timely manner. Ensure data integrity and streamline reporting processes. Collaborate with business stakeholders to translate requirements into technical solutions. Skills, Knowledge and Expertise 1+ years of hands-on Salesforce development or administration experience. Strong knowledge of Salesforce Lightning and automation tools (Flow, Process Builder, Apex triggers a plus). Experience building and managing reports, dashboards, and layouts. Proficient in customizing and extending Salesforce functionality using configuration and code. Ability to research, evaluate, and implement new CRM features or tools. Strong problem-solving skills and an analytical mindset. Resourceful and efficient coding habits with attention to scalability and performance. Salesforce Developer or Administrator certification is preferred but not required. Benefits Above market salary HMO on Day 1 for principal and two dependents Government-mandated benefits Performance-based Incentives Quarterly Company Events 1,000 PHP De Minimis Equipment and software provided Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-03",
+    "deadline": "2026-12-02",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.6179,
+     "matched_signals": [
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.4253743886947632
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.843630+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  },
+  {
+   "key": "himalayas:https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102",
+   "dagi_label": "interesting",
+   "expected": "Apply",
+   "record": {
+    "title": "Research Intern",
+    "company": "Ritual",
+    "apply_url": "https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102",
+    "canonical_url": "https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102",
+    "content_fingerprint": "b5d6ff2f86055b58",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "About Ritual Ritual is building a sovereign, execution layer for AI, with our private testnet already live and running. The Ritual chain is the first blockchain custom-built to support AI-native operations, designed from the ground up to enable a new class of applications at the intersection of crypto and AI. Our first product, Infernet, is pioneering new ground as the first solution to enable developers to access AI models both on-chain via smart contracts and off-chain, demonstrating our commitment to bridging these transformative technologies. About the role Prototype new mechanisms, then work to productionize your research Work at the frontier of modern cryptographic schemes and open-source AI Collaborate closely with our engineering and product team to ensure your research has real-world impact Release your work into the open-source world and build alongside the Ritual community About you Intellectually curious about the latest advancements in machine learning, cryptography, and how they intersect Desire to see your research go beyond academic papers and have a tangible impact Experience with taking research projects or experiments from ideation to prototype code, or implementation either on your own or coordinating with engineering teams Quick iteration and development cycles on writing and/or proof-of-concept Extras Bonus points if you have existing research or writing in conferences or journals Have some level of comfort with algebraic structures, distributed systems, mechanism design, or statistical modeling Why join us Join a passionate group of engineers, researchers, and operators on a mission to build the next generation of AI infrastructure hardened by cryptographic schemes We work completely in open-source and ship weekly Maximize your knowledge gradient around fields that typically would not intersect We’re open to exceptional people of all backgrounds for research (e.g. high school, undergraduate and graduate degrees). Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-09-18",
+    "deadline": "2026-11-17",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.9475,
+     "matched_signals": [
+      "tech: go",
+      "employment type wanted: internship"
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.7249704003334045
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.843075+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  },
+  {
+   "key": "himalayas:https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445",
+   "dagi_label": "interesting",
+   "expected": "Apply",
+   "record": {
+    "title": "Software Engineer Intern",
+    "company": "Ritual",
+    "apply_url": "https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445",
+    "canonical_url": "https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445",
+    "content_fingerprint": "d3ffd492614003ba",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "About Ritual Ritual is building a sovereign, execution layer for AI, with our private testnet already live and running. The Ritual chain is the first blockchain custom-built to support AI-native operations, designed from the ground up to enable a new class of applications at the intersection of crypto and AI. Our first product, Infernet, is pioneering new ground as the first solution to enable developers to access AI models both on-chain via smart contracts and off-chain, demonstrating our commitment to bridging these transformative technologies. About the role Prototype rapidly, iterate and execute quickly based on technical guidance Work at the frontier of modern cryptographic schemes and open-source AI Release your work into the open-source world and build alongside the Ritual community About you Intellectually curious around intersections of interdisciplinary fields ranging from game theory to cryptography to machine learning Quick iteration and development cycles on writing and/or proof-of-concept Extras Experience in cryptography, machine learning software projects, ideally in open-source land Why join us Join a passionate group of engineers, researchers, and operators on a mission to build the next generation of AI infrastructure hardened by cryptographic schemes We work completely in open-source and ship weekly Maximize your knowledge gradient around fields that typically would not intersect We’re open to exceptional people of all backgrounds for research (e.g. high school, undergraduate and postgraduate degree). Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-09-18",
+    "deadline": "2026-11-17",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 1.0,
+     "matched_signals": [
+      "role match: software engineer intern",
+      "role match: machine learning engineer intern",
+      "employment type wanted: internship"
+     ],
+     "concerns": [],
+     "semantic_similarity": 1.0000001192092896
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.843088+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  },
+  {
+   "key": "himalayas:https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm",
+   "dagi_label": "interesting, too advanced",
+   "expected": "Aspirational",
+   "record": {
+    "title": "Research Engineer Intern (Video/Multimodal LLM)",
+    "company": "Tether Operations Limited",
+    "apply_url": "https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm",
+    "canonical_url": "https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm",
+    "content_fingerprint": "acfc3fd59c01348e",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "Join Tether and Shape the Future of Digital Finance At Tether, we’re not just building products, we’re pioneering a global financial revolution. Our cutting-edge solutions empower businesses—from exchanges and wallets to payment processors and ATMs—to seamlessly integrate reserve-backed tokens across blockchains. By harnessing the power of blockchain technology, Tether enables you to store, send, and receive digital tokens instantly, securely, and globally, all at a fraction of the cost. Transparency is the bedrock of everything we do, ensuring trust in every transaction. Innovate with Tether Tether Finance: Our innovative product suite features the world’s most trusted stablecoin, USDT , relied upon by hundreds of millions worldwide, alongside pioneering digital asset tokenization services. But that’s just the beginning: Tether Power: Driving sustainable growth, our energy solutions optimize excess power for Bitcoin mining using eco-friendly practices in state-of-the-art, geo-diverse facilities. Tether Data: Fueling breakthroughs in AI and peer-to-peer technology, we reduce infrastructure costs and enhance global communications with cutting-edge solutions like KEET , our flagship app that redefines secure and private data sharing. Tether Education : Democratizing access to top-tier digital learning, we empower individuals to thrive in the digital and gig economies, driving global growth and opportunity. Tether Evolution : At the intersection of technology and human potential, we are pushing the boundaries of what is possible, crafting a future where innovation and human capabilities merge in powerful, unprecedented ways. Why Join Us? Our team is a global talent powerhouse, working remotely from every corner of the world. If you’re passionate about making a mark in the fintech space, this is your opportunity to collaborate with some of the brightest minds, pushing boundaries and setting new standards. We’ve grown fast, stayed lean, and secured our place as a leader in the industry. If you have excellent English communication skills and are ready to contribute to the most innovative platform on the planet, Tether is the place for you. Are you ready to be part of the future? About the job We are looking for talented individuals to join us for an internship in 2025/2026. MSc/PhD Internships at Tether aim to provide students with the opportunity to actively contribute to our products and research, and to the organization's future plans and emerging technologies. In our team, you will have the opportunity to participate in the development of the state-of-the-art (SOTA) foundation models, and will also be responsible for optimizing our distributed model training framework continuously. PhD internships at Tether provide students with the opportunity to actively contribute to our products and research, and to the organization's future plans and emerging technologies. Our dynamic internship experience blends hands-on learning, enriching community-building and development events, and collaboration with industry experts. Applications will be reviewed on a rolling basis. We encourage you to apply early. Please state your availability clearly in your resume (Start date, End date). Responsibilities Research and develop state-of-the-art LLM and/or video or multimodality models to accelerate open-source progress in the domains. Implement the application of large models in our business scenarios, like pre-training, supervised fine-tuning, post-training, inference etc. Continuously optimize the training framework to better adapt to the training of large models on thousands of multi-node GPUs. In this role, you’ll have the opportunity to advance the development of open-source LLM, vision and/or multimodal foundation models and products. You will have the opportunity to collaborate with broader teams across Tether. Requirements MSc/PhD candidate in computer science or a related technical discipline Related Research Experience at least one of the following areas: LLM, computer vision, multimodality Be proficient with PyTorch deep learning framework and libraries Have excellent analytical and problem-solving skills, logical thinking skills, communication and collaboration skills Publications in the top AI conferences (e.g., ACL, NIPS, ICML, ICLR, CVPR, ICCV, ECCV, TPAMI, IJCV, etc.) is a nice to have. Important information for candidates Recruitment scams have become increasingly common. To protect yourself, please keep the following in mind when applying for roles: Apply only through our official channels. We do not use third-party platforms or agencies for recruitment unless clearly stated. All open roles are listed on our official careers page: Verify the recruiter’s identity. All our recruiters have verified LinkedIn profiles. If you’re unsure, you can confirm their identity by checking their profile or contacting us through our website. Be cautious of unusual communication methods. We do not conduct interviews over WhatsApp, Telegram, or SMS. All communication is done through official company emails and platforms. Double-check email addresses. All communication from us will come from emails ending in @ or @ We will never request payment or financial details. If someone asks for personal financial information or payment at any point during the hiring process, it is a scam. Please report it immediately. When in doubt, feel free to reach out through our official website. Highlights Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-08-31",
+    "deadline": "2026-10-30",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.8448,
+     "matched_signals": [
+      "role match: data engineer intern",
+      "employment type wanted: internship"
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.6522517204284668
+    },
+    "status": "new",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm",
+      "first_seen": "2026-10-04T11:51:36.322943+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-04T11:51:48.843196+00:00",
+    "notified_at": null,
+    "history": []
+   }
+  }
+ ]
+}

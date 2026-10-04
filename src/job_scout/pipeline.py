@@ -36,20 +36,22 @@ from .models import EmploymentType, Opportunity, Provenance
 from .normalize import normalize
 from .notify import (
     gate_reasons,
+    pick_samples,
     render_digest,
     render_funnel_md,
     render_issue_md,
     select_for_notification,
     write_digest,
 )
-from .score import filter_reason, hard_filter, rank, score_opportunity
+from .score import filter_reason, hard_filter, rank, score_opportunity, stage_of
 from .sources.base import Source
 from .store import connect, mark_notified, record_run, upsert_and_reconcile
 
 log = logging.getLogger("job_scout.pipeline")
 
 # Types tracked by the internship funnel — the scarce target class whose absence must be explained.
-_FUNNEL_TYPES = frozenset({EmploymentType.INTERNSHIP, EmploymentType.STIPEND_PROGRAM})
+# Target classes (S10 review H2: NEW_GRAD too, so stage rejections of graduate/junior roles are sampled).
+_FUNNEL_TYPES = frozenset({EmploymentType.INTERNSHIP, EmploymentType.NEW_GRAD, EmploymentType.STIPEND_PROGRAM})
 _MAX_SAMPLES = 5
 
 
@@ -128,13 +130,15 @@ def _internship_funnel(target_raw: list[Opportunity], kept_ids: set[int], reason
             continue
         reason = reason_of.get(id(o))
         outcomes[reason or "notified"] += 1
-        if reason and reason not in _KNOWN and len(samples) < _MAX_SAMPLES:   # real rejections only (L4)
+        if reason and reason not in _KNOWN:                    # real rejections only (L4)
             b = _brief(o)
             samples.append({
                 "title": b["title"], "company": b["company"], "location": b["location"], "reason": reason,
-                "evidence": "; ".join(o.eligibility.evidence) if o.eligibility else "",
+                # a stage rejection quotes its sentence (§12), so a wrong one is visible in the heartbeat
+                "evidence": ("; ".join(stage_of(o)[1]) if reason.startswith("stage:")
+                             else "; ".join(o.eligibility.evidence) if o.eligibility else ""),
             })
-    return {"fetched": len(target_raw), "outcomes": dict(outcomes), "rejected_samples": samples}
+    return {"fetched": len(target_raw), "outcomes": dict(outcomes), "rejected_samples": pick_samples(samples)}
 
 
 def _discover(sources: list[Source], cfg: AppConfig) -> tuple[list[Opportunity], dict[str, dict]]:

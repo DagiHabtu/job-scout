@@ -1,9 +1,24 @@
 # Copy to config/profile.yaml and edit. Secrets do NOT go here — they load from env / .env.
 profile:
-  target_roles: ["data engineer intern", "software engineer intern", "machine learning engineer intern", "junior data engineer", "junior software engineer", "junior platform engineer"]   # S3 default; edit freely
+  interests:                          # what you want to work on (spec §12 S11); titles are compared to these
+    - "software engineering intern"
+    - "systems, infrastructure, cloud or DevOps engineering"
+    - "Linux, kernel or open source engineering"
+    - "machine learning or AI engineering"
+    - "technical research engineering"
+    - "frontend, backend or full-stack software engineering"
+  # Current preference, not an absolute exclusion: matching titles are still listed, in
+  # "Eligible, outside your stated interests" — unless the title also names a strong-interest term.
+  not_interested: ["qa", "qc", "quality assurance", "manual testing", "crm", "salesforce"]
+  strong_interest_terms: ["linux", "kernel", "systems", "infrastructure", "compiler", "embedded",
+                          "distributed", "machine learning", "ml", "ai", "research", "open source"]
   target_technologies: ["python", "sql", "docker", "postgres"]
   employment_types: ["internship", "stipend_program", "new_grad"]
   experience_level: "entry"
+  education:                          # candidate stage (spec §12 S10)
+    status: "undergraduate"           # undergraduate | graduate
+    accept_graduate_programs: false   # graduate-only roles (completed degree required)
+    max_required_years: 2             # roles demanding more years of experience are not surfaced
   location:
     country_code: "ET"
     country_name: "Ethiopia"

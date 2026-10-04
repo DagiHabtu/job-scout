@@ -1,6 +1,137 @@
 # STATE
 
-## RESUME — next-iteration
+## RESUME — iteration-2
+Branch: iteration-2 (cut from origin/main bc4154c)      Last code commit: 1dc90fd iteration-2: close final review (followed only by STATE-only commits)
+Step in progress: none — **PASS COMPLETE** (S9, S10, S11 done; final review CLOSED). Branch PUSHED: `git push -u origin iteration-2` → origin/iteration-2 at e125fc3 (+ this STATE line). Not merged; no workflow dispatched.
+Steps done and verified: S9 (1608ab3 — unit level; email arrival = pending human check 1), S10 (69df1b3, 1213ac8 — review closed), S11 (e6b94e4, 1dc90fd — final review closed). Baseline: spec §12 43422e0; c54fe46.
+Reviews: S10 closed (1213ac8), final closed (1dc90fd)
+Next action: Dagi does the pending human checks below, in order. Nothing else is in flight. Do not dispatch, do not merge without Dagi.
+Pending human checks (in this order; commands run from `job-scout/`):
+  (1) S9 delivery — open https://github.com/notifications and look for the 2026-10-04 issue; in Settings → Notifications enable Email for "Participating, @mentions and custom", confirm the default notification email is verified and is the one being checked, search the mailbox (incl. spam) for `notifications@github.com`. Then dispatch on the branch: `gh workflow run scout --ref iteration-2 -f seed=true` → `gh run watch` → confirm the issue exists (`gh issue list --label scout`), is assigned to you, ends with `cc @DagiHabtu`, and an email arrived. If no email arrives after the settings are confirmed: the Telegram fallback (§12 S9) becomes the first follow-up. Note: this run commits `data/scout.db` to `iteration-2`.
+  (2) Merge by pull request (never via local main): `gh pr create --base main --head iteration-2 --title "Iteration 2: delivery assignee/mention, stage fit, interest sections" --body "Implements docs/SPEC-2026-10-04-next-iteration.md §12 (S9–S11) plus the final-review fixes. Evidence, reviews and deviations: STATE.md (RESUME — iteration-2 + pass log)."` then `gh pr merge --merge`. If the PR reports a conflict in `data/scout.db`: `git checkout iteration-2 && git pull && git merge origin/main` → `git checkout --ours data/scout.db && git add data/scout.db && git commit --no-edit && git push`, then `gh pr merge --merge`. Afterwards `git checkout main && git pull`.
+  (3) DECISION carried over (onsite/hybrid in Addis = UNKNOWN@0.4 → an Addis NEW_GRAD role is never notified; see next-iteration block, check 4).
+  (4) After merge: §8 criterion 6 — 14 days of issues, ≥60% of "Apply" items ticked.
+Known limits (final review Lows not fixed, and test gaps): L2 `education.status` is recorded config only (no rule in the spec). L3 "Graduate Research Assistant" reads `not_target_class` (the `_GRAD_PROGRAM_TITLE` lookahead keeps it from NEW_GRAD), not `stage:graduate_only` — still unselected. L4 eligibility "position/role … based in" pattern (c54fe46) sits outside §12's file list — 6 probes, no false negative. L5 generic strong terms ("systems", "ai", "research") cancel most vetoes — spec-literal. L6 "2-4 years" → N=2 (stretch) — spec-literal, test-pinned. Test gaps: the first-run regression test does not check the order inside "Apply", runs in lexical mode (no model), and its synthetic cases preset `employment_type`.
+Deviations from spec: (i2-a) [WITHDRAWN 1dc90fd — replaced by i2-p]. (i2-b) S10 `advanced_degree` context words accept plurals (internships, students, …) — Tether's own sentence uses them. (i2-c) `accept_graduate_programs` is applied at score time (verdict `graduate_only_accepted`, positive) because `gate_reason(opp, threshold)` has no profile. (i2-d) `profile.education` replaces an unused free-text field of the same name; a string still loads (defaults). (i2-e) [SUPERSEDED 1dc90fd by i2-n] S10 review H1: `experience_required`/`stretch` read only a requirement-shaped phrase "<N>[+][-M] years|yrs [of] [≤3 words] experience|hands-on" (spec: 60-char window with experience|hands-on|working|professional), skipping company-subject phrases ("we bring 25 years…"); numbers may be words (one–ten) or decimals. (i2-f) S10 review M1/M2: MSc/PhD exclusions and context are read within ±60 chars of the degree word (undergraduate/bachelor only as an or/and/'/' alternative within ±40), not across the whole tag-stripped "sentence"; company-blurb phrases (founded, our mission, team of…) are not requirements. (i2-g) S10 review M4: only "graduated by/in/before/between <month> 20xx" is graduate-only (spec regex also "graduating", which describes a current student); "undergraduate(s)" joins the student exception; a negated mention ("students are not eligible") is no exception. (i2-h) S10 review M6: a body sentence is `fits` evidence only when it addresses candidates (you/candidates/applicants/role/hiring/open to/eligible…). (i2-i) S10 review H2: `internship_funnel` now covers NEW_GRAD too (target classes), so stage rejections are sampled with their quote; labelled "Target-class funnel". (i2-j) `_GRAD_PROGRAM_TITLE` lookahead also excludes "graduate research/teaching/assistant" (graduate-student roles). (i2-k) [WITHDRAWN 1dc90fd — replaced by i2-o] S11: a title with an interest veto is checked only for the role-family VETO words, not for a family word ("QA/QC Intern" has none once `qa` leaves the family; §12's acceptance places it in "outside your stated interests"). Side effect seen live: "CRM Assistant (with Insellerate Experience)" is listed there too. (i2-l) [WITHDRAWN 1dc90fd — replaced by i2-p] S11: an interest-vetoed item with UNKNOWN eligibility stays in "Check eligibility" (§12: that section is unchanged), with an "outside your stated interests ('<term>')" line. (i2-m) `not_interested` / `strong_interest_terms` defaults also live in `UserProfile` (same values as §12), so a profile without them behaves the same.
+  Final-review deviations (Dagi's decisions D1–D7, 2026-10-04): (i2-n) D1 — every "<N>[+][-M] years|yrs" mention is a requirement unless its sentence names something else: combined/collective, team of, founded/founders, in business, ago, has/have been, our team/company/engineers/clients/customers, we've/we have/we bring/we were, old/older/age/aged, vesting, stock options, equity, contract, lasts, duration; a span before it (within/over/after/every/per/up to/next/past/last/first) is not a requirement; N>1 with a singular "year" is attributive ("a 10 year … commitment"); a "sentence" longer than 200 chars (a merged list block) is read only ±60 chars around the mention. Measured on the 244 stored descriptions: 36 sentences read as requirements, all genuine; 10 skipped, all non-requirements. (i2-o) D4 — `role_family_ok(title, description)` is checked before the interest veto; QA/QC/quality assurance/tester/testing/sdet is a family only when the title or description names software work (software, web, browsers, mobile app/devices, apps, automation, api, bugs, codebase, coding, selenium/cypress/playwright); `inspector` is a discipline veto; D5 — `linux|kernel|compiler` join the family. Golden set still 1.000/1.000 (in-sample). (i2-p) D3 — least actionable section wins: interest veto → "Eligible, outside your stated interests", else MSc/PhD → "Aspirational", whatever the eligibility (UNKNOWN items say "eligibility not confirmed — check it before applying"); "Check eligibility" holds only would-be "Apply" items, and only those use an `unknown_cap` slot. A title both vetoed and MSc/PhD goes to "outside" (the later, less actionable section). Selection is unchanged: an UNKNOWN new-grad is still `eligibility_unknown` (not selected) even when vetoed or MSc/PhD. (i2-q) D2 — internships are exempt from the years rule: the sentence is shown as "years mentioned (not applied to internships): …" under the `fits`/`no_evidence` verdict. (i2-r) D7 — `rejected_samples` keeps 5, at least 2 of them `stage:graduate_only`/`stage:experience` when present (cap overflows are not stage judgements); the weekly heartbeat now lists the samples of its runs (deduplicated by title+company, same reserve) — §12 says a wrong stage rejection must be visible there, and the heartbeat had no sample table. (i2-s) D6 — a softener up to 150 chars after the degree word (60 before) counts, and one softened mention softens the sentence.
+Unverified facts still in code: as in the next-iteration block; plus whether the Himalayas API truncates descriptions (§12 "Limit").
+
+### S10 review findings (CLOSED `1213ac8` — outcomes in the pass log entry "S10 review CLOSED")
+- H1 `_EXPERIENCE` reads non-requirements: company age ("we bring 25 years of experience", "10+ years working with"), age limits ("18 years old … working"), vesting ("4 years, plus a professional development budget"), decimal "1.5 years" → 5, "within 3 years working", boilerplate max beats the real requirement ("0-1 years of experience. Our founders have 20 years of experience") → `stage:experience` (dropped).
+- H2 NEW_GRAD stage rejections never reach `internship_funnel.rejected_samples` (funnel types = INTERNSHIP/STIPEND only) — Graduate SWE and every Junior `stage:experience` invisible in the heartbeat; the pipeline test hid it with an Intern title.
+- M1 sentence splitting: merged list blocks attach a far "nice to have" to Tether's real "Requirements MSc/PhD candidate…" (Tether is Aspirational only via blurb); "Currently enrolled in a PhD program … Bachelor's degree" → fits; abbreviations split ("Ph.D. are preferred", "e.g. … Master's or PhD") → false advanced_degree.
+- M2 boilerplate triggers advanced_degree ("Founded by a team of PhD scientists, we are looking for candidates…", "help every student get a master's degree").
+- M3 "Software Engineering Intern (Undergraduate/Graduate)", "Graduate or Undergraduate Software Intern" → graduate_only.
+- M4 "graduating between Dec 2026 and Jun 2027" / "graduating in May 2027" (future = still a student) → graduate_only; "2026 graduates and undergraduates" → graduate_only (exception lacks "undergraduate").
+- M5 negation: "current students are not eligible" escapes graduate_only and then yields `fits` quoting it.
+- M6 body boilerplate `fits` ("app used by 2 million students") — §12: no evidence must be said, not assumed.
+- L1 word numbers ("Five years"), "yrs", keyword-before-number missed. L2 curly apostrophe "Master’s". L3 "Graduate Research/Teaching Assistant" → graduate_only. L4 Junior/early-career title switches off every body graduate rule (spec-literal). L5 `education.status` never read. L6 HTML digest prints raw `stage:` strings (also for stipend programs). L7 MSc/PhD + UNKNOWN intern uses an UNKNOWN-intern cap slot (spec silent). L8 dedupe.py/pipeline.py touched outside S10's file list. L9 fixture not yet read by a test (S11).
+- Weak tests: "5 years in business" trivially passes; "PhD preferred" only without dots; empty-body undergrad title; Ritual exclusion never exercised; Junior titles decide before the body; Tether blurb not its Requirements line; Intern-typed pipeline test; no cap-interaction test.
+
+### Final review findings — iteration 2 (CLOSED `1dc90fd` — outcomes in the pass log entry "Final review CLOSED")
+Reviewer confirmed: 403 passed; S9 clean (both `gh issue create` carry --assignee; issue/heartbeat/seed end with cc @owner); funnel invariant holds with stage:*/stage:advanced_cap/interest:cap; spine, $0, eligibility honesty clean; three caps act on disjoint groups; word boundaries hold; `test_first_run_regression` genuinely runs the 9 byte-identical records through run_once.
+- H1 `_EXPERIENCE`/`_COMPANY_SUBJECT` (score.py ~564-605) miss common requirements → 3–5-year roles land in Apply (title "Junior Backend Engineer", worldwide, NEW_GRAD; expected stage:experience): "We require 3+ years of experience with Go." / "We expect 5 years of hands-on experience." (skip matches "We require/expect ") · "Our ideal candidate has 4+ years of experience building APIs." (skip matches "Our ideal candidate has") · "Minimum 3 years' experience in backend development." (apostrophe) · "You have 3+ years working with Kubernetes in production." (spec's `working` dropped) · "5+ years of professional software development." (spec's `professional` dropped).
+- M1 strong term cancels the veto but the title has no family word → `role_family` (notify.py:60): "QA Intern, Linux Kernel", "QA (Linux) Intern" → expected Apply with note "matches 'qa' but also 'linux'".
+- M2 any vetoed title skips the family requirement → non-technical roles delivered to "outside your stated interests": "QC Inspector Intern", "Quality Assurance Intern" (pharma GMP), "CRM Intern" (HubSpot sales support), "Junior CRM Specialist" (expected role_family). Live: "CRM Assistant (with Insellerate Experience)". Existing test only covers a _ROLE_VETO-word title.
+- M3 UNKNOWN eligibility: vetoed ("QA Intern") and MSc/PhD ("Software Engineer Intern" + "Currently pursuing a Master's or PhD in Computer Science.") interns go to "Check eligibility" as full items and compete for the 5 UNKNOWN-intern slots (offline ordering = score). Spec S10 does not condition Aspirational on eligibility (deviation i2-a; tests test_advanced_degree_with_unknown_eligibility_is_not_aspirational / test_caps_interaction lock it in). Not an honesty problem — a section/cap question.
+- M4 company copy with >2 words after the subject → `stage:experience`: "Software Engineering Intern" + "We are a team of 5 with 20 years of combined experience." → expected Apply.
+- M5 MSc/PhD window misses a sentence's softener: "PhD students are welcome to apply for this internship on our compiler and runtime team, though a PhD is a plus rather than a requirement." / "Candidates pursuing a PhD in machine learning, statistics, applied mathematics or a related quantitative field are preferred." → advanced_degree; expected fits (spec: the SENTENCE also contains preferred/a plus…).
+- M6 `rejected_samples` keeps the first 5 non-known reasons incl. cap overflows → stage rejections not guaranteed (probe: 2× interest:cap, 2× stage:advanced_cap, 1 graduate_only, stage:experience never sampled). §12 acceptance wants stage rejections included.
+- L1 stipend program with a not-interested term → Apply but prints "outside your stated interests ('salesforce')" ("Salesforce Trailblazer Fellowship"). L2 `education.status` unread. L3 `_GRAD_PROGRAM_TITLE` extra lookahead → "Graduate Research Assistant" reads not_target_class instead of stage:graduate_only (still unselected). L4 eligibility "position/role … based in" pattern outside §12's file list (6 probes, no false negative). L5 generic strong terms ("systems", "ai", "research") cancel most vetoes — spec-literal. L6 "2-4 years" → N=2 stretch — spec-literal, test-pinned.
+- Tests: none cover H1/M1/M2/M4 inputs; experience tests only use working phrasings; regression test does not check Apply ordering, runs without the model, synthetic cases preset employment_type.
+
+### Iteration-2 pass log
+- 2026-10-04 — Part A done (Dagi-authorised): PR #2 merged → origin/main `bc4154c`; local `main` realigned with
+  `git branch -f main origin/main` (tree was clean — the settings.json edit had already been committed in `12c70a9`).
+  Updated spec copied from `D:\Downloads` (contains §12; diff is §12 only, +178 lines) and committed on the new
+  branch `iteration-2` (`43422e0`). Baseline on origin/main: **1 failed / 308 passed** — the merged `data/scout.db`
+  (bot commit `4c6a095`, the delivery-test run) now holds 244 rows, and the stored-row check found one
+  positive: GitLab "Business Development Representative", location "Remote, EMEA; …", body "this position is
+  100% remote and will be based in the UK, Ireland, Germany, the Netherlands" → was REMOTE_REGION_INCLUDES_USER.
+  Test first (2 failed) → `_BODY_RESTRICTION` also reads "position/role/job … (will be|is) based/located in"
+  (`c54fe46`). **311 passed**; re-classification 244 rows, 0 bad. The 9 records delivered on 2026-10-04 are in
+  `data/scout.db` with `notified_at 2026-10-04T11:51:55Z` (fixture source for §12 acceptance).
+- 2026-10-04 — **S9 done (unit level)** (`1608ab3`): both `gh issue create` calls get `--assignee
+  "${{ github.repository_owner }}"`; `render_issue_md` and `render_heartbeat_md` end with `cc @<owner>` from env
+  `GITHUB_REPOSITORY_OWNER` (Actions sets it by default; omitted when unset); the seeded test item also ends
+  with `cc @owner`. Tests `tests/test_delivery_s9.py` (2 of 3 failed on the old code; the third is the
+  "omitted when unset" guard). Workflow YAML parses. Email arrival = pending human check (1).
+- 2026-10-04 — **S10 acceptance** (`69df1b3`; review pending). Spec facts verified first: all four §12 quotes are
+  in the stored descriptions verbatim. Tests first (`tests/test_stage_s10.py`, collection failed before the
+  code existed). `stage_fit` on the 9 delivered records: 7 `fits` (5 by title token, Linux Kernel/Junior Ubuntu
+  by title too), Tether `advanced_degree` ("MSc/PhD Internships at Tether aim to provide students…"),
+  Graduate SWE `graduate_only` (title + "We are hiring 2025 and 2026 Graduate Software Engineers"), CRM
+  `stretch` ("1+ years of hands-on Salesforce…"). Live run `70235d635740` on the PRE-delivery DB
+  (`4c6a095~1`, so the 9 are NEW again): 628 → merged 17 → rejects 413 → survived 198 → gate 190 (not_target_class
+  100, role_family 85, not_new 4, **stage:graduate_only 1**) → **notified 8**: Actionable 7 (incl. QA/QC and CRM —
+  S11's job), Aspirational 1 (Tether). Invariant 628−17−413−190 = 8 ✓. **351 passed.**
+- 2026-10-04 — **S10 review CLOSED** (`1213ac8`). Reviewer (general-purpose, Opus, read-only; given §12 S10 +
+  acceptance, §9, CLAUDE.md, the diff 1608ab3..69df1b3, the tests, and the 9 stored records). Findings →
+  `tests/test_stage_review_s10.py` first: **31 failed → confirmed → fixed** (H1 non-requirement years ×7, decimal,
+  boilerplate max; H2 NEW_GRAD stage sample; M1 Tether's real Requirements block, merged-list "enrolled in a PhD",
+  "Ph.D. … preferred/a plus", "e.g. … Master's or PhD"; M2 blurbs ×2; M3/L3 titles ×4; M4 ×3; M5; M6 ×2; L1 ×3;
+  L2). Passed before the fix (guards, kept): real requirements still caught (3+ years → experience, 1+ → stretch),
+  "must have graduated by June 2026" still graduate_only, the Linux-Kernel candidate sentence still `fits` with a
+  neutral title, and the cap interaction (3 positive MSc/PhD + 6 UNKNOWN interns → 2 + advanced_cap 1, 5 +
+  unknown_cap 1). L6 fixed (readable stage line in the HTML digest; none for programs) with a test. My own S10 row
+  "graduating in May 2026 → graduate_only" changed to "graduated in May 2026" (justified inline, M4). Kept: L4
+  (Junior/early-career title switches off the body graduate rules — spec-literal), L5 (`education.status` has no
+  rule in the spec; it is recorded config only), L7 (MSc/PhD + UNKNOWN intern sits in Check eligibility and uses
+  an UNKNOWN-intern slot — spec silent; deviation i2-a), L8 (dedupe gains a "graduate" level so graduate titles
+  never fuzzy-merge with entry ones; pipeline carries the stage samples — both needed by S10), L9 (S11). The 9
+  records: unchanged verdicts (7 fits, Tether advanced_degree, Graduate SWE graduate_only, CRM stretch). **387 passed.**
+- 2026-10-04 — **S11 acceptance** (`e6b94e4`; final review pending). Tests first (`tests/test_interest_s11.py`;
+  collection failed before the code existed). Profile: `interests` (§12 list; `target_roles` still loads as an
+  alias, read-only `target_roles` property kept), `not_interested`, `strong_interest_terms`. `qa` removed from
+  the role family; `interest_veto(opp, profile)` reads the TITLE (word boundary) → `interest:veto: <term>` in
+  `Relevance.concerns`, or `interest:note: matches '<t>' but also '<strong>'` in `matched_signals`. Gate:
+  vetoed titles are checked for veto words only (deviation i2-k); positive + vetoed → "Eligible, outside your
+  stated interests" (title-and-link lines, cap 5, overflow `interest:cap`). Sections Apply (by relevance score)
+  · Check eligibility · Aspirational · Eligible, outside your stated interests; empty ones omitted; "Actionable"
+  renamed "Apply" (4 older tests updated, one-line justification each: test_delivery, S6 acceptance Case A,
+  test_gate ordering → `test_issue_sections_order`, my S10 rendering test). **§12 regression:**
+  `test_first_run_regression` runs the 9 fixture records + 3 synthetic ones through `run_once` with
+  `config/profile.yaml` (lexical mode): Junior Ubuntu, both Ritual, CloudCops, Junior Linux Kernel → Apply; Tether
+  → Aspirational; QA/QC and CRM → outside interests; Graduate SWE not selected (`stage:graduate_only`); Junior
+  Backend Engineer, Frontend Engineer Intern → Apply; "QA Automation Engineer, Linux Kernel" → Apply with the note
+  — passes. Golden set: with `qa` out, old labels give precision 1.000 / recall 0.966 (QA/QC the one miss);
+  QA/QC relabelled 0 for role family → **1.000 / 1.000** (in-sample). Title similarity vs `interests`: positives
+  p10/p50/p90 0.42/0.62/0.78, negatives 0.17/0.38/0.66. Live run `a080a4536216` (pre-delivery DB, model loaded):
+  628 → merged 17 → rejects 413 → survived 198 → gate 189 (not_target_class 100, role_family 84, not_new 4,
+  stage:graduate_only 1) → **notified 9**: Apply 5 (Ritual SWE Intern, Junior Ubuntu, CloudCops, Junior Linux
+  Kernel, Ritual Research Intern), Aspirational 1 (Tether), Outside 3 (QA/QC Intern, CRM Developer, CRM
+  Assistant (with Insellerate Experience) — new live listing; see i2-k). Invariant 628−17−413−189 = 9 ✓.
+  **403 passed.**
+- 2026-10-04 — **Resumed after context clear**; git and the resume block agreed, tree clean, 403 passed.
+  **Final review CLOSED** (`1dc90fd`), with Dagi's decisions D1–D7 (deviations i2-n…i2-s). Findings →
+  `tests/test_final_review_i2.py` first: **25 failed → confirmed → fixed**: H1 ×7 wordings (incl. "At least 4
+  years in a backend role") → `stage:experience`; M4 "team of 5 with 20 years of combined experience" (verdict and
+  intern → Apply); D2 intern with "3+ years" → Apply with the sentence shown; M3/D3 UNKNOWN MSc/PhD intern →
+  Aspirational with the note, UNKNOWN QA intern → outside, per-section caps; M2/D4 ×5 non-technical titles
+  ("QC Inspector Intern", pharma "Quality Assurance Intern", "CRM Intern", "Junior CRM Specialist", "CRM Assistant
+  (with Insellerate Experience)") → `role_family`; M1/D5 "QA Intern, Linux Kernel", "QA (Linux) Intern" → Apply with
+  the note; M5/D6 ×2 softeners; M6/D7 run samples and heartbeat samples carry the stage rejections; L1 stipend
+  program prints no interest line. **Passed before the fix (guards, kept):** `test_m4_non_requirement_years` ×3
+  ("in business for 15 years", "founded 12 years ago", "our engineers have a track record of 10 years"),
+  `test_m2_software_qa_still_reaches_outside_interests`. D1 then measured on the 244 stored descriptions
+  (`years_probe`, scratch, read-only): first version suppressed 4 real requirements ("track record" in the same
+  list block; "Our engineers are:" in a merged block) and read 4 non-requirements (two ages, "has been helping …
+  for 8 years", "a 10 year … commitment") → `test_d1_stored_sentences` (7 verbatim sentences; the "8 years" one
+  failed before its fix) → fixed; final: 36 read, all genuine requirements; 10 skipped, all non-requirements.
+  Older tests changed (one-line justification each, inline): `test_stage_s10` real-sentence table and
+  `max_required_years` typed NEW_GRAD as the stored records are (D2 exempts the INTERNSHIP default);
+  `test_advanced_degree_with_unknown_eligibility_is_not_aspirational` inverted to `…_is_aspirational` (D3);
+  `test_caps_interaction` → one Aspirational cap over all nine (D3); `test_gate_review_s5` L3 pipeline role "QA
+  Automation" → "Cloud" (a QA title is no longer a Check-eligibility slot); `test_interest_s11` cap test gets a
+  software-QA body (D4). Lows L2–L6 and the test gaps → "Known limits" in the resume block. **§12 regression
+  (`test_first_run_regression`, 9 records + 3 synthetic) passes**; golden set 1.000/1.000 (in-sample). **439 passed.**
+
+  **End of pass (iteration 2).** §12 acceptance: regression fixture ✓; funnel shows `stage:*`, `interest:cap`
+  and samples include stage rejections with their sentence (per run and in the weekly heartbeat) ✓; existing
+  tests pass or carry a one-line justification ✓; golden set re-reported ✓. S9 email arrival and §8 criterion 6
+  (14 days) are pending human checks (1) and (4). No workflow dispatched; nothing merged; `main` untouched.
+
+## RESUME — next-iteration (COMPLETE — merged to main as bc4154c; kept for history)
 Branch: next-iteration      Last commit: b911406 Merge origin/main (a39feaa, bot run 2026-10-04) into next-iteration
 Step in progress: none — **PASS COMPLETE** + Dagi's follow-ups done (body-restriction rule `5819288`; origin/main merged; branch PUSHED to origin/next-iteration). Not merged to main.
 Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S6 (5cd289f, 3e7d379 — review closed), S7 (ab4e919, 0ef22b7), S8 (d1f055e)

@@ -186,3 +186,12 @@ def test_body_restriction_elsewhere_beats_world_or_user_location(loc, body):
 ])
 def test_body_restriction_guards(loc, body, expected):
     assert _c(loc, body).category == expected
+
+
+# Found on iteration-2's baseline (GitLab row in the merged data/scout.db): "will be based in …".
+@pytest.mark.parametrize("body", [
+    "This position is 100% remote and will be based in the UK, Ireland, Germany, the Netherlands.",
+    "The role is based in the United States.",
+])
+def test_body_restriction_position_based_in(body):
+    assert _c("Remote, EMEA", body).category in NOT_POSITIVE

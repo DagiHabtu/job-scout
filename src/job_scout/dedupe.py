@@ -27,9 +27,9 @@ def _canon_company(c: str) -> str:
 def _level(title: str) -> tuple[str, ...]:
     """The title's level tokens (intern / entry / senior). "Junior X" and "Senior X" are ~0.9 similar
     but are different roles — tier 3 never merges across levels (final review H3)."""
-    from .normalize import _ENTRY_TITLE, _INTERN_TITLE, _SENIOR_TITLE
+    from .normalize import _ENTRY_TITLE, _GRAD_PROGRAM_TITLE, _INTERN_TITLE, _SENIOR_TITLE
 
-    levels = {"intern": _INTERN_TITLE, "entry": _ENTRY_TITLE, "senior": _SENIOR_TITLE}
+    levels = {"intern": _INTERN_TITLE, "entry": _ENTRY_TITLE, "graduate": _GRAD_PROGRAM_TITLE, "senior": _SENIOR_TITLE}
     return tuple(name for name, rx in levels.items() if rx.search(title))
 
 
