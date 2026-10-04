@@ -66,7 +66,8 @@ def _scored(title, etype=ET.INTERNSHIP, cat=EC.WORLDWIDE_REMOTE, body=""):
 
 
 def test_outside_interests_selected_and_capped_at_five():
-    opps = [_scored(f"QA Intern {i}") for i in range(6)]
+    # software-QA body: a bare QA title is role_family now (final review M2 — family checked before the veto)
+    opps = [_scored(f"QA Intern {i}", body="Test our web app and report bugs.") for i in range(6)]
     r = gate_reasons(opps, 0.4)
     assert r.count(None) == 5 and r.count("interest:cap") == 1
     assert section_of(opps[0]) == OUTSIDE

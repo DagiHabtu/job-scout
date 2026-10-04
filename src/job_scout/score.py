@@ -158,13 +158,25 @@ _NEGATED = re.compile(r"\bnot\s+(eligible|open|accepted|considered)\b|\bineligib
                       re.IGNORECASE)
 _NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8,
                  "nine": 9, "ten": 10}
-# A requirement-shaped years phrase: "<N>[+] [- M] years|yrs [of] [≤3 words] experience|hands-on". The
-# spec's 60-char window with working/professional read company age, age limits and vesting (review H1).
-_EXPERIENCE = re.compile(
-    r"(?<![\d.])(\d+(?:\.\d+)?|" + "|".join(_NUMBER_WORDS) + r")\s*\+?\s*(?:(?:[-–]|to)\s*\d+\s*)?"
-    r"(?:years?|yrs?)\b(?:\s+of)?\s+(?:[\w/&-]+\s+){0,3}?(?:experience|hands-on)\b",
+# Every "<N>[+] [- M] years|yrs" mention is read as a requirement unless its sentence is about something
+# else (Dagi, 2026-10-04: no wording-by-wording list of requirement phrasings). "4-year degree" is not a
+# mention (the hyphen binds it to the noun).
+_YEARS = re.compile(
+    r"(?<![\d.,])\b(\d+(?:\.\d+)?|" + "|".join(_NUMBER_WORDS) + r")\s*\+?\s*(?:(?:[-–]|to)\s*\d+\s*)?"
+    r"(years?|yrs?)\b",
     re.IGNORECASE)
-_COMPANY_SUBJECT = re.compile(r"\b(we|we've|our\s+\w+|founders?|company|team)\s+(?:\w+\s+){0,2}$", re.IGNORECASE)
+# Sentences about something else: combined/team experience, company age or history, a person's age,
+# vesting/contract/programme duration. ("track record" / "history" are not here: requirement lists use
+# them — "3+ years …, with a track record of …" — measured on the stored descriptions.)
+_NOT_REQUIREMENT = re.compile(
+    r"\b(combined|collective(ly)?|team of|founded|founders?|in business|ago|has been|have been|"
+    r"our (team|company|engineers|clients|customers)|we(?:'ve| have| bring| were)|"
+    r"old|older|age|aged|vest(s|ed|ing)?|stock options|equity|contract|lasts?|duration)\b",
+    re.IGNORECASE)
+_SENTENCE_MAX = 200
+# A span, not a requirement: "within 3 years", "over 10 years", "in the last 2 years", "up to 2 years".
+_SPAN_BEFORE = re.compile(r"\b(within|over|after|every|per|up to|(?:the\s+)?(?:next|past|last|first))\s+$",
+                          re.IGNORECASE)
 _FITS = re.compile(
     r"\b(students?|interns?|internships?|junior|jr\.?|early[- ]careers?|entry[- ]level|new[- ]grads?"
     r"|recent (?:university )?graduates?|trainees?|apprentices?)\b", re.IGNORECASE)
@@ -183,10 +195,16 @@ def _sentences(text: str) -> list[str]:
 
 
 def _advanced_requirement(s: str) -> bool:
-    for m in _ADVANCED.finditer(s):
+    mentions = list(_ADVANCED.finditer(s))
+    # A softener after the degree reaches further than one before it ("Candidates pursuing a PhD in ML,
+    # statistics … are preferred"); a softened mention softens the sentence ("PhD students are welcome …,
+    # though a PhD is a plus") — final review M5.
+    if any(_ADVANCED_SOFT.search(s[max(0, m.start() - 60): m.end() + 150]) for m in mentions):
+        return False
+    for m in mentions:
         win = s[max(0, m.start() - 60): m.end() + 60]
         near = s[max(0, m.start() - 40): m.end() + 40]
-        if not _ADVANCED_CONTEXT.search(win) or _ADVANCED_SOFT.search(win) or _BLURB.search(win):
+        if not _ADVANCED_CONTEXT.search(win) or _BLURB.search(win):
             continue
         if _UNDERGRAD.search(near) and _ALTERNATIVE.search(near):
             continue
@@ -196,11 +214,19 @@ def _advanced_requirement(s: str) -> bool:
 
 def _years(s: str) -> list[float]:
     out = []
-    for m in _EXPERIENCE.finditer(s):
-        if _COMPANY_SUBJECT.search(s[: m.start()]):        # "we bring 25 years of experience"
+    for m in _YEARS.finditer(s):
+        # the mention's sentence; a long one is a tag-stripped list block merging many items, so only the
+        # 60 chars a side of the mention are read there
+        ctx = s if len(s) <= _SENTENCE_MAX else s[max(0, m.start() - 60): m.end() + 60]
+        if _NOT_REQUIREMENT.search(ctx):                    # "… 20 years of combined experience"
+            continue
+        if _SPAN_BEFORE.search(s[: m.start()]):             # "become leads within 3 years"
             continue
         g = m.group(1).lower()
-        out.append(float(_NUMBER_WORDS.get(g, g)))
+        n = float(_NUMBER_WORDS.get(g, g))
+        if n > 1 and not m.group(2).lower().endswith("s"):  # attributive: "a 10 year security commitment"
+            continue
+        out.append(n)
     return out
 
 
@@ -231,19 +257,23 @@ def stage_fit(opp: Opportunity, profile: UserProfile) -> tuple[str, list[str]]:
         return "graduate_only", grad[:2]
 
     years = [(n, s) for s in sentences for n in _years(s)]
+    note: list[str] = []
     if years:
         n, s = max(years, key=lambda x: x[0])
-        if n > profile.education.max_required_years:
+        if opp.employment_type == EmploymentType.INTERNSHIP:
+            # Internships are exempt from the experience gate (Dagi, 2026-10-04): shown, never rejected.
+            note = [f"years mentioned (not applied to internships): {s}"]
+        elif n > profile.education.max_required_years:
             return "experience_required", [s]
-        if n >= 1:
+        elif n >= 1:
             return "stretch", [s]
 
     if _FITS.search(title):
-        return "fits", [f"title: {title}"]
+        return "fits", [f"title: {title}", *note]
     fits = [s for s in sentences if _FITS.search(s) and _ADDRESSED.search(s) and not _NEGATED.search(s)]
     if fits:
-        return "fits", fits[:1]
-    return "no_evidence", [NO_STAGE_EVIDENCE]
+        return "fits", [fits[0], *note]
+    return "no_evidence", [NO_STAGE_EVIDENCE, *note]
 
 
 def stage_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], list[str]]:
@@ -320,9 +350,16 @@ _ROLE_FAMILY = re.compile(
     r"\b(engineer(ing)?|developer|programmer|software|data|machine learning|ml|ai|devops|sre|"
     r"site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|analyst|analytics|"
     r"scientist|security|research|"            # `qa` removed (§12 S11): taste lives in the profile
-    r"embedded|computer vision|database)\b",
+    r"embedded|computer vision|database|"
+    r"linux|kernel|compiler)\b",               # "QA Intern, Linux Kernel" is technical (final review M1)
     re.IGNORECASE,
 )
+# QA/QC is a technical family only for software QA, which the title alone cannot tell from pharma or
+# manufacturing QC: the description must name software work (final review M2).
+_QA_FAMILY = re.compile(r"\b(qa|qc|quality assurance|tester|testing|sdet)\b", re.IGNORECASE)
+_SOFTWARE_CONTEXT = re.compile(
+    r"\b(software|web|browsers?|mobile (apps?|devices?)|apps?|automation|automated|api|bugs?|codebase|coding|"
+    r"selenium|cypress|playwright)\b", re.IGNORECASE)
 _ROLE_VETO = re.compile(
     r"\b(sales|account executive|marketing|recruit(er|ing)|talent|legal|counsel|finance|accounting|"
     r"customer success|people|hr|designer?|content|community|partnerships?|curriculum|renewals|support|"
@@ -338,25 +375,27 @@ _ROLE_VETO = re.compile(
 # (Psychology)", "Mac Users Needed").
 _DISCIPLINE_VETO = re.compile(
     r"\b(psychology|mechanical|civil|chemical|technician|guard|participants?|stud(y|ies)|needed|"
-    r"data entry|keyer|annotat(or|ion))\b",
+    r"data entry|keyer|annotat(or|ion)|inspector)\b",
     re.IGNORECASE,
 )
 _TITLE_QUALIFIER = re.compile(r",\s|\s[-–—|]\s|\(|:\s")
 
 
-def role_family_ok(title: str, *, family_required: bool = True) -> bool:
-    """True when the title names a technical role family and no non-technical veto word.
+def role_family_ok(title: str, description: str = "") -> bool:
+    """True when the title names a technical role family and no non-technical veto word. Checked before
+    the interest veto: taste never admits a non-technical title ("CRM Assistant" → role_family).
 
     The role head (text before the first ", " / " - " / "(") is judged on its own when it names a
     family, so a team-name suffix cannot veto it ("Backend Engineer Intern, People Platform" — final
     review M4). A head with no family word ("Intern, Software Engineering") falls back to the whole title.
-    `family_required=False` checks only the vetoes — used for a title that names a technical direction
-    the user listed as not interested ("QA/QC Intern"), so it reaches its own section (§12 S11).
+    A QA/QC title counts as a family only when it or the description names software work ("QA/QC Intern" at a
+    software company — yes; "Quality Assurance Intern" at a pharmaceutical site — no).
     """
     title = title or ""
     head = _TITLE_QUALIFIER.split(title, maxsplit=1)[0]
     text = head if _ROLE_FAMILY.search(head) else title
-    family = bool(_ROLE_FAMILY.search(text)) or not family_required
+    family = bool(_ROLE_FAMILY.search(text)) or bool(
+        _QA_FAMILY.search(text) and _SOFTWARE_CONTEXT.search(f"{title} {description or ''}"))
     return family and not _ROLE_VETO.search(text) and not _DISCIPLINE_VETO.search(title)
 
 
@@ -381,7 +420,10 @@ def interest_veto(opp: Opportunity, profile: UserProfile) -> tuple[str | None, s
 
 
 def interest_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], list[str]]:
-    """(matched, concerns): 'interest:note: …' (kept, with the note) or 'interest:veto: <term>'."""
+    """(matched, concerns): 'interest:note: …' (kept, with the note) or 'interest:veto: <term>'. Stipend
+    programs are always "Apply", so they carry neither (final review L1)."""
+    if opp.employment_type == EmploymentType.STIPEND_PROGRAM:
+        return [], []
     veto, note = interest_veto(opp, profile)
     if veto:
         return [], [f"interest:veto: {veto}"]

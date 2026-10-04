@@ -45,7 +45,8 @@ REAL = [
 
 @pytest.mark.parametrize("title,body,verdict", REAL)
 def test_stage_fit_real_sentences(title, body, verdict):
-    v, ev = stage_fit(_o(title, body), P)
+    # typed as the stored record is (CRM Developer is new_grad): internships are exempt from the years rule (D2)
+    v, ev = stage_fit(_o(title, body, etype=ET.INTERNSHIP if "Intern" in title else ET.NEW_GRAD), P)
     assert v == verdict
     if verdict in ("advanced_degree", "graduate_only", "stretch"):
         assert ev and all(isinstance(s, str) and s for s in ev)
@@ -125,7 +126,9 @@ def test_accept_graduate_programs_lets_them_through():
 
 def test_max_required_years_from_profile():
     p = UserProfile(education={"max_required_years": 3})
-    assert stage_fit(_o("Junior Software Engineer", "3+ years of professional experience."), p)[0] == "stretch"
+    # NEW_GRAD as a Junior title is typed (the INTERNSHIP default is now exempt from the years rule — D2)
+    assert stage_fit(_o("Junior Software Engineer", "3+ years of professional experience.", etype=ET.NEW_GRAD),
+                     p)[0] == "stretch"
 
 
 def test_advanced_degree_is_aspirational_capped_at_two():
@@ -136,10 +139,11 @@ def test_advanced_degree_is_aspirational_capped_at_two():
     assert section_of(opps[0]) == "Aspirational"
 
 
-def test_advanced_degree_with_unknown_eligibility_is_not_aspirational():
+def test_advanced_degree_with_unknown_eligibility_is_aspirational():
+    # inverted (was ..._is_not_aspirational, deviation i2-a): least actionable section wins — Dagi, final review M3
     body = "MSc/PhD Internships at Tether aim to provide students with research opportunities."
     o = _scored("Research Engineer Intern", body, etype=ET.INTERNSHIP, cat=EC.UNKNOWN)
-    assert gate_reason(o, 0.4) is None and section_of(o) == "Check eligibility"
+    assert gate_reason(o, 0.4) is None and section_of(o) == "Aspirational"
 
 
 def test_stipend_programs_skip_stage():

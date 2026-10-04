@@ -170,10 +170,11 @@ def test_caps_interaction():
         o.relevance = score_opportunity(o, P, ScoringConfig())
         return o
 
+    # UNKNOWN MSc/PhD interns are now Aspirational too (final review M3, Dagi): one cap over all nine,
+    # none of them uses a Check-eligibility slot (per-section caps: tests/test_final_review_i2.py)
     opps = [mk(i, EC.WORLDWIDE_REMOTE) for i in range(3)] + [mk(10 + i, EC.UNKNOWN) for i in range(6)]
     r = gate_reasons(opps, 0.4)
-    assert r[:3].count(None) == 2 and r[:3].count("stage:advanced_cap") == 1
-    assert r[3:].count(None) == 5 and r[3:].count("unknown_cap") == 1
+    assert r.count(None) == 2 and r.count("stage:advanced_cap") == 7 and "unknown_cap" not in r
 
 
 # L6 — the HTML digest shows a readable stage line, never raw "stage:" strings; none for programs.

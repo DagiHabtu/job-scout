@@ -36,6 +36,7 @@ from .models import EmploymentType, Opportunity, Provenance
 from .normalize import normalize
 from .notify import (
     gate_reasons,
+    pick_samples,
     render_digest,
     render_funnel_md,
     render_issue_md,
@@ -129,7 +130,7 @@ def _internship_funnel(target_raw: list[Opportunity], kept_ids: set[int], reason
             continue
         reason = reason_of.get(id(o))
         outcomes[reason or "notified"] += 1
-        if reason and reason not in _KNOWN and len(samples) < _MAX_SAMPLES:   # real rejections only (L4)
+        if reason and reason not in _KNOWN:                    # real rejections only (L4)
             b = _brief(o)
             samples.append({
                 "title": b["title"], "company": b["company"], "location": b["location"], "reason": reason,
@@ -137,7 +138,7 @@ def _internship_funnel(target_raw: list[Opportunity], kept_ids: set[int], reason
                 "evidence": ("; ".join(stage_of(o)[1]) if reason.startswith("stage:")
                              else "; ".join(o.eligibility.evidence) if o.eligibility else ""),
             })
-    return {"fetched": len(target_raw), "outcomes": dict(outcomes), "rejected_samples": samples}
+    return {"fetched": len(target_raw), "outcomes": dict(outcomes), "rejected_samples": pick_samples(samples)}
 
 
 def _discover(sources: list[Source], cfg: AppConfig) -> tuple[list[Opportunity], dict[str, dict]]:
