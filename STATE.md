@@ -1,12 +1,12 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: 3e7d379 S6: close independent review — …
-Step in progress: S8
-  Sub-progress S8: [ ] verify `canonical` token (scripts/verify_boards.sh)  [ ] add to greenhouse_boards with provenance comment  [ ] commit
-Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S6 (5cd289f, 3e7d379 — review closed), S7 (ab4e919, 0ef22b7)
+Branch: next-iteration      Last commit: d1f055e S8: add the canonical Greenhouse board (verified live: 310 jobs)
+Step in progress: final whole-branch review
+  Sub-progress: [ ] reviewer spawned on 7ec0b85..HEAD (fresh context, read-only)  [ ] findings → tests → fixes  [ ] end-of-pass STATE (pending human checks + exact commands)
+Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S6 (5cd289f, 3e7d379 — review closed), S7 (ab4e919, 0ef22b7), S8 (d1f055e)
 Reviews: S2 closed, S5 closed, S6 closed, final open
-Next action: S8 — verify the `canonical` Greenhouse token and add it; then the final whole-branch review and end-of-pass STATE.
+Next action: run the final whole-branch review (spec §11: general-purpose, same model, read-only; give it §5, §8, §9, §11 review brief, the diff 7ec0b85..HEAD and the tests), action findings test-first, then write the end-of-pass STATE.
 Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up. (3) DECISION for Dagi (S5 review M1): an onsite/hybrid role in Addis Ababa is UNKNOWN@0.4 (Gate-0 Decision #1), so a NEW_GRAD one is never notified (`eligibility_unknown`) and an INTERNSHIP one lands in "Check eligibility" using a cap slot — though the user can certainly take it. Fixing it needs either a gate rule ("own-country onsite UNKNOWN → select") or E2's proposed new EligibilityCategory (spine change). Not changed in this pass.
 Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD. (j) S6: gate checks `already_notified` before `not_new` (spec Case A requires it). (k) S6: `US_EMBARGOED` = Cuba, Iran, North Korea, Crimea, Donetsk, Luhansk — composed from OFAC's active program list (which has no single "embargoed countries" list); what is verified is that no Ethiopia program exists. (l) S6: program-level `report` key for a program with no future round is its name; a program's last-checked date in that message is the latest of its geo/round checks. (m) S6 review H1: `ats_job_id = <key>@<recorded state>`, not `@<effective_state>` as the spec writes — otherwise a stale `open` round is re-announced as "expected"; staleness still changes title and lead window. (n) S6 review M3: MLH `geo_scope="worldwide"` with the form's verified no-projects list as `geo_exclusions` (spec gave no scope; the earlier "unknown" was only because the list was not extracted).
 Unverified facts still in code: all 2027 round dates are `expected` extrapolations (Outreachy ~Feb 5–12, GSoC Mar 24–Apr 7 kept from the old table, LFX mid-Jan/Apr/Jul + 4 weeks); Himalayas freshness per listing (E1 used pubDate).
@@ -208,6 +208,15 @@ Unverified facts still in code: all 2027 round dates are `expected` extrapolatio
   `geo_scope="worldwide"` (same treatment as GSoC: embargo rule + verified list); `geo_url` stays the
   form (where the quote and list live), program `url` is fellowship.mlh.com. No round → no output
   change. **268 passed.**
+- 2026-10-04 — **S8 done** (`d1f055e`). `scripts/verify_boards.sh` (needs a `python3` on PATH — on
+  this Windows box a scratch shim to the venv python) → `canonical` VERIFIED, 310 jobs (gitlab 211,
+  sourcegraph91 10, posthog 8, deel 0 also verified). Added to `greenhouse_boards` with a provenance
+  comment; no other boards. Live run `c10ee16c1d62` (copy of the DB): discovered 628 → merged 19 →
+  rejects 413 (remote_excludes 269, seniority_title 128, onsite_foreign 9, work_auth 6, type 2+…)
+  → survived 196 → gate not_target_class 98, role_family 85, not_new 4 → **notified 9**: the 6
+  Himalayas items from S7 plus 3 Canonical — Junior Ubuntu Software Engineer, Junior Linux Kernel
+  Engineer - Ubuntu, Graduate Software Engineer, Open Source and Linux (all "Home based -
+  Worldwide"). by_type new_grad 73. Invariant 628−19−413−187 = 9 ✓. **268 passed.**
 
 ---
 
