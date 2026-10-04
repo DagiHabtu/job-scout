@@ -52,6 +52,9 @@ step's acceptance criteria pass, rebased first (the bot commits `data/scout.db` 
   The only available route is `general-purpose` with an `opus`/`sonnet` alias (resolves to the
   newest model, not the pinned version; no effort setting). Per §11, waiting for Dagi's call
   before delegating S0. No S0 code written yet.
+- 2026-10-04 — Dagi's decision: restart Claude Code from `job-scout/`; a new prompt and an updated
+  spec (revised delegation, single-pass implementation) will follow. **Next action: wait for them.**
+  Commits `80ae5b6`..HEAD are local only (not pushed); rebase onto `origin/main` before pushing.
 
 ---
 
