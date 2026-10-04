@@ -268,6 +268,7 @@ def _followed_by(hay: str, phrase: str, terms: set[str]) -> bool:
 # "candidates/applicants in …", "open to residents of …". The captured clause runs to the sentence end.
 _BODY_RESTRICTION = re.compile(
     r"\b(?:must\s+(?:be\s+)?(?:based|located|resid(?:e|ing)|liv(?:e|ing))\s+in"
+    r"|(?:position|role|job)\s+(?:is\s+)?(?:\S+\s+){0,3}?(?:will\s+be\s+|is\s+)?(?:based|located)\s+in"
     r"|(?:candidates|applicants|residents)\s+(?:(?:based|located|residing|living)\s+)?(?:in|of))"
     r"\s+([^.;:\n]{1,80})"
 )
