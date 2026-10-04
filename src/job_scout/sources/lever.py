@@ -100,10 +100,12 @@ class LeverSource:
                 opps.append(_to_opportunity(posting, company))
             except Exception as exc:  # one malformed posting never aborts the site
                 log.warning("lever: skipping malformed posting in site %s: %r", site, exc)
+                self.skipped_records += 1
         log.info("lever: site %s → %d postings", site, len(opps))
         return opps
 
     def fetch(self, cfg: SourceConfig) -> list[Opportunity]:
+        self.skipped_records = 0                       # malformed records skipped (§6)
         sites = self._sites if self._sites is not None else list(cfg.lever_sites)
         if not sites:
             log.info("lever: no sites configured")

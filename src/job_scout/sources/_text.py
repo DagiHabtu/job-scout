@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from html import unescape
 
-_TAG = re.compile(r"<[^>]+>")
+_TAG = re.compile(r"<[^>]+>|</?[a-zA-Z][^<>]*$")   # 2nd branch: a tag cut off by truncated HTML
 _WS = re.compile(r"\s+")
 
 

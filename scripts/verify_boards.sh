@@ -12,7 +12,7 @@ set -uo pipefail
 UA="job-scout-token-verify/1.0"
 
 # ---- edit these ----------------------------------------------------------------------------- #
-GREENHOUSE=(gitlab sourcegraph91)     # board tokens  -> boards-api.greenhouse.io/v1/boards/<t>/jobs
+GREENHOUSE=(gitlab sourcegraph91 canonical)     # board tokens  -> boards-api.greenhouse.io/v1/boards/<t>/jobs
 LEVER=()                              # site slugs    -> api.lever.co/v0/postings/<t>?mode=json
 ASHBY=(posthog deel)                  # org slugs     -> api.ashbyhq.com/posting-api/job-board/<t>
 # --------------------------------------------------------------------------------------------- #

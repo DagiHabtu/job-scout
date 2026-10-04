@@ -1,8 +1,8 @@
 # Copy to config/profile.yaml and edit. Secrets do NOT go here — they load from env / .env.
 profile:
-  target_roles: ["software engineer intern", "backend intern", "data engineer intern"]
+  target_roles: ["data engineer intern", "software engineer intern", "machine learning engineer intern", "junior data engineer", "junior software engineer", "junior platform engineer"]   # S3 default; edit freely
   target_technologies: ["python", "sql", "docker", "postgres"]
-  employment_types: ["internship", "stipend_program"]
+  employment_types: ["internship", "stipend_program", "new_grad"]
   experience_level: "entry"
   location:
     country_code: "ET"

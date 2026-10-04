@@ -1,9 +1,9 @@
 # Live profile for the Job Scout. Non-secret preferences only — secrets load from env / .env.
 # Copied from profile.example.yaml and pointed at real Greenhouse boards for the Gate-1 live run.
 profile:
-  target_roles: ["software engineer intern", "backend intern", "data engineer intern", "backend engineer"]
+  target_roles: ["data engineer intern", "software engineer intern", "machine learning engineer intern", "junior data engineer", "junior software engineer", "junior platform engineer"]   # S3 default; edit freely
   target_technologies: ["python", "sql", "docker", "postgres", "kubernetes", "go"]
-  employment_types: ["internship", "stipend_program"]
+  employment_types: ["internship", "stipend_program", "new_grad"]
   experience_level: "entry"
   location:
     country_code: "ET"
@@ -32,10 +32,14 @@ sources:
   # The highest-fidelity internship source for ET remains `known_programs` (Outreachy/GSoC/MLH),
   # already enabled. These ATS boards add calibration breadth; expect modest raw internship yield.
   # (Re-verify tokens any time with scripts/verify_boards.sh.)
-  enabled: ["greenhouse", "lever", "ashby", "known_programs"]
-  greenhouse_boards: ["gitlab", "sourcegraph91"]
+  enabled: ["greenhouse", "lever", "ashby", "known_programs", "himalayas"]
+  #   himalayas — public search API (spec S7; E1 probe passed 2026-10-04). Default queries in config.py
+  #   (Intern / Entry-level × worldwide / country=ET). Terms: link back + attribution, no resubmission.
+  greenhouse_boards: ["gitlab", "sourcegraph91", "canonical"]
   #   gitlab        — verified live (project Gate-1 run fetched 234 jobs). All-remote, hires 65+ countries.
   #   sourcegraph91 — verified via Sourcegraph's own job-board repo + live boards.greenhouse.io/sourcegraph91. All-remote.
+  #   canonical     — verified 2026-10-04 by scripts/verify_boards.sh (310 jobs). Remote-first, hires
+  #                   worldwide incl. graduate roles (spec S8; the only board added this iteration).
   lever_sites: []
   #   Left empty: verified Lever accounts (Spotify, Palantir, Plaid, Zoox, WHOOP, Aircall, …) skew
   #   US/hub-based; none was a clear worldwide-remote internship fit. Add a verified slug when one is.

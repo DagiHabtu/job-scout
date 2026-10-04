@@ -1,111 +1,145 @@
-"""Known-programs curated source — date-driven surfacing + top-tier ranking through the pipeline."""
+"""Known-programs calendar (S6) — unit tests for timing, staleness, identity, verdicts, maintenance.
+
+Rewritten for S6 (the round/program data model changed: state, dated evidence, per-state identity,
+no fixed LEAD_DAYS). The pipeline-level Case A/B/C acceptance lives in
+tests/test_known_programs_acceptance.py.
+
+The seven pre-S6 tests, one line each (spec §8 criterion 7):
+- test_round_is_surfaced_only_within_its_window → fixed LEAD_DAYS gone; now per-state leads in
+  test_lead_windows_by_state.
+- test_expired_round_is_skipped_for_the_next_one → now test_deadline_boundaries (+ report reason).
+- test_outreachy_open_window_surfaces_as_stipend_program → Case A in the acceptance file (synthetic
+  program; the shipped Outreachy round is `expected`, not open).
+- test_opening_soon_phrasing_before_open_date → titles are per state now: test_titles_per_state.
+- test_quiet_period_surfaces_nothing_today_dates → test_shipped_table_is_valid_and_quiet_on_2026_10_04.
+- test_best_fit_stipend_surfaces_below_threshold_but_unknown_does_not → threshold no longer gates
+  programs (S5); UNKNOWN programs are now surfaced as "Check eligibility" — Case C in the acceptance file.
+- test_program_ranks_top_tier_and_notifies_through_the_pipeline → Case A in the acceptance file.
+"""
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
-from job_scout.config import AppConfig
-from job_scout.models import EligibilityCategory as EC
-from job_scout.models import Eligibility, EmploymentType, Lifecycle, Opportunity, Relevance
-from job_scout.notify import select_for_notification
-from job_scout.pipeline import run_once
+import job_scout.sources.known_programs as kp
 from job_scout.sources.known_programs import (
-    LEAD_DAYS,
+    _PROGRAMS,
     KnownProgramsSource,
     _Program,
     _Round,
-    _active_round,
+    effective_state,
+    geo_evidence,
+    geo_verdict,
+    maintenance_notes,
+    validate_table,
 )
 
-
-def _fetch(today):
-    return KnownProgramsSource(today=today).fetch(cfg=None)
+T = date(2027, 1, 10)
 
 
-def _titles(today):
-    return [o.company for o in _fetch(today)]
+def _prog(name="P", rounds=(), **kw):
+    base = dict(org=name, url=f"https://{name}/", stipend="$1", summary="s", geo_scope="worldwide",
+                geo_quote="open to everyone", geo_url=f"https://{name}/rules", geo_checked_on=T)
+    base.update(kw)
+    return _Program(name=name, rounds=tuple(rounds), **base)
 
 
-def test_round_is_surfaced_only_within_its_window():
-    prog = _Program(
-        name="Test", org="Test", url="https://x/", stipend="$1", eligibility="worldwide",
-        summary="s",
-        rounds=(_Round("r1", date(2027, 3, 1), date(2027, 4, 1), "period"),),
-    )
-    assert _active_round(prog, date(2027, 1, 1)) is None                 # too early (before lead)
-    assert _active_round(prog, date(2027, 1, 15)).key == "r1"            # exactly LEAD_DAYS before opens
-    assert _active_round(prog, date(2027, 3, 15)).key == "r1"            # open
-    assert _active_round(prog, date(2027, 4, 1)).key == "r1"            # on the deadline (still in)
-    assert _active_round(prog, date(2027, 4, 2)) is None                 # closed
-    # LEAD_DAYS boundary is exact
-    assert (date(2027, 3, 1) - date(2027, 1, 15)).days == LEAD_DAYS
+def _round(key="r1", opens=T, deadline=T + timedelta(days=10), state="open", checked=T):
+    return _Round(key, opens, deadline, "period", state, "https://state/", checked)
 
 
-def test_expired_round_is_skipped_for_the_next_one():
-    prog = _Program(
-        name="Two", org="Two", url="https://x/", stipend="$1", eligibility="worldwide", summary="s",
-        rounds=(
-            _Round("past", date(2026, 1, 1), date(2026, 2, 1), "old"),
-            _Round("next", date(2027, 1, 1), date(2027, 2, 1), "new"),
-        ),
-    )
-    assert _active_round(prog, date(2026, 12, 20)).key == "next"         # past one skipped
+def _fetch(today, *progs):
+    src = KnownProgramsSource(today=today, programs=tuple(progs))
+    return src.fetch(cfg=None), src.report
 
 
-def test_outreachy_open_window_surfaces_as_stipend_program():
-    # Mid-Feb 2027: the Outreachy May cohort application window is open.
-    opps = _fetch(date(2027, 2, 10))
-    outreachy = next((o for o in opps if o.company == "Outreachy"), None)
-    assert outreachy is not None
-    assert outreachy.employment_type == EmploymentType.STIPEND_PROGRAM
-    assert outreachy.deadline == date(2027, 2, 24)
-    assert outreachy.ats_provider == "known_programs" and outreachy.ats_job_id == "outreachy-2027-05"
-    assert "open now" in outreachy.title.lower()
-    assert "approximate" in outreachy.description.lower()               # honesty about dates
+def test_lead_windows_by_state():
+    opens = T + timedelta(days=40)
+    for state, lead in (("announced", 30), ("expected", 51)):
+        r = _round(opens=opens, deadline=opens + timedelta(days=7), state=state)
+        assert _fetch(opens - timedelta(days=lead), _prog(rounds=[r]))[0]                    # first day in
+        out, rep = _fetch(opens - timedelta(days=lead + 1), _prog(rounds=[r]))
+        assert out == [] and rep["r1"] == "outside_lead_window"
+    r = _round(opens=T + timedelta(days=90), deadline=T + timedelta(days=100), state="open")
+    assert _fetch(T, _prog(rounds=[r]))[0]                                                    # open: no lead needed
 
 
-def test_opening_soon_phrasing_before_open_date():
-    # Late Feb 2027 is within GSoC's lead window but before its open date.
-    opps = _fetch(date(2027, 2, 20))
-    gsoc = next((o for o in opps if o.company == "Google Summer of Code"), None)
-    assert gsoc is not None and "opening soon" in gsoc.title.lower()
+def test_deadline_boundaries():
+    r = _round(deadline=T)
+    assert _fetch(T, _prog(rounds=[r]))[0]                                                    # on the deadline
+    out, rep = _fetch(T + timedelta(days=1), _prog(rounds=[r]))
+    assert out == [] and rep["r1"] == "deadline_passed" and rep["P"].startswith("no_published_round")
 
 
-def test_quiet_period_surfaces_nothing_today_dates():
-    # Early Sep 2026: the Dec cohort's application window has closed and the next windows are >LEAD
-    # away — an honest empty result rather than a stale/misleading one.
-    assert _fetch(date(2026, 9, 3)) == []
+def test_stale_open_state_becomes_expected_and_title_says_so():
+    r = _round(state="open", checked=T - timedelta(days=46))
+    assert effective_state(r, T) == "expected"
+    o = _fetch(T, _prog(rounds=[r]))[0][0]
+    # identity keeps the recorded state (S6 review H1: staleness must not re-announce an open round)
+    assert o.ats_job_id == "r1@open" and "dates not published" in o.title
+    assert effective_state(_round(state="open", checked=T - timedelta(days=45)), T) == "open"
 
 
-def test_best_fit_stipend_surfaces_below_threshold_but_unknown_does_not():
-    def mk(cat):
-        o = Opportunity(title="P", company="C", apply_url="u", canonical_url="u", status=Lifecycle.NEW)
-        o.eligibility = Eligibility(cat, 0.9)
-        o.relevance = Relevance(score=0.10)          # well below any sane threshold
-        return o
-
-    stipend = mk(EC.STIPEND_PROGRAM_GLOBAL)
-    unknown = mk(EC.UNKNOWN)
-    picked = select_for_notification([stipend, unknown], threshold=0.45)
-    assert stipend in picked                          # best-fit class surfaces on eligibility alone
-    assert unknown not in picked                      # a low-relevance UNKNOWN does not
+def test_titles_per_state():
+    p = _prog(rounds=[_round(opens=date(2027, 2, 5), deadline=date(2027, 2, 12), state="announced", checked=T)])
+    o = _fetch(date(2027, 1, 20), p)[0][0]
+    assert o.title == "P — opens Feb 5, 2027"
+    p = _prog(rounds=[_round(opens=date(2027, 1, 5), deadline=date(2027, 2, 12), state="open")])
+    assert _fetch(T, p)[0][0].title == "P — applications open (deadline Feb 12, 2027)"
 
 
-def test_program_ranks_top_tier_and_notifies_through_the_pipeline(tmp_path):
-    cfg = AppConfig()
-    cfg.db_path = str(tmp_path / "scout.db")
-    cfg.notify.digest_path = str(tmp_path / "digest.html")
-    today = date(2027, 2, 10)
+def test_geo_verdict_rules():
+    _fetch(T, _prog("W", [_round("w1")]))
+    assert geo_verdict("w1@open", "Ethiopia") == "eligible"
+    _fetch(T, _prog("X", [_round("x1")], geo_exclusions=("Ethiopia",)))
+    assert geo_verdict("x1@open", "Ethiopia") == "excluded"
+    _fetch(T, _prog("U", [_round("u1")], geo_scope="unknown"))
+    assert geo_verdict("u1@open", "Ethiopia") == "unknown"
+    _fetch(T, _prog("S", [_round("s1")], geo_checked_on=T - timedelta(days=366)))
+    assert geo_verdict("s1@open", "Ethiopia") == "unknown"                                    # stale rule
+    _fetch(T, _prog("E", [_round("e1")], embargo_rule=True))
+    assert geo_verdict("e1@open", "Iran") == "excluded"
+    assert geo_verdict("e1@open", "Ethiopia") == "eligible"
+    assert geo_verdict("nope@open", "Ethiopia") == "unknown"
 
-    summary = run_once(cfg, [KnownProgramsSource(today=today)], today=today)
-    assert summary.sources["known_programs"]["ok"] is True
-    assert summary.ranked, "expected at least one program surfaced"
 
-    top = summary.ranked[0]
-    assert top.eligibility.category == EC.STIPEND_PROGRAM_GLOBAL     # structurally worldwide → top tier
-    assert top.status == Lifecycle.NEW
-    assert summary.notified >= 1                                     # a stipend program is worth surfacing
+def test_embargo_rule_unverified_is_unknown(monkeypatch):
+    monkeypatch.setattr(kp, "US_EMBARGOED_CHECKED_ON", None)
+    _fetch(T, _prog("E2", [_round("e2")], embargo_rule=True))
+    assert geo_verdict("e2@open", "Ethiopia") == "unknown"
 
-    # idempotency: a second run marks them ACTIVE and does not re-notify
-    summary2 = run_once(cfg, [KnownProgramsSource(today=today)], today=today)
-    assert summary2.lifecycle["new"] == 0 and summary2.notified == 0
+
+def test_geo_evidence_quotes_rule_url_date_and_conditions():
+    _fetch(T, _prog("C", [_round("c1")], conditions=("18+", "30 hours/week")))
+    ev = " | ".join(geo_evidence("c1@open"))
+    assert "open to everyone" in ev and "https://C/rules" in ev and T.isoformat() in ev
+    assert "condition (not checked): 18+" in ev and "30 hours/week" in ev
+
+
+def test_shipped_table_is_valid_and_quiet_on_2026_10_04():
+    assert validate_table(_PROGRAMS) == []
+    out, rep = _fetch(date(2026, 10, 4), *_PROGRAMS)
+    assert out == []
+    assert rep["outreachy-2027-05"] == "outside_lead_window"
+    assert rep["lfx-2027-spring"] == "outside_lead_window"
+    assert rep["MLH Fellowship"].startswith("no_published_round")
+
+
+def test_shipped_table_first_surfacing_dates():
+    # Outreachy May 2027 (expected, opens ~Feb 5) from Dec 16; LFX spring (opens ~Jan 15) from Nov 25.
+    keys = lambda d: {o.ats_job_id for o in _fetch(d, *_PROGRAMS)[0]}  # noqa: E731
+    assert "lfx-2027-spring@expected" in keys(date(2026, 11, 25)) and "lfx-2027-spring@expected" not in keys(date(2026, 11, 24))
+    assert "outreachy-2027-05@expected" in keys(date(2026, 12, 16)) and "outreachy-2027-05@expected" not in keys(date(2026, 12, 15))
+
+
+def test_shipped_table_has_a_round_more_than_60_days_ahead():
+    # Maintenance tripwire: fails when the calendar has run dry and needs refreshing.
+    today = date.today()
+    assert any(r.apply_deadline > today + timedelta(days=60) for p in _PROGRAMS for r in p.rounds)
+
+
+def test_maintenance_notes_list_stale_checks_and_missing_rounds():
+    notes = "\n".join(maintenance_notes(date(2026, 11, 10)))
+    assert "re-check: https://www.outreachy.org/docs/applicant/" in notes
+    assert "MLH Fellowship: no_published_round" in notes
+    assert maintenance_notes(date(2026, 10, 4), (_prog(rounds=[_round(deadline=date(2026, 12, 1), checked=date(2026, 10, 1))]),)) == []

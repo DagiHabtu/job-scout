@@ -1,5 +1,303 @@
 # STATE
 
+## RESUME — next-iteration
+Branch: next-iteration      Last commit: b911406 Merge origin/main (a39feaa, bot run 2026-10-04) into next-iteration
+Step in progress: none — **PASS COMPLETE** + Dagi's follow-ups done (body-restriction rule `5819288`; origin/main merged; branch PUSHED to origin/next-iteration). Not merged to main.
+Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S6 (5cd289f, 3e7d379 — review closed), S7 (ab4e919, 0ef22b7), S8 (d1f055e)
+Reviews: S2 closed, S5 closed, S6 closed, final closed (96c10db)
+Next action: Dagi does the pending human checks below, in order. Nothing else is in flight.
+Pending human checks (in this order; commands run from `job-scout/`):
+  (1) [DONE 2026-10-04] Branch pushed: `git push -u origin next-iteration` (carries origin/main a39feaa's data/scout.db).
+  (2) S0 + S1 — dispatch on the branch with a seeded delivery test:
+      `gh workflow run scout --ref next-iteration -f seed=true` then `gh run watch` (or the Actions tab).
+      Confirm (a) the funnel table is on the run page (step summary), (b) an issue "Job Scout: N new — <date>"
+      exists (`gh issue list --label scout`) — on today's data it should list the real items (9 in the local
+      run), not just the seeded one — and (c) it reached a real device (email or GitHub mobile). If it did not
+      arrive, the Telegram fallback is the first follow-up. Note: this run commits `data/scout.db` to
+      `next-iteration`, and the items are then marked notified on that branch's DB.
+  (3) Merge by pull request — never via local `main` (local `main` has diverged from `origin/main`: it holds
+      the 4 pre-branch commits 80ae5b6..7ec0b85, which are already in next-iteration, and lacks a39feaa):
+      `gh pr create --base main --head next-iteration --title "Next iteration: funnel, delivery, eligibility, gate, programs, Himalayas, canonical" --body "Implements docs/SPEC-2026-10-04-next-iteration.md (S0–S8). Evidence, reviews and deviations: STATE.md (RESUME block + pass log)."`
+      then `gh pr merge --merge`.
+      If the PR reports a conflict in `data/scout.db` (the bot commits it to `main` daily, and step 2's run commits it
+      to the branch), keep the branch's copy so items delivered in step 2 are not re-sent:
+      `git checkout next-iteration && git pull && git merge origin/main` → on conflict
+      `git checkout --ours data/scout.db && git add data/scout.db && git commit --no-edit && git push`, then `gh pr merge --merge`.
+      Afterwards, realign local main: `git checkout main && git reset --hard origin/main`.
+  (4) DECISION for Dagi (S5 review M1): an onsite/hybrid role in Addis Ababa is UNKNOWN@0.4 (Gate-0 Decision #1), so a NEW_GRAD one is never notified (`eligibility_unknown`) and an INTERNSHIP one lands in "Check eligibility" using a cap slot — though the user can certainly take it. Fixing it needs either a gate rule ("own-country onsite UNKNOWN → select") or E2's proposed new EligibilityCategory (spine change). Not changed in this pass.
+Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) [withdrawn — §6 `skipped_records` now implemented, final review M5]. (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD. (j) S6: gate checks `already_notified` before `not_new` (spec Case A requires it). (k) S6: `US_EMBARGOED` = Cuba, Iran, North Korea, Crimea, Donetsk, Luhansk — composed from OFAC's active program list (which has no single "embargoed countries" list); what is verified is that no Ethiopia program exists. (l) S6: program-level `report` key for a program with no future round is its name; a program's last-checked date in that message is the latest of its geo/round checks. (m) S6 review H1: `ats_job_id = <key>@<recorded state>`, not `@<effective_state>` as the spec writes — otherwise a stale `open` round is re-announced as "expected"; staleness still changes title and lead window. (n) S6 review M3: MLH `geo_scope="worldwide"` with the form's verified no-projects list as `geo_exclusions` (spec gave no scope; the earlier "unknown" was only because the list was not extracted).
+  Final-review deviations: (o) M1 — step 2 (work authorization) is no longer "unchanged": a residency phrase naming the user's region/"anywhere" ("must be based in EMEA") is not foreign auth, and a visa-sponsorship line does not count when the location is decisively worldwide or includes the user (a remote hire needs no visa); a foreign right-to-work phrase still disqualifies first. (p) H2 — a body worldwide phrase plus "located/reside/based/live in <place elsewhere>" → UNKNOWN 0.5. (q) M2/L9 — exclusion wording in the location ("Global (excluding US)") labels only the part before it, or excludes when it names the user; a WORLD location next to an ELSEWHERE title marker is MIXED → UNKNOWN 0.5 (spec: "any WORLD" wins). (r) M4 — `role_family_ok` judges the title's role head (before ", " / " - " / "(") alone when it names a family; discipline vetoes (psychology, mechanical, technician, guard, participants, study, data entry, annotation, …) count anywhere; golden set still 1.0/1.0 (in-sample). (s) H3 — dedupe tier 3 never merges titles of different level (intern/entry/senior). (t) Follow-up — a WORLD/USER location plus a body sentence restricting applicants only to places elsewhere → UNKNOWN 0.5 (spec: the location decides first).
+Unverified facts still in code: all 2027 round dates are `expected` extrapolations (Outreachy ~Feb 5–12, GSoC Mar 24–Apr 7 kept from the old table, LFX mid-Jan/Apr/Jul + 4 weeks); Himalayas freshness per listing (E1 used pubDate).
+
+### Final review findings (CLOSED `96c10db` — outcomes in the pass log entry "Final review CLOSED")
+- H1 `\bus\b` in the step-4 body exclusion matches the pronoun ("join us") → plain "Remote" + neutral body → REMOTE_EXCLUDES_USER 0.8 → hard reject (UNKNOWN made disqualifying).
+- H2 Sourcegraph "hire almost anywhere in the world, we do require successful candidates to be located in the United States" → WORLDWIDE 0.7 (place outside the 60-char window) → Actionable for US-only roles; 9 stored rows.
+- H3 dedupe tier 3 fuzzy ratio ≥0.90 merges "Junior Data Engineer" into "Senior Data Engineer" (same company+location); the senior survives and is rejected → junior lost.
+- M1 work-auth step overrides a decisive WORLD/USER location ("Worldwide" + "We do not sponsor visas" → requires_work_auth; "Remote, EMEA" + "must be based in EMEA" → requires_work_auth). Spec-literal (steps 1–2 unchanged).
+- M2 "Remote - Global (excluding US)" → excludes; "Anywhere except the United States" → onsite_foreign (exclusion wording read as restriction).
+- M3 gazetteer gaps ("Remote, Ontario" + "work from anywhere" → WORLDWIDE 0.7).
+- M4 role_family vetoes team-name suffixes ("Software Engineer Intern, Financial Data Platform", "Backend Engineer Intern, People Platform", "Data Scientist Intern - Sales Analytics"); "Security Guard Trainee" passes; golden set is in-sample.
+- M5 §6 `skipped_records` not implemented → a source skipping every record reads as a genuine zero.
+- L1 gate order (= deviation j). L2 `eligibility_negative` (= deviation h). L3 identity recorded state (= deviation m). L4 `rejected_samples` filled by not_new/already_notified. L5 invariant tests near-tautological; no test with failing source/skip. L6 lexical mode reads body + tech double count (model mode unaffected). L7 reclassify checker blind to plain "Remote" positives (misses H2). L8 deleted known_programs tests lack one-line-each justification. L9 Himalayas synthetic "Worldwide" beats an ELSEWHERE title marker ("Software Engineer Intern (US)" → WORLDWIDE 0.85). L10 "EMEA, excluding Ethiopia" → includes; "Fully Remote" → OTHER 0.3 not BARE; "Remote (GMT+3)" → UNKNOWN 0.3.
+
+### S6 review findings (CLOSED `3e7d379` — outcomes in the pass log entry "S6 independent review CLOSED")
+- H1 stale `open` round re-notified as `@expected` with "dates not published" (round q1 open, opens T-1, deadline T+80, checked T; run at T then T+46 → notified twice). Spec composition issue → choose: keep last-notified state, or staleness changes only the title not `ats_job_id`.
+- H2 `_INDEX` keyed by round key only, last write wins; duplicate keys across programs/sources borrow another program's "eligible" + quote. `validate_table` does not reject duplicate keys. Fix: index by (program, round) or reject duplicates.
+- M1 `geo_verdict` returns eligible for geo_scope worldwide with empty quote/url (only validate_table catches; fetch never runs it).
+- M2 `_lookup` miss reloads `_PROGRAMS` over injected programs with real `date.today()` → call-order-dependent verdicts (injected `gsoc-2027` unknown → later eligible).
+- M3 MLH row: geo_exclusions empty + geo_scope unknown (29-country list not extracted) and geo_url tfaforms vs spec's fellowship.mlh.com — needs a recorded decision.
+- L1 embargo list never goes stale / not in maintenance_notes. L2 embargo match exact lowercase names only (ISO codes / official names miss). L3 gate order swap made in S6 commit (deviation j) — funnel tests loosened to a set; pin it. L4 tests: maintenance "fresh" case uses future geo date (never exercised); no test pins shipped verdicts for Ethiopia (GSoC eligible, LFX/MLH unknown); no backward-state test.
+
+### Pass log (next-iteration, single pass per spec §11)
+- 2026-10-04 — Pass started. Partial work found from earlier session: `.claude/settings.json`
+  has an uncommitted edit adding `claude-opus-5-5` to `availableModels` (harness config, not
+  spec work) — left uncommitted, untouched. No partial S0 code. Updated spec (§11 rewritten:
+  single session, single branch) moved from repo root into `docs/` and committed (`1c086a1`).
+  Branch `next-iteration` created from `main` @ `7ec0b85`. Baseline: **89 passed**.
+  §11 supersedes the per-step branches (`s0-funnel`, …) described in §Next iteration below.
+- 2026-10-04 — **S0 done and verified** (`6bcbce7`, `e4535c9`). `filter_reason` / `gate_reason`;
+  `RunSummary` gains `rejects`, `gate`, `by_type`, `by_eligibility`, `near_misses`,
+  `internship_funnel`, per-source `report`; runtime invariant check (warning); `data/funnel.md`
+  written beside the digest and appended to `$GITHUB_STEP_SUMMARY`. Tests: 89 existing unchanged +
+  7 new (`tests/test_funnel.py`) → **96 passed**. Acceptance (per §11: local live run against a
+  COPY of `data/scout.db`, model loaded), run `b760ad8582a3`:
+
+  | stage | count |
+  |---|--:|
+  | discovered (greenhouse 221, ashby 8, lever 0, known_programs 0) | 229 |
+  | merged by dedupe | 24 |
+  | hard-filter rejects | 175 |
+  | — `eligibility:remote_excludes_user` | 169 |
+  | — `eligibility:requires_work_auth` | 3 |
+  | — `type_unwanted:full_time` | 2 |
+  | — `eligibility:onsite_foreign` | 1 |
+  | survived | 30 |
+  | gate `not_new` | 30 |
+  | notified | 0 |
+
+  by_type: unknown 221, full_time 8. by_eligibility: remote_excludes_user 169, worldwide_remote 23,
+  remote_region_includes_user 9, requires_work_auth 3, onsite_foreign 1. Internship funnel:
+  fetched 0. Near misses include "Intermediate Support Engineer — Bangalore, India →
+  remote_region_includes_user" and "Enterprise AE — Remote, Singapore → worldwide_remote" (C4 live).
+  **§1 INFERENCE confirmed:** the 85% loss is 97% location exclusion (169/175); 6 of the 8 Ashby
+  FT jobs are rejected on eligibility first (filter order), 2 on type.
+- 2026-10-04 — **E1 probe: PASS** (`scripts/probe_himalayas.py`, 12 requests, no 429). Intern ∧
+  worldwide: totalCount 29 (25 ≤30d); Intern ∧ ET: identical 29; Entry-level ∧ worldwide: 306;
+  Entry-level ∧ ET: 333 (one ET-restricted listing seen — H1 supported: `country=ET` returns
+  worldwide + ET-scoped). Distinct `role_family_ok` listings ≤30d: **20** (≥10 → pass). Honest
+  caveat: by hand, roughly 7 of the 20 are genuine technical roles (Software Engineer Intern and
+  Research Intern @ Ritual, QA/QC Intern @ Flowmingo, Junior DevOps/Cloud Engineer @ CloudCops,
+  CRM Developer, L1-L2 Service Desk Engineer, Data Annotator); the rest are paid "AI study
+  participant" / data-entry posts that the regex admits ("AI", "Research", "Data"), plus
+  "Business Development … Intern - Nearby.ai" (matches `\bai\b` in the company suffix). S5's golden
+  set includes these as negatives. Paging: `page=N` works (offset advances); `offset=` is ignored;
+  no `nextCursor` field returned. Flywheel candidates (≥2 open-to-ET target-class ≤30d): Ritual
+  (2, genuine), Your Personal AI / Growe Talents / Xperteez (study / data-entry posts — not
+  candidates on inspection). → S7 will be built.
+- 2026-10-04 — **S1 done (unit level)** (`49aa593`, `dfd37ec`). `render_issue_md` (task-list
+  lines, "Actionable" / "Check eligibility", evidence + matched signals, "via Himalayas" line);
+  pipeline writes `data/notify.md` only when the selection is non-empty, deletes a stale one
+  otherwise; workflow: `issues: write`, deliver step before "Commit state" (failure → replay),
+  Monday heartbeat issue; `.gitignore` adds `notify.md`, `funnel.md`, `heartbeat.md`. Tests: 4 new
+  (`tests/test_delivery.py`) → **100 passed**. Workflow YAML parsed OK. Not pushed, not dispatched.
+- 2026-10-04 — **S2 acceptance passed** (`613e2a1`; review pending). `_geo.py` (countries,
+  regions in/excluding Africa, worldwide tokens, cities, US-state pattern); `_classify_location`
+  labels each `;|/ or and`-separated segment USER/WORLD/BARE/ELSEWHERE/OTHER plus a title region
+  marker. Re-classification of the 50 stored rows (`scripts/reclassify_stored.py`): 24
+  worldwide→excluded, 13 region_includes→excluded, 4 worldwide→unknown, 9 stay worldwide;
+  **positive rows whose location names only non-user places: 0** (was 37). The 9 remaining
+  positives are all Sourcegraph `Remote` rows whose body says "we hire almost anywhere in the
+  world" (the spec's own added phrase) → `WORLDWIDE_REMOTE` 0.7, or 0.5 where US hours are stated.
+  The spec predicted UNKNOWN 0.5 for these; the difference is a fact about Sourcegraph's text, not a
+  rule change. Tests: 34 new → **134 passed**. Updated existing tests (justified inline):
+  `test_stipend_program_is_globally_eligible` (now via `geo_verdict`), text-mention test inverted,
+  `test_known_programs::test_program_ranks_top_tier…` pins `geo_verdict="eligible"`, gate0
+  stipend fixture gains `location_raw="Worldwide"`.
+  Interpretations: (i) a named place beats a worldwide word in the SAME segment ("Anywhere in the
+  US" → excluded); (ii) an ELSEWHERE title marker qualifies a bare "Remote" (needed for the spec's
+  "`Remote` + '…, US [IC5]' → excludes" case); (iii) the step-4 body exclusion rule is kept verbatim
+  incl. its old guard (the spec's own `us-hours` test needs it); (iv) USER + ONSITE/HYBRID in the
+  user's own country/city stays `UNKNOWN 0.4` (Gate-0 Decision #1); (v) "remote" in the location
+  field counts as remote for REMOTE_EXCLUDES_USER vs ONSITE_FOREIGN (both disqualifying).
+- 2026-10-04 — **S2 independent review CLOSED** (`ed728ba`). Reviewer (general-purpose, Opus,
+  read-only, given only S2 + §9 + diff `ef3615d..613e2a1` + tests). Every finding became a test in
+  `tests/test_eligibility_review_s2.py` first; 19 of those tests FAILED → confirmed → fixed:
+  H1 "South/North/West Africa" read as USER via "africa" (masked; sub-regions added as excluding);
+  H2 onsite foreign city + "EMEA"/"East Africa" → included (region tokens now count only for a
+  remote role); H3 "ET" (Eastern Time) read as Ethiopia (bare code dropped from USER, per spec);
+  H4 "work from anywhere within the US" → worldwide (a worldwide phrase now needs no named place in
+  the next 60 chars; US-hours phrases ignored there); M1 "Remote; Remote, Canada; Remote, US" decided
+  by body words → now a body-independent `MIXED` verdict → UNKNOWN 0.5; M2 "Remote, California"
+  rescued (US state names added) / "Germany; Cologne" → MIXED; M3 " and " split broke "Bosnia and
+  Herzegovina" (protected); M4 "EMEA (Europe only)" → now excluded; L2 onsite-own-city from body →
+  UNKNOWN 0.4 restored. Refuted/kept: H4's guard tests (`test_h4_us_hours_stays_a_penalty…`,
+  `test_m4_unqualified_multi_region_still_includes`, `test_m3_middle_east_and_africa_still_includes`)
+  passed before the fix — behaviour already right. L1 (OTHER-only → 0.3; "remote" in the location
+  counts as remote) kept and listed as deviations. L3 (title marker misses "…, US (Remote)") is the
+  spec's exact regex — kept; such rows become MIXED/UNKNOWN, not positive. Test-quality findings
+  fixed: oracle in `scripts/reclassify_stored.py` no longer blind to "South Africa"/"Anywhere in the";
+  GSoC text test pinned to UNKNOWN 0.3; empty `geo_evidence` for eligible programs → S6 (tested there).
+  Re-classification after fixes: still **0 bad**, 9 Sourcegraph rows worldwide (0.7/0.5). **187 passed.**
+- 2026-10-04 — **S3 done** (`ab43dd8`): `_INTERN_TITLE`, `_ENTRY_TITLE`, `_SENIOR_TITLE` (exact
+  spec regexes) in `normalize.py`; UNKNOWN/FULL_TIME + entry token and no senior token → NEW_GRAD;
+  profiles: `employment_types` + `new_grad`, default `target_roles` shipped. 22 title-table tests.
+  Spec conflict (fact, not decision): "Graduate Partner Marketing Manager → NEW_GRAD by level" is
+  impossible with the spec's exact regexes ("manager" is a senior token) → stays UNKNOWN; the S5
+  role-family veto also rejects it; both asserted. Acceptance (`by_type` shows new_grad on a run with
+  Himalayas/Canonical data) → checked after S7/S8.
+- 2026-10-04 — **S4 done** (`b34b338`): `filter_reason` adds `seniority_title:<token>` after the
+  type check (not for INTERNSHIP/STIPEND_PROGRAM); dedupe tier 3 blocked by
+  `(canon(company), canon(location))`. Tests: C7 reproduction → 2 records (EMEA one included, US one
+  excluded); same-location near-dup merges; "Senior Backend Engineer" → `seniority_title:senior`;
+  "Intern, Engineering Manager's Office" kept.
+- 2026-10-04 — **S5 acceptance passed** (`452e3ed`; review pending). `embed_similarity` = max
+  cosine(title, each target role); score = base + 0.03×body tech hits (cap 0.15) + existing nudges;
+  per-concern damping dropped. Gate (`notify.gate_reason` / `gate_reasons`): not_new →
+  already_notified → stipend program (positive/UNKNOWN → select) → not_target_class → role_family →
+  eligibility (positive → Actionable; UNKNOWN intern → Check eligibility, cap 5 → `unknown_cap`;
+  UNKNOWN new-grad → `eligibility_unknown`). Threshold no longer consulted. Golden set 67 titles
+  (31 stored DB titles, 19 Himalayas probe titles, 17 hand-written incl. 3 hard positives):
+  precision **0.962**, recall **1.000** (spec regex alone: 0.61 / 0.88 — see deviation g).
+  `scripts/calibrate.py` with the real model: title-only similarity positives p10/p50/p90 =
+  0.47/0.67/1.00, negatives 0.19/0.36/0.65. **C3 confirmed** on 10 GitLab rows: old (profile blob
+  vs title+description) sd 0.021, range 0.081; new (title vs roles) sd 0.198, range 0.583 — sales
+  titles fall to 0.09–0.21, backend titles rise to 0.59–0.68. §7 integration test: EMEA intern +
+  same-title US intern + senior + sales intern + program → exactly the EMEA intern and the program
+  are selected; invariant holds. Tests → **203 passed**.
+- 2026-10-04 — **S5 independent review CLOSED** (`5ecb953`). Findings → `tests/test_gate_review_s5.py`
+  (16 failed → confirmed → fixed): H1 my broad vetoes (`customer`, `social`, `manager`) rejected
+  real technical internships ("Software Engineer Intern, Customer Platform", "Package Manager
+  Engineer Intern", …) → narrowed to phrases; non-software titles passed ("Financial/Business/
+  Operations Analyst Intern", "Mechanical/Civil/Chemical Engineering Intern", "Policy Research
+  Intern", "Data Center Technician Intern", "Mac Users Needed … $25") → vetoed; these 13 rows were
+  added to the golden set (now 80 rows: precision 1.0 / recall 1.0 — **in-sample, so not evidence of
+  generalisation**; §8.6's ticked-item observation is the real measure). M3 cap kept top-5 by
+  nudged score → now by title similarity. M2 ordering test did not discriminate score vs
+  similarity → fixed. L3 gate gaps (None eligibility, NEW_GRAD role_family, stipend negative, ACTIVE
+  intern not using a cap slot, pipeline run producing `unknown_cap`/`not_target_class`/
+  `eligibility_unknown` with the invariant) → tests added, passed after the fixes. L5 stale comment
+  fixed. Kept/refuted: L1 `eligibility_negative` (deviation h); L2 obsolete test removed in S6's
+  rewrite; L4 lexical-mode double count of body tech (spec-literal; model mode unaffected). M1 →
+  Pending human checks (3), a decision not a bug. **236 passed.**
+- 2026-10-04 — **PAUSED by Dagi** (context clear requested) mid-S7 after committing WIP `ab4e919`.
+  S6 review report received and recorded above (OPEN). Tests at pause: 247 passed, 1 failed
+  (`test_himalayas.py::test_mapping_from_recorded_fixture`). Nothing pushed; `main` untouched.
+  `.claude/settings.json` edit (adds `claude-opus-5-5`) committed at Dagi's request (`12c70a9`).
+- 2026-10-04 — **S6 acceptance passed** (`5cd289f`; review pending). `known_programs.py` rewritten:
+  `_Program` (geo_scope, geo_quote, geo_url, geo_checked_on, geo_exclusions, embargo_rule,
+  conditions), `_Round` (state, state_url, state_checked_on); `rolling` dropped; leads 30
+  (announced) / 51 (expected); staleness 45 d (state) / 365 d (geo); identity `<key>@<state>`;
+  titles per state; `report` (deadline_passed / outside_lead_window / no_published_round);
+  `geo_verdict` / `geo_evidence` (quote, URL, date, embargo check, every condition);
+  `validate_table`; `maintenance_notes` in the Monday heartbeat. **Live facts verified 2026-10-04**:
+  Outreachy "open to applicants around the world", $7,000, 42-day and Northern-Hemisphere rules;
+  GSoC "Not residing in a U.S. embargoed country" (2027 timeline not published); LFX eligibility
+  wording (no explicit worldwide statement → `unknown`) and term timeline; MLH form: Fall 2026
+  deadline Aug 31, 2026, no later batch, embargo rule; OFAC active-program list has no Ethiopia
+  program (Cuba, Iran, North Korea comprehensive; Syria now targeted PAARSS). Spec acceptance test
+  `tests/test_known_programs_acceptance.py`: Case A, B1–B4, C, state change once per state, shipped
+  table on 2026-10-04 → **0 program notifications** with a reason per round — all pass. Old
+  `test_known_programs.py` rewritten for the new model (justified in its docstring). Spec conflict
+  (fact): Case A asserts `gate["already_notified"] == 1` on a re-run, but the record is ACTIVE and
+  the spec's gate lists `not_new` first → `already_notified` is now checked first (label only;
+  selection identical). **236 passed** (after the S5 review fixes).
+- 2026-10-04 — **Resumed after context clear.** git and the resume block agreed; tree clean; 247
+  passed / 1 failed as recorded. **S7 done and verified** (`ab4e919`, `0ef22b7`). Failing test
+  cause: the recorded fixture truncates each description at 1,500 chars, leaving a dangling `</li`;
+  `_text.html_to_text` now also strips a tag cut off at the end of the string (only `</?letter…`,
+  so a literal "a < b" stays). **248 passed.** Live acceptance (local, copy of `data/scout.db` in
+  the scratchpad, model loaded), run `b98c1c4d89a3`: discovered 318 (greenhouse 221, ashby 8,
+  himalayas 89, known_programs 0 with a reason per round) → merged 7 → rejects 219 (remote_excludes
+  201, requires_work_auth 6, seniority_title 8, onsite_foreign 2, type_unwanted 2) → survived 92 →
+  gate role_family 80, not_new 4, not_target_class 2 → **notified 6**, all Himalayas and all
+  genuine technical roles: Software Engineer Intern + Research Intern @ Ritual, Research Engineer
+  Intern (Video/Multimodal LLM) @ Tether, Junior DevOps / Cloud Engineer @ CloudCops, QA/QC Intern @
+  Flowmingo, CRM Developer @ NightOwl. by_type: unknown 221, new_grad 60, internship 29, full_time 8
+  (**S3 acceptance: new_grad non-zero ✓**). Invariant holds (318−7−219−86 = 6). Observations, not
+  changed: entry-level queries hit the 3-page cap (60 of totalCount ~306); title similarity is
+  ~0.8–0.9 for any "… Intern" title (UX/Recruiting interns top the near-miss list) — the
+  role_family gate, not the score, is what separates them. Himalayas' feed now says cursor
+  pagination is preferred and `offset` is deprecated; `page=N` (what we use) still worked live.
+- 2026-10-04 — **S6 independent review CLOSED** (`3e7d379`). Findings → `tests/test_known_programs_review_s6.py`
+  first; **15 failed → confirmed → fixed**: H1 stale `open` round re-announced as `@expected` →
+  `ats_job_id` now uses the RECORDED state; staleness changes only the title and lead window
+  (deviation m; `test_known_programs::test_stale_open_state…` updated to `r1@open`, justified
+  inline). H2 duplicate round keys → `validate_table` reports them and `fetch` raises (a broken
+  curated table is a total failure, not a silent borrow). M2 → each fetch replaces `_INDEX`; a miss
+  reads the shipped table without mutating the index. M1 → `eligible` also requires `geo_quote` and
+  `geo_url` in `geo_verdict` itself. L1 → embargo list older than 365 d → embargo-rule programs
+  `unknown`; heartbeat asks for its re-check after 30 d. L2 → ISO codes / official names added
+  (CU, IR, KP, DPRK, "Islamic Republic of Iran", …). **Passed before any fix (behaviour already
+  right, now pinned):** `test_h1_forward_state_change_is_still_announced`,
+  `test_l3_gate_order_already_notified_before_not_new` (+ `test_funnel` now pins
+  `gate == {"already_notified": 4}` instead of a subset), `test_l4_shipped_verdicts_for_ethiopia`
+  (Outreachy/GSoC eligible, LFX unknown), `test_l4_maintenance_fresh_checks_are_quiet`. M3 decided:
+  the MLH "no anticipated projects" list was extracted live from the form (29 countries — Ethiopia not
+  among them) → `geo_exclusions` filled (+ "South Korea" alias for the form's "Korea"),
+  `geo_scope="worldwide"` (same treatment as GSoC: embargo rule + verified list); `geo_url` stays the
+  form (where the quote and list live), program `url` is fellowship.mlh.com. No round → no output
+  change. **268 passed.**
+- 2026-10-04 — **S8 done** (`d1f055e`). `scripts/verify_boards.sh` (needs a `python3` on PATH — on
+  this Windows box a scratch shim to the venv python) → `canonical` VERIFIED, 310 jobs (gitlab 211,
+  sourcegraph91 10, posthog 8, deel 0 also verified). Added to `greenhouse_boards` with a provenance
+  comment; no other boards. Live run `c10ee16c1d62` (copy of the DB): discovered 628 → merged 19 →
+  rejects 413 (remote_excludes 269, seniority_title 128, onsite_foreign 9, work_auth 6, type 2+…)
+  → survived 196 → gate not_target_class 98, role_family 85, not_new 4 → **notified 9**: the 6
+  Himalayas items from S7 plus 3 Canonical — Junior Ubuntu Software Engineer, Junior Linux Kernel
+  Engineer - Ubuntu, Graduate Software Engineer, Open Source and Linux (all "Home based -
+  Worldwide"). by_type new_grad 73. Invariant 628−19−413−187 = 9 ✓. **268 passed.**
+- 2026-10-04 — **Final review CLOSED** (`96c10db`). Reviewer (general-purpose, Opus, read-only, given
+  only §5–§9, CLAUDE.md, the diff 7ec0b85..48745df and the tests). Findings → `tests/test_final_review.py`
+  (+ `test_reclassify_stored::test_body_residency_oracle`); every fix-targeting test was run against the
+  pre-fix code and **failed** (eligibility 14 written first; H3/M4/M5/L4/L7 tests written alongside the
+  fix and then confirmed failing on the stashed old code). Fixed: H1 "US" matched case-sensitively in
+  the body rule (pronoun "us" no longer excludes); H2 body residency requirement elsewhere cancels a
+  worldwide phrase → UNKNOWN 0.5; H3 no cross-level fuzzy merge; M1 work-auth vs decisive location
+  (deviation o); M2 exclusion wording; M3 `_geo.SUBNATIONAL` (Canadian provinces, Australian/Indian
+  states, UK nations, Bay Area, …); M4 role head + discipline vetoes; M5 `skipped_records` per source in
+  the run record and a "skipped" column in `funnel.md` (deviation b withdrawn); L4 `rejected_samples`
+  exclude not_new/already_notified; L7 checker also flags a positive whose body requires residence in a
+  named non-user country; L8 one-line justification per deleted pre-S6 known_programs test; L9 WORLD +
+  ELSEWHERE title marker → MIXED; L10 "Fully Remote" → BARE 0.5 and "EMEA, excluding Ethiopia" → excluded.
+  Guard tests that passed before the fixes (kept): `test_h1_country_us_still_restricts`,
+  `test_h2_worldwide_phrase_alone_still_worldwide`, `test_m1_foreign_right_to_work_still_disqualifies`,
+  `test_m1_sponsorship_still_disqualifies_without_decisive_location`, "New South Wales" (already via
+  "wales"), M4's three must-veto titles. Refuted / kept as recorded deviations: L1 (= j), L2 (= h),
+  L3 (= m). Kept, not changed: L5 — the invariant is algebraic by construction (one reason per record
+  from one map); the new M5 test covers a source whose records are all skipped; L6 — lexical-mode body
+  reading only matters without the model (same as S5 review L4); "Remote (GMT+3)" stays UNKNOWN 0.3
+  (spec has no time-zone rule for the location field). H2 on the stored rows: the real Sourcegraph text
+  is "we have a **preference** … welcome to apply regardless of location", not a requirement, so 7 stored
+  Sourcegraph rows stay worldwide (0.5 where US/EST hours are required); the two "require … located in
+  the United States" rows are "…, US" titles and were already excluded. Re-classification: **0 bad**
+  (checker now also body-aware). Golden set 1.000/1.000. Live re-run `5e2c7dedde72` (copy of the DB):
+  628 → merged 17 (was 19 — the level guard keeps 2 cross-level pairs apart) → rejects 413 → survived
+  198 → gate 189 (not_target_class 100, role_family 85, not_new 4) → **notified 9**, the same 9 items;
+  skipped 0 for every source. Invariant 628−17−413−189 = 9 ✓. **301 passed.**
+
+  **End of pass.** §8 status: (1) invariant holds on every run record, skipped records now attributed ✓;
+  (2) 0 bad stored rows ✓; (3) delivery on a real device — pending human check (2); (4) golden 1.0/1.0 ✓
+  (in-sample); (5) S6 acceptance A/B/C ✓, today's shipped table → 0 program notifications with a
+  reason per round ✓; (6) 14-day observation — starts after merge; (7) pre-existing tests pass or carry
+  a one-line justification ✓. Nothing pushed; `main` untouched.
+- 2026-10-04 — **Dagi's follow-ups.** (1) Body restriction vs WORLD/USER location (`5819288`): tests first in
+  `tests/test_final_review.py` — the 3 reported cases FAILED (all positive), 5 guards passed. Rule: when the
+  location is WORLD or USER, a description sentence "must be based/located/reside/live in …", "candidates /
+  applicants in …", "residents of …" whose every part names a place outside the user's scope → UNKNOWN 0.5
+  ("Check eligibility"), evidence quotes the clause. Results: "Worldwide" + "open to candidates in the US and
+  Canada only" → UNKNOWN 0.5; "Worldwide" + "must reside in Europe or North America" → UNKNOWN 0.5; "Remote,
+  EMEA" + "Must be based in the United Kingdom." → REQUIRES_WORK_AUTH 0.85 (excluded) — its root cause was the
+  step-2 residency window running past the sentence end into the appended location text ("…kingdom. remote,
+  emea"); the window now stops at `.;:` / newline. M1 visa-sponsorship behaviour kept (guard test). Live run
+  `3bb7a4f9766a`: rule fired on 0 of 628 records; the same 9 selected; re-classification of stored rows 0 bad
+  (7 Sourcegraph positives unchanged). **309 passed.** (2) `origin/main` a39feaa (bot run) merged into the branch
+  (`b911406`, clean; `data/scout.db` identical to origin/main); suite 309 passed and re-classification 0 bad on
+  the merged DB; branch pushed. (3) Pending check (3) rewritten to merge by PR. FACT: local `main` is 4 ahead /
+  1 behind `origin/main`; the 4 (80ae5b6, b9e0e96, a6d4fae, 7ec0b85) are ancestors of next-iteration, so the PR
+  carries them; local `main` was not touched.
+
+---
+
 Live cursor. Update at **every task boundary** — this is a deliverable of every dispatched agent,
 not an afterthought. This file, `PLAN.md`, `CLAUDE.md`, and the code are the source of truth —
 never the conversation.
@@ -14,6 +312,47 @@ hard-logic tuning deferred pending more real-run evidence (per user). See §Phas
 verification for executed evidence.
 
 **Prior passes:** Gate 1 (live model + greenhouse) → Gate 0 (spine frozen) → recovery.
+
+---
+
+## NEXT ITERATION — started 2026-10-04 (this section supersedes the freeze below)
+
+**The observation/calibration freeze is ENDED** (2026-10-04, by the user's instruction and spec
+§9). The plan is `docs/SPEC-2026-10-04-next-iteration.md` (revision 2): the spec decides what to
+build; the repo decides what is true. Order = spec §10; delegation/gates = spec §11; scope limits =
+spec §9. One branch per step (`s0-funnel`, `s1-delivery`, …), merged to `main` only after that
+step's acceptance criteria pass, rebased first (the bot commits `data/scout.db` to `main` daily).
+
+**Single next action: S0 — reason-coded funnel (no behaviour change)**, branch `s0-funnel`.
+
+### Spec-vs-repo checks (2026-10-04)
+- FACT: `origin/main` HEAD = `a2f685b` ("scout: run 2026-10-03T09:30Z"), as the spec states.
+  Local `main` was 25 bot commits behind (data only); fast-forwarded.
+- FACT: `PYTHONPATH=src python -m pytest -q` → **89 passed** on `a2f685b` (spec: 89). The 85 in
+  the header above is stale (commit `fe8a9fe` added tests after it was written).
+- FACT: S0 "current" claims match the code — `hard_filter` returns survivors only
+  (`score.py`), `select_for_notification` returns the selection only (`notify.py`), `RunSummary`
+  has scalar counts (`pipeline.py`), `runs.summary` is a JSON text column (`store.py`).
+- FACT: configured sources match spec §2 — greenhouse `gitlab`, `sourcegraph91`; ashby `posthog`,
+  `deel`; lever none; `known_programs`.
+- Note for S0 (no behaviour change): `select_for_notification` also passes a confident
+  `STIPEND_PROGRAM_GLOBAL` below threshold (Decision #8). S0's `gate_reason` must keep that, so
+  `below_threshold` applies only to non-best-fit records.
+
+### Step log
+*(One entry per step: what changed · acceptance evidence in numbers · single next action.)*
+- 2026-10-04 — spec committed (`80ae5b6`); freeze ended; S0 next.
+- 2026-10-04 — §11 roles created in `.claude/agents/`: `builder` (claude-opus-4-6, high),
+  `hard-logic` (claude-opus-4-8, high), `mechanic` (claude-sonnet-5-5, medium);
+  `claude-sonnet-5-5` added to the enforced `availableModels` in `.claude/settings.json`.
+  **BLOCKED (FACT):** spawning `builder` from the current session failed — "Agent type 'builder'
+  not found" (the session was started in the parent folder, so project agents were not loaded).
+  The only available route is `general-purpose` with an `opus`/`sonnet` alias (resolves to the
+  newest model, not the pinned version; no effort setting). Per §11, waiting for Dagi's call
+  before delegating S0. No S0 code written yet.
+- 2026-10-04 — Dagi's decision: restart Claude Code from `job-scout/`; a new prompt and an updated
+  spec (revised delegation, single-pass implementation) will follow. **Next action: wait for them.**
+  Commits `80ae5b6`..HEAD are local only (not pushed); rebase onto `origin/main` before pushing.
 
 ---
 
@@ -36,7 +375,7 @@ verification for executed evidence.
 
 ---
 
-## OPERATING MODE — OBSERVATION / CALIBRATION FREEZE (set 2026-09-03 by the user)
+## OPERATING MODE — OBSERVATION / CALIBRATION FREEZE (set 2026-09-03; ENDED 2026-10-04 — see §Next iteration; kept for history)
 
 The deployed system is left **running as-is**. This is an observation/calibration period.
 
@@ -186,6 +525,9 @@ filtered; the cross-source duplicate merged with **unioned provenance** (this al
 a second run marks records ACTIVE, not NEW.
 
 ## Single next action
+
+**Superseded 2026-10-04: the single next action is S0 — see §Next iteration.** The list below is
+the pre-spec state, kept for history.
 
 **Deployed + verified at `$0`. The core project is COMPLETE and operating.** Remaining items are
 optional and were consciously deferred:
@@ -356,6 +698,9 @@ Decisions #3–6.)*
 ## Resume note
 
 *(Written only when a checkpoint interrupts work mid-task. Empty = nothing in flight.)*
+
+**2026-10-04: the freeze described below is ENDED.** Work in flight = the spec iteration; resume
+from §Next iteration (top of file).
 
 **Nothing in flight. DEPLOYED + VERIFIED. Now in an OBSERVATION / CALIBRATION FREEZE** (see
 §Operating mode). The project is live at `https://github.com/DagiHabtu/job-scout` (PUBLIC) and runs

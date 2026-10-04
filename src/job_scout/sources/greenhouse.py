@@ -93,10 +93,12 @@ class GreenhouseSource:
                 opps.append(_to_opportunity(job, company))
             except Exception as exc:  # one malformed record never aborts the board
                 log.warning("greenhouse: skipping malformed job in board %s: %r", token, exc)
+                self.skipped_records += 1
         log.info("greenhouse: board %s → %d jobs", token, len(opps))
         return opps
 
     def fetch(self, cfg: SourceConfig) -> list[Opportunity]:
+        self.skipped_records = 0                       # malformed records skipped (§6)
         boards = self._boards if self._boards is not None else list(cfg.greenhouse_boards)
         if not boards:
             log.info("greenhouse: no boards configured")

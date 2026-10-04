@@ -15,7 +15,12 @@ on:
     #   - cron: "0 7 * * *"
     #     timezone: Africa/Addis_Ababa
     - cron: "0 4 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Delivery test: post a seeded test item if the run selects nothing"
+        type: boolean
+        default: false
 
 # Only one scout run at a time — it commits state back, so overlapping runs would race on push.
 concurrency:
@@ -24,6 +29,7 @@ concurrency:
 
 permissions:
   contents: write  # needed to commit data/scout.db back to the repo
+  issues: write    # delivery: new items are posted as a GitHub Issue (GitHub emails/pushes the owner)
 
 jobs:
   scout:
@@ -54,6 +60,11 @@ jobs:
       - name: Run scout
         run: python -m job_scout -c config/profile.yaml -v
 
+      # The reason-coded funnel on the run page: every zero reads as a specific cause.
+      - name: Funnel summary
+        if: always()
+        run: if [ -f data/funnel.md ]; then cat data/funnel.md >> "$GITHUB_STEP_SUMMARY"; fi
+
       # Surface the digest without committing it (it is gitignored) — downloadable from the run.
       - name: Upload digest
         if: always()
@@ -62,6 +73,30 @@ jobs:
           name: digest
           path: data/digest.html
           if-no-files-found: warn
+
+      # S1 acceptance: a seeded item proves an issue opened by the bot reaches the owner's device.
+      # It never touches the DB, so it cannot suppress or fake a real notification.
+      - name: Seed delivery test item
+        if: ${{ inputs.seed }}
+        run: |
+          if [ ! -s data/notify.md ]; then
+            printf -- '- [ ] [Job Scout delivery test](%s) — seeded test item · not a real listing\n' \
+              "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > data/notify.md
+          fi
+
+      # Delivery. This step runs BEFORE "Commit state": if it fails, the job stops, notified_at is
+      # never committed, and the next run re-selects the same items (a replay, not a silent loss).
+      - name: Deliver new items as an issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s data/notify.md ]; then
+            N=$(grep -c '^- \[ \]' data/notify.md)
+            gh label create scout --color 0e8a16 --description "Job Scout delivery" --force
+            gh issue create --title "Job Scout: $N new — $(date -u +%F)" --body-file data/notify.md --label scout
+          else
+            echo "nothing selected this run — no issue"
+          fi
 
       # Persist the SQLite store back to the repo: it IS the cross-run state (NEW/UPDATED/ACTIVE,
       # notified_at, gone-detection) and committing it also keeps the schedule alive.
@@ -75,4 +110,17 @@ jobs:
           else
             git commit -m "scout: run $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
+          fi
+
+      # Weekly heartbeat (Mondays, UTC): the funnel over the last 7 runs plus near misses, so
+      # silence is distinguishable from failure.
+      - name: Weekly heartbeat
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(date -u +%u)" = "1" ]; then
+            python -m job_scout -c config/profile.yaml --heartbeat
+            gh label create scout --color 0e8a16 --description "Job Scout delivery" --force
+            gh issue create --title "Job Scout weekly funnel — $(date -u +%F)" --body-file data/heartbeat.md --label scout
           fi

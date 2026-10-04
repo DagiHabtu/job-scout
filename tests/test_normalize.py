@@ -86,6 +86,50 @@ def test_infer_employment_type_never_overrides_a_source_value():
     assert infer_employment_type(opp) == EmploymentType.FULL_TIME
 
 
+import pytest  # noqa: E402
+
+from job_scout.score import role_family_ok  # noqa: E402
+
+
+@pytest.mark.parametrize("title,source_type,expected", [
+    # intern tokens (UNKNOWN only)
+    ("Werkstudent Data Engineering", EmploymentType.UNKNOWN, EmploymentType.INTERNSHIP),
+    ("Werkstudentin Software", EmploymentType.UNKNOWN, EmploymentType.INTERNSHIP),
+    ("Working Student - Backend", EmploymentType.UNKNOWN, EmploymentType.INTERNSHIP),
+    ("Software Trainee", EmploymentType.UNKNOWN, EmploymentType.INTERNSHIP),
+    ("DevOps Apprenticeship", EmploymentType.UNKNOWN, EmploymentType.INTERNSHIP),
+    ("Intern, Engineering Manager's Office", EmploymentType.UNKNOWN, EmploymentType.INTERNSHIP),
+    # entry tokens (UNKNOWN or FULL_TIME, no seniority token)
+    ("Junior Data Engineer", EmploymentType.UNKNOWN, EmploymentType.NEW_GRAD),
+    ("Jr. Backend Developer", EmploymentType.FULL_TIME, EmploymentType.NEW_GRAD),
+    ("Entry-Level Software Engineer", EmploymentType.FULL_TIME, EmploymentType.NEW_GRAD),
+    ("New Grad Software Engineer", EmploymentType.UNKNOWN, EmploymentType.NEW_GRAD),
+    ("Graduate Software Engineer", EmploymentType.UNKNOWN, EmploymentType.NEW_GRAD),
+    ("Early Career Data Scientist", EmploymentType.UNKNOWN, EmploymentType.NEW_GRAD),
+    ("Associate Software Engineer", EmploymentType.FULL_TIME, EmploymentType.NEW_GRAD),
+    ("Associate Site Reliability Engineer", EmploymentType.UNKNOWN, EmploymentType.NEW_GRAD),
+    # negatives
+    ("Internal Tools Engineer", EmploymentType.UNKNOWN, EmploymentType.UNKNOWN),
+    ("International Sales", EmploymentType.UNKNOWN, EmploymentType.UNKNOWN),
+    ("Associate Renewals Manager", EmploymentType.UNKNOWN, EmploymentType.UNKNOWN),
+    ("Junior Engineering Manager", EmploymentType.UNKNOWN, EmploymentType.UNKNOWN),   # seniority vetoes level
+    ("Senior Software Engineer", EmploymentType.FULL_TIME, EmploymentType.FULL_TIME),
+    ("Junior Contract Developer", EmploymentType.CONTRACT, EmploymentType.CONTRACT),  # only UNKNOWN/FULL_TIME refined
+    ("Engineering Intern", EmploymentType.FULL_TIME, EmploymentType.FULL_TIME),      # intern token fills UNKNOWN only
+])
+def test_type_and_level_inference_table(title, source_type, expected):
+    assert infer_employment_type(_opp(title=title, employment_type=source_type)) == expected
+
+
+def test_graduate_marketing_manager_is_not_a_target():
+    # Spec S3 lists this as "NEW_GRAD by level, vetoed by role family". With the spec's exact
+    # regexes "manager" is a seniority token, so the level is not assigned at all; the role-family
+    # veto (S5) also applies. Either way it can never be selected — both are asserted.
+    t = "Graduate Partner Marketing Manager"
+    assert infer_employment_type(_opp(title=t, employment_type=EmploymentType.UNKNOWN)) == EmploymentType.UNKNOWN
+    assert role_family_ok(t) is False
+
+
 def test_normalize_backfills_internship_type_end_to_end():
     out = normalize(_opp(title="Backend Engineering Intern", employment_type=EmploymentType.UNKNOWN))
     assert out.employment_type == EmploymentType.INTERNSHIP

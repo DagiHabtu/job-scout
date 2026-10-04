@@ -43,6 +43,8 @@ def stipend_opp() -> Opportunity:
         apply_url="https://www.outreachy.org/apply/",
         canonical_url="",
         employment_type=EmploymentType.STIPEND_PROGRAM,
+        # S2: eligibility is read from the location field, not assumed from the type.
+        location_raw="Worldwide",
         description="A paid, fully remote internship contributing to open source. Worldwide, "
         "stipend of $5,500. Mentorship included. Great for Python beginners.",
         technologies=["python"],

@@ -24,31 +24,43 @@ def strip_tracking(url: str) -> str:
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(kept), ""))
 
 
-# An explicit internship token in a TITLE. Anchored on word boundaries so "internal" and
-# "international" never match; covers intern/interns/internship(s) and co-op/coop/co-ops.
-_INTERN_TITLE = re.compile(r"\b(intern(ship)?s?|co-?ops?)\b", re.IGNORECASE)
+# Title level tokens (spec S3, exact). Word-boundaried so "internal"/"international" never match.
+_INTERN_TITLE = re.compile(
+    r"\b(intern(ship)?s?|co-?ops?|working student|werkstudent(in)?|trainee|apprentice(ship)?)\b", re.IGNORECASE
+)
+_ENTRY_TITLE = re.compile(
+    r"\b(junior|jr\.?|entry[- ]level|new[- ]grad(uate)?|graduate|early[- ]career|associate (software|data|ml|"
+    r"machine learning|devops|platform|cloud|security|qa|site reliability) (engineer|developer|analyst|scientist))\b",
+    re.IGNORECASE,
+)
+_SENIOR_TITLE = re.compile(
+    r"\b(senior|sr\.?|staff|principal|lead|head|director|manager|vp|chief|architect)\b", re.IGNORECASE
+)
 
 
 def infer_employment_type(opp: Opportunity) -> EmploymentType:
-    """Backfill INTERNSHIP from an explicit title token when the source left the type UNKNOWN.
+    """Infer the employment type/level from TITLE tokens where the source is silent or coarse.
 
-    Symmetric to `infer_remote_status`: a source with a structured employment field (Lever's
-    `commitment`, Ashby's `employmentType`) already sets this and is left untouched; a source
-    without one (Greenhouse's board API exposes no employment-type field, so its adapter honestly
-    emits UNKNOWN) would otherwise leave an unmistakable "Software Engineering Intern" unrecognized
-    as an internship for the whole pipeline — no wanted-type boost, a harder notification bar, and
-    indistinguishable at the type level from every other UNKNOWN role.
+    * UNKNOWN + an intern token → INTERNSHIP. (Greenhouse exposes no employment-type field, so its
+      adapter honestly emits UNKNOWN; an unmistakable "Software Engineering Intern" must still be
+      recognized.)
+    * UNKNOWN or FULL_TIME + an entry-level token and no seniority token → NEW_GRAD. Refining
+      FULL_TIME is consistent with the enum ("entry-level / early-career full-time"): a structured
+      "Full Time" says nothing about level, the title does.
 
-    Deliberately narrow: TITLE-only (a description mentioning "our interns" must not reclassify a
-    full-time role) and INTERNSHIP-only (the one type inferable from a title with high precision).
-    It only ever fills an UNKNOWN — it never overrides a source's structured value, and it stays
-    UNKNOWN when the title carries no signal.
+    Any other structured value (INTERNSHIP, CONTRACT, STIPEND_PROGRAM, NEW_GRAD) is left untouched.
+    TITLE-only: a description mentioning "our interns" must not reclassify a full-time role.
     """
-    if opp.employment_type != EmploymentType.UNKNOWN:
-        return opp.employment_type
-    if _INTERN_TITLE.search(opp.title or ""):
+    title = opp.title or ""
+    if opp.employment_type == EmploymentType.UNKNOWN and _INTERN_TITLE.search(title):
         return EmploymentType.INTERNSHIP
-    return EmploymentType.UNKNOWN
+    if (
+        opp.employment_type in (EmploymentType.UNKNOWN, EmploymentType.FULL_TIME)
+        and _ENTRY_TITLE.search(title)
+        and not _SENIOR_TITLE.search(title)
+    ):
+        return EmploymentType.NEW_GRAD
+    return opp.employment_type
 
 
 def infer_remote_status(opp: Opportunity) -> RemoteStatus:
