@@ -32,7 +32,9 @@ sources:
   # The highest-fidelity internship source for ET remains `known_programs` (Outreachy/GSoC/MLH),
   # already enabled. These ATS boards add calibration breadth; expect modest raw internship yield.
   # (Re-verify tokens any time with scripts/verify_boards.sh.)
-  enabled: ["greenhouse", "lever", "ashby", "known_programs"]
+  enabled: ["greenhouse", "lever", "ashby", "known_programs", "himalayas"]
+  #   himalayas — public search API (spec S7; E1 probe passed 2026-10-04). Default queries in config.py
+  #   (Intern / Entry-level × worldwide / country=ET). Terms: link back + attribution, no resubmission.
   greenhouse_boards: ["gitlab", "sourcegraph91"]
   #   gitlab        — verified live (project Gate-1 run fetched 234 jobs). All-remote, hires 65+ countries.
   #   sourcegraph91 — verified via Sourcegraph's own job-board repo + live boards.greenhouse.io/sourcegraph91. All-remote.

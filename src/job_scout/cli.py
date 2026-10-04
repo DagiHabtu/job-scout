@@ -47,7 +47,14 @@ def _ashby_factory() -> Source:
     return AshbySource()
 
 
+def _himalayas_factory() -> Source:
+    from .sources.himalayas import HimalayasSource
+
+    return HimalayasSource()
+
+
 _REGISTRY: dict[str, "callable[[], Source]"] = {
+    "himalayas": _himalayas_factory,
     "greenhouse": _greenhouse_factory,
     "known_programs": _known_programs_factory,
     "lever": _lever_factory,

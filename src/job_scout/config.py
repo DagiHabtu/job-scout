@@ -74,6 +74,13 @@ class SourceConfig(BaseModel):
     greenhouse_boards: list[str] = Field(default_factory=list)   # board tokens, e.g. "stripe"
     lever_sites: list[str] = Field(default_factory=list)         # site slugs
     ashby_orgs: list[str] = Field(default_factory=list)
+    # Himalayas search queries (spec S7): internships and entry-level, worldwide and Ethiopia-scoped.
+    himalayas_queries: list[str] = Field(default_factory=lambda: [
+        "employment_type=Intern&worldwide=true",
+        "employment_type=Intern&country=ET",
+        "seniority=Entry-level&worldwide=true",
+        "seniority=Entry-level&country=ET",
+    ])
     adzuna_country: str = "gb"                                   # Adzuna requires a country code
     adzuna_queries: list[str] = Field(default_factory=list)
 
