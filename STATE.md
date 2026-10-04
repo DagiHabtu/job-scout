@@ -1,14 +1,14 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: e4535c9 S0: E1 Himalayas probe script; role_family_ok (spec S5 regex) used by it; funnel table headers
-Step in progress: S1
-  Sub-progress: [ ] render_issue_md + data/notify.md (write / delete stale)  [ ] heartbeat (Mondays, 7-run aggregate + near-misses)  [ ] workflow: issues:write, gh issue create before commit state  [ ] .gitignore notify.md  [ ] tests (renderer, notify.md absent when empty)
-Steps done and verified: S0 (6bcbce7, e4535c9)
+Branch: next-iteration      Last commit: dfd37ec S1: workflow_dispatch 'seed' input for the delivery acceptance test
+Step in progress: S2
+  Sub-progress: [ ] _geo.py gazetteer  [ ] _classify_location + new decision order  [ ] step-1 known_programs rule (geo_verdict stub until S6) + delete text-mention path  [ ] table-driven tests + existing-test updates w/ justification  [ ] re-classify stored rows (acceptance)  [ ] independent review
+Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending)
 Reviews: S2 open, S5 open, S6 open, final open
-Next action: implement S1 (issue delivery) in notify.py, pipeline.py, scout.yml.
-Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page.
-Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex.
+Next action: implement S2 (_geo.py + eligibility by location field).
+Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up.
+Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC).
 Unverified facts still in code: none yet
 
 ### Pass log (next-iteration, single pass per spec §11)
@@ -57,6 +57,12 @@ Unverified facts still in code: none yet
   no `nextCursor` field returned. Flywheel candidates (≥2 open-to-ET target-class ≤30d): Ritual
   (2, genuine), Your Personal AI / Growe Talents / Xperteez (study / data-entry posts — not
   candidates on inspection). → S7 will be built.
+- 2026-10-04 — **S1 done (unit level)** (`49aa593`, `dfd37ec`). `render_issue_md` (task-list
+  lines, "Actionable" / "Check eligibility", evidence + matched signals, "via Himalayas" line);
+  pipeline writes `data/notify.md` only when the selection is non-empty, deletes a stale one
+  otherwise; workflow: `issues: write`, deliver step before "Commit state" (failure → replay),
+  Monday heartbeat issue; `.gitignore` adds `notify.md`, `funnel.md`, `heartbeat.md`. Tests: 4 new
+  (`tests/test_delivery.py`) → **100 passed**. Workflow YAML parsed OK. Not pushed, not dispatched.
 
 ---
 
