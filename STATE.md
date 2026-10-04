@@ -44,6 +44,14 @@ step's acceptance criteria pass, rebased first (the bot commits `data/scout.db` 
 ### Step log
 *(One entry per step: what changed · acceptance evidence in numbers · single next action.)*
 - 2026-10-04 — spec committed (`80ae5b6`); freeze ended; S0 next.
+- 2026-10-04 — §11 roles created in `.claude/agents/`: `builder` (claude-opus-4-6, high),
+  `hard-logic` (claude-opus-4-8, high), `mechanic` (claude-sonnet-5-5, medium);
+  `claude-sonnet-5-5` added to the enforced `availableModels` in `.claude/settings.json`.
+  **BLOCKED (FACT):** spawning `builder` from the current session failed — "Agent type 'builder'
+  not found" (the session was started in the parent folder, so project agents were not loaded).
+  The only available route is `general-purpose` with an `opus`/`sonnet` alias (resolves to the
+  newest model, not the pinned version; no effort setting). Per §11, waiting for Dagi's call
+  before delegating S0. No S0 code written yet.
 
 ---
 
