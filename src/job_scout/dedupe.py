@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import fields as dataclass_fields
 from difflib import SequenceMatcher
 
-from .models import Opportunity, content_fingerprint
+from .models import Opportunity, _canon_text, content_fingerprint
 
 _FUZZY_THRESHOLD = 0.90  # conservative: only near-identical titles within one company merge
 
@@ -80,11 +80,13 @@ def dedupe(opps: list[Opportunity]) -> list[Opportunity]:
         by_fp[fp] = opp
         tier2.append(opp)
 
-    # Tier 3 — fuzzy title, blocked by company.
+    # Tier 3 — fuzzy title, blocked by (company, location). Location is part of the block because
+    # the same title in two places is two roles for eligibility: merging "Remote, United States"
+    # into "Remote, EMEA" would let an ineligible variant swallow an eligible one (C7).
     final: list[Opportunity] = []
-    per_company: dict[str, list[Opportunity]] = {}
+    per_company: dict[tuple[str, str], list[Opportunity]] = {}
     for opp in tier2:
-        ckey = _canon_company(opp.company)
+        ckey = (_canon_company(opp.company), _canon_text(opp.location_raw or ""))
         bucket = per_company.setdefault(ckey, [])
         dup_of = None
         for existing in bucket:

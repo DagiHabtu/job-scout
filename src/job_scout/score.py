@@ -13,6 +13,7 @@ import re
 from datetime import date
 
 from .config import ScoringConfig, UserProfile
+from .normalize import _SENIOR_TITLE
 from .models import (
     Eligibility,
     EligibilityCategory,
@@ -192,6 +193,12 @@ def filter_reason(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig, to
         return "deadline_passed"
     if opp.employment_type != EmploymentType.UNKNOWN and wanted and opp.employment_type not in wanted:
         return f"type_unwanted:{opp.employment_type.value}"
+    # A seniority token in the title is high-precision and never actionable for this profile. An
+    # internship/program title may name a senior person ("Intern, Engineering Manager's Office").
+    if opp.employment_type not in (EmploymentType.INTERNSHIP, EmploymentType.STIPEND_PROGRAM):
+        m = _SENIOR_TITLE.search(opp.title or "")
+        if m:
+            return f"seniority_title:{m.group(1).lower()}"
     return None
 
 
