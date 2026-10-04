@@ -95,14 +95,4 @@ def test_filter_reason_codes():
     assert filter_reason(o, cfg.profile, cfg.scoring, date(2026, 1, 1)) is None
 
 
-def test_gate_reason_codes():
-    o = Opportunity(title="t", company="c", apply_url="u", canonical_url="u", status=Lifecycle.ACTIVE)
-    o.relevance = Relevance(score=0.9)
-    assert gate_reason(o, 0.4) == "not_new"
-    o.status = Lifecycle.NEW
-    o.notified_at = __import__("datetime").datetime(2026, 1, 1)
-    assert gate_reason(o, 0.4) == "already_notified"
-    o.notified_at = None
-    assert gate_reason(o, 0.4) is None
-    o.relevance = Relevance(score=0.1)
-    assert gate_reason(o, 0.4) == "below_threshold"
+# test_gate_reason_codes (S0 interim gate) superseded by S5's deterministic gate: tests/test_gate.py

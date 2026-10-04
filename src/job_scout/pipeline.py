@@ -35,7 +35,7 @@ from .eligibility import classify_eligibility
 from .models import EmploymentType, Opportunity, Provenance
 from .normalize import normalize
 from .notify import (
-    gate_reason,
+    gate_reasons,
     render_digest,
     render_funnel_md,
     render_issue_md,
@@ -220,8 +220,8 @@ def run_once(
         # 9. notify (new/updated ∧ ≥ threshold ∧ not already notified) → digest → mark notified
         threshold = cfg.scoring.relevance_threshold
         to_notify = select_for_notification(ranked, threshold)
-        for o in ranked:
-            reason_of[id(o)] = gate_reason(o, threshold)
+        for o, r in zip(ranked, gate_reasons(ranked, threshold)):
+            reason_of[id(o)] = r
         gate = Counter(reason_of[id(o)] for o in ranked if reason_of[id(o)] is not None)
         unselected = [o for o in ranked if reason_of[id(o)] is not None]
         near_misses = [

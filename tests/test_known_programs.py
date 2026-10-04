@@ -78,8 +78,12 @@ def test_quiet_period_surfaces_nothing_today_dates():
 
 
 def test_best_fit_stipend_surfaces_below_threshold_but_unknown_does_not():
+    # Updated (S5): the gate is by class; a program is typed STIPEND_PROGRAM, the other record is a
+    # non-target type, so it is not selected however its eligibility reads.
     def mk(cat):
-        o = Opportunity(title="P", company="C", apply_url="u", canonical_url="u", status=Lifecycle.NEW)
+        etype = EmploymentType.STIPEND_PROGRAM if cat == EC.STIPEND_PROGRAM_GLOBAL else EmploymentType.UNKNOWN
+        o = Opportunity(title="P", company="C", apply_url="u", canonical_url="u", status=Lifecycle.NEW,
+                        employment_type=etype)
         o.eligibility = Eligibility(cat, 0.9)
         o.relevance = Relevance(score=0.10)          # well below any sane threshold
         return o

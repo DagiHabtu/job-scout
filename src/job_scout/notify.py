@@ -1,9 +1,9 @@
 """Notification — selection + digest rendering. File-first, $0, zero external dependency.
 
 Two responsibilities, kept separate so both are testable:
-  * `select_for_notification` — the gate: an opportunity is worth surfacing iff it is NEW or
-    UPDATED this run, clears the relevance threshold, and has not already been notified. This is
-    the load-bearing anti-spam rule (over-notification is the real product risk, PLAN §9).
+  * `select_for_notification` — the gate: NEW/UPDATED, not already notified, and passing the
+    deterministic class ∧ role-family ∧ eligibility rules in `gate_reason`. This is the
+    load-bearing anti-spam rule (over-notification is the real product risk, PLAN §9).
   * `render_digest` / `write_digest` — turn the selected opportunities into a legible HTML digest
     and write it where the config says. The digest shows the *reasoning* (eligibility evidence,
     matched signals, concerns), never a bare number, so a human can audit every call.
@@ -18,46 +18,66 @@ from html import escape
 from pathlib import Path
 
 from .config import AppConfig
-from .models import EligibilityCategory, Lifecycle, Opportunity
+from .models import EligibilityCategory, EmploymentType, Lifecycle, Opportunity
+from .score import role_family_ok
 
 # Statuses that are worth telling the user about. ACTIVE (seen again, unchanged) is deliberately
 # excluded — re-announcing an unchanged posting is exactly the noise we are avoiding.
 _NOTIFIABLE = frozenset({Lifecycle.NEW, Lifecycle.UPDATED})
 
-# Confidence at/above which the best-fit class is surfaced regardless of relevance score.
-_STIPEND_SURFACE_CONFIDENCE = 0.7
-
-
-def _is_best_fit_class(opp: Opportunity) -> bool:
-    """A confident, structurally-worldwide stipend program — the single best-fit class for a
-    location-constrained user (PLAN §1/§5). Its value is its eligibility, not keyword overlap, so it
-    is surfaced whenever it appears even if its generic description scores modest relevance. It still
-    passes through NEW/UPDATED + not-already-notified gating, so it is announced once, not repeatedly.
-    """
-    e = opp.eligibility
-    return (
-        e is not None
-        and e.category == EligibilityCategory.STIPEND_PROGRAM_GLOBAL
-        and e.confidence >= _STIPEND_SURFACE_CONFIDENCE
-    )
+UNKNOWN_INTERN_CAP = 5     # "Check eligibility" internships per run (stipend programs are outside it)
+_TARGET_CLASS = frozenset({EmploymentType.INTERNSHIP, EmploymentType.NEW_GRAD})
 
 
 def gate_reason(opp: Opportunity, threshold: float) -> str | None:
-    """Why `opp` is NOT notified (`not_new`, `already_notified`, `below_threshold`), or None if it
-    is selected. First match wins, so every unselected record carries exactly one reason."""
+    """Why `opp` is NOT notified, or None if it is selected. Deterministic rules, first match wins,
+    so every unselected record carries exactly one reason (spec S5):
+
+    not_new → already_notified → stipend program (positive or UNKNOWN eligibility → selected; never
+    dropped for uncertainty) → not_target_class (not INTERNSHIP/NEW_GRAD) → role_family (title is not
+    a technical role) → eligibility: positive → selected; UNKNOWN internship → selected under "Check
+    eligibility" (capped per run by `gate_reasons`); UNKNOWN new-grad → eligibility_unknown.
+
+    `threshold` stays in the signature (frozen) but is no longer consulted: relevance orders items,
+    it does not gate them (C3).
+    """
     if opp.status not in _NOTIFIABLE:
         return "not_new"
     if opp.notified_at is not None:
         return "already_notified"
-    relevant = opp.relevance is not None and opp.relevance.score >= threshold
-    if relevant or _is_best_fit_class(opp):
+    cat = opp.eligibility.category if opp.eligibility else EligibilityCategory.UNKNOWN
+    if opp.employment_type == EmploymentType.STIPEND_PROGRAM:
+        return None if cat in _POSITIVE or cat == EligibilityCategory.UNKNOWN else "eligibility_negative"
+    if opp.employment_type not in _TARGET_CLASS:
+        return "not_target_class"
+    if not role_family_ok(opp.title):
+        return "role_family"
+    if cat in _POSITIVE:
         return None
-    return "below_threshold"
+    if cat == EligibilityCategory.UNKNOWN:
+        return None if opp.employment_type == EmploymentType.INTERNSHIP else "eligibility_unknown"
+    return "eligibility_negative"   # a low-confidence disqualifier that survived the hard filter
+
+
+def gate_reasons(opps: list[Opportunity], threshold: float) -> list[str | None]:
+    """`gate_reason` for each record in order, plus the per-run cap on UNKNOWN-eligibility
+    internships (overflow → `unknown_cap`). Records are taken in the given (ranked) order."""
+    out: list[str | None] = []
+    unknown_interns = 0
+    for o in opps:
+        r = gate_reason(o, threshold)
+        if (r is None and o.employment_type == EmploymentType.INTERNSHIP
+                and (o.eligibility is None or o.eligibility.category == EligibilityCategory.UNKNOWN)):
+            unknown_interns += 1
+            if unknown_interns > UNKNOWN_INTERN_CAP:
+                r = "unknown_cap"
+        out.append(r)
+    return out
 
 
 def select_for_notification(opps: list[Opportunity], threshold: float) -> list[Opportunity]:
-    """new/updated ∧ not already notified ∧ (relevance ≥ threshold OR best-fit class). Order preserved."""
-    return [o for o in opps if gate_reason(o, threshold) is None]
+    """The records `gate_reasons` selects. Order preserved."""
+    return [o for o, r in zip(opps, gate_reasons(opps, threshold)) if r is None]
 
 
 # --------------------------------------------------------------------------------------------- #
@@ -190,13 +210,21 @@ def _issue_item(opp: Opportunity) -> str:
     return "\n".join(lines)
 
 
+def _title_fit(opp: Opportunity) -> float:
+    """Ordering key within a section: title-to-target-role similarity, else the relevance score."""
+    r = opp.relevance
+    if r is None:
+        return 0.0
+    return r.semantic_similarity if r.semantic_similarity is not None else r.score
+
+
 def render_issue_md(opps: list[Opportunity], cfg: AppConfig) -> str:
     """One task-list line per item (tick the ones worth applying to), grouped into "Actionable" and
     "Check eligibility", each with its eligibility evidence and matched signals."""
     out = [f"Job Scout — {len(opps)} new for {cfg.profile.location.country_name}. "
            "Tick the items worth applying to.\n"]
     for section in (ACTIONABLE, CHECK_ELIGIBILITY):
-        items = [o for o in opps if section_of(o) == section]
+        items = sorted((o for o in opps if section_of(o) == section), key=_title_fit, reverse=True)
         if items:
             out.append(f"## {section}\n")
             out.append("\n".join(_issue_item(o) for o in items) + "\n")

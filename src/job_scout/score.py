@@ -57,18 +57,16 @@ def load_model(model_id: str):
     return model
 
 
-def _profile_text(p: UserProfile) -> str:
-    return " ".join([*p.target_roles, *p.target_technologies, *p.preferred_industries, p.experience_level])
-
-
 def embed_similarity(opp: Opportunity, profile: UserProfile, model) -> float | None:
-    if model is None:
+    """Max cosine between the TITLE and each target role. Title only: descriptions start with
+    employer boilerplate that the model's 256-token window never gets past (C3)."""
+    if model is None or not profile.target_roles:
         return None
     try:  # pragma: no cover - only where a real model is present
         import numpy as np
 
-        vecs = model.encode([_profile_text(profile), f"{opp.title}. {opp.description}"], normalize_embeddings=True)
-        return float(np.dot(vecs[0], vecs[1]))
+        vecs = model.encode([opp.title, *profile.target_roles], normalize_embeddings=True)
+        return float(np.max(vecs[1:] @ vecs[0]))
     except Exception:
         return None
 
@@ -128,6 +126,11 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
         concerns.append(_MODEL_UNAVAILABLE)
 
     final = base
+    # Target technologies named in the body: +0.03 each, capped at +0.15.
+    body = f"{opp.description} {' '.join(opp.technologies)}".lower()
+    body_tech = [t for t in profile.target_technologies if _wb(t, body)]
+    if body_tech:
+        final = min(1.0, final + min(0.15, 0.03 * len(body_tech)))
     if opp.company.lower() in {c.lower() for c in profile.companies_prioritize}:
         matched.append("prioritized company")
         final = min(1.0, final + 0.15)
@@ -143,10 +146,7 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
             final = min(1.0, final + 0.05 * opp.eligibility.confidence)
         elif opp.eligibility.category == EligibilityCategory.UNKNOWN:
             final = max(0.0, final - 0.05)
-    # Role-quality concerns dampen the score; the model-availability caveat is transparency, not a
-    # defect of the role, so it must NOT silently dock every lexical-mode score.
-    role_concerns = [c for c in concerns if c != _MODEL_UNAVAILABLE]
-    final = max(0.0, final - 0.1 * len(role_concerns))
+    # No per-concern damping: seniority is a hard filter now (S4); concerns stay listed for the reader.
 
     return Relevance(score=round(final, 4), matched_signals=matched, concerns=concerns, semantic_similarity=sim)
 
@@ -155,15 +155,22 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
 # Role family — is this title the kind of work the user targets? (pure regex, testable in CI)
 # --------------------------------------------------------------------------------------------- #
 
+# Spec S5 regexes, extended after the golden set (tests/fixtures/golden_titles.csv) measured the exact
+# spec version at precision 0.61: the extra veto terms each come from a mislabelled golden row (paid
+# "AI study" posts, data entry/annotation, service desk, managers); the extra family terms from
+# missed technical titles. See STATE.md "Deviations from spec".
 _ROLE_FAMILY = re.compile(
     r"\b(engineer(ing)?|developer|programmer|software|data|machine learning|ml|ai|devops|sre|"
     r"site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|analyst|analytics|"
-    r"scientist|security|qa|research)\b",
+    r"scientist|security|qa|research|"
+    r"embedded|computer vision|database)\b",
     re.IGNORECASE,
 )
 _ROLE_VETO = re.compile(
     r"\b(sales|account executive|marketing|recruit(er|ing)|talent|legal|counsel|finance|accounting|"
-    r"customer success|people|hr|designer?|content|community|partnerships?|curriculum|renewals|support)\b",
+    r"customer success|people|hr|designer?|content|community|partnerships?|curriculum|renewals|support|"
+    r"manager|participants?|stud(y|ies)|annotat(or|ion)|data entry|keyer|service desk|help ?desk|"
+    r"business development|social|customer|opportunities|ad quality|professional services)\b",
     re.IGNORECASE,
 )
 
