@@ -1,13 +1,12 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: 613e2a1 S2: eligibility — the location field decides first (gazetteer, _classify_location)
-Step in progress: S2 (review open) + S3
-  Sub-progress S2: [x] _geo.py gazetteer  [x] _classify_location + new decision order  [x] step-1 known_programs rule (geo_verdict stub until S6) + text-mention path deleted  [x] tests  [x] re-classify stored rows: 0 bad  [ ] independent review (launched on ef3615d..613e2a1) → findings → tests/fixes
-  Sub-progress S3: [ ] regexes in normalize.py  [ ] infer_employment_type NEW_GRAD  [ ] profile.yaml + example  [ ] title-table tests
-Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending)
-Reviews: S2 open (reviewer running; if context was cleared, re-launch it per §11), S5 open, S6 open, final open
-Next action: S3 (type/level inference) while the S2 review runs; then close the S2 review.
+Branch: next-iteration      Last commit: ed728ba S2: close independent review — fixes for H1-H4, M1-M4, L2 with a test per finding
+Step in progress: S5
+  Sub-progress: [ ] embed_similarity title-only vs target_roles  [ ] score_opportunity (tech hits cap, drop seniority damping)  [ ] gate_reason (deterministic, sections, unknown_cap)  [ ] golden_titles.csv + scripts/calibrate.py  [ ] tests (golden precision/recall, gate table, ordering)  [ ] independent review
+Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8), S4 (b34b338)
+Reviews: S2 closed, S5 open, S6 open, final open
+Next action: implement S5 (title scoring + deterministic notify gate + golden set).
 Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up.
 Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC).
 Unverified facts still in code: none yet
@@ -83,6 +82,37 @@ Unverified facts still in code: none yet
   incl. its old guard (the spec's own `us-hours` test needs it); (iv) USER + ONSITE/HYBRID in the
   user's own country/city stays `UNKNOWN 0.4` (Gate-0 Decision #1); (v) "remote" in the location
   field counts as remote for REMOTE_EXCLUDES_USER vs ONSITE_FOREIGN (both disqualifying).
+- 2026-10-04 — **S2 independent review CLOSED** (`ed728ba`). Reviewer (general-purpose, Opus,
+  read-only, given only S2 + §9 + diff `ef3615d..613e2a1` + tests). Every finding became a test in
+  `tests/test_eligibility_review_s2.py` first; 19 of those tests FAILED → confirmed → fixed:
+  H1 "South/North/West Africa" read as USER via "africa" (masked; sub-regions added as excluding);
+  H2 onsite foreign city + "EMEA"/"East Africa" → included (region tokens now count only for a
+  remote role); H3 "ET" (Eastern Time) read as Ethiopia (bare code dropped from USER, per spec);
+  H4 "work from anywhere within the US" → worldwide (a worldwide phrase now needs no named place in
+  the next 60 chars; US-hours phrases ignored there); M1 "Remote; Remote, Canada; Remote, US" decided
+  by body words → now a body-independent `MIXED` verdict → UNKNOWN 0.5; M2 "Remote, California"
+  rescued (US state names added) / "Germany; Cologne" → MIXED; M3 " and " split broke "Bosnia and
+  Herzegovina" (protected); M4 "EMEA (Europe only)" → now excluded; L2 onsite-own-city from body →
+  UNKNOWN 0.4 restored. Refuted/kept: H4's guard tests (`test_h4_us_hours_stays_a_penalty…`,
+  `test_m4_unqualified_multi_region_still_includes`, `test_m3_middle_east_and_africa_still_includes`)
+  passed before the fix — behaviour already right. L1 (OTHER-only → 0.3; "remote" in the location
+  counts as remote) kept and listed as deviations. L3 (title marker misses "…, US (Remote)") is the
+  spec's exact regex — kept; such rows become MIXED/UNKNOWN, not positive. Test-quality findings
+  fixed: oracle in `scripts/reclassify_stored.py` no longer blind to "South Africa"/"Anywhere in the";
+  GSoC text test pinned to UNKNOWN 0.3; empty `geo_evidence` for eligible programs → S6 (tested there).
+  Re-classification after fixes: still **0 bad**, 9 Sourcegraph rows worldwide (0.7/0.5). **187 passed.**
+- 2026-10-04 — **S3 done** (`ab43dd8`): `_INTERN_TITLE`, `_ENTRY_TITLE`, `_SENIOR_TITLE` (exact
+  spec regexes) in `normalize.py`; UNKNOWN/FULL_TIME + entry token and no senior token → NEW_GRAD;
+  profiles: `employment_types` + `new_grad`, default `target_roles` shipped. 22 title-table tests.
+  Spec conflict (fact, not decision): "Graduate Partner Marketing Manager → NEW_GRAD by level" is
+  impossible with the spec's exact regexes ("manager" is a senior token) → stays UNKNOWN; the S5
+  role-family veto also rejects it; both asserted. Acceptance (`by_type` shows new_grad on a run with
+  Himalayas/Canonical data) → checked after S7/S8.
+- 2026-10-04 — **S4 done** (`b34b338`): `filter_reason` adds `seniority_title:<token>` after the
+  type check (not for INTERNSHIP/STIPEND_PROGRAM); dedupe tier 3 blocked by
+  `(canon(company), canon(location))`. Tests: C7 reproduction → 2 records (EMEA one included, US one
+  excluded); same-location near-dup merges; "Senior Backend Engineer" → `seniority_title:senior`;
+  "Intern, Engineering Manager's Office" kept.
 
 ---
 
