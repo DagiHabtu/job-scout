@@ -35,9 +35,11 @@ sources:
   enabled: ["greenhouse", "lever", "ashby", "known_programs", "himalayas"]
   #   himalayas — public search API (spec S7; E1 probe passed 2026-10-04). Default queries in config.py
   #   (Intern / Entry-level × worldwide / country=ET). Terms: link back + attribution, no resubmission.
-  greenhouse_boards: ["gitlab", "sourcegraph91"]
+  greenhouse_boards: ["gitlab", "sourcegraph91", "canonical"]
   #   gitlab        — verified live (project Gate-1 run fetched 234 jobs). All-remote, hires 65+ countries.
   #   sourcegraph91 — verified via Sourcegraph's own job-board repo + live boards.greenhouse.io/sourcegraph91. All-remote.
+  #   canonical     — verified 2026-10-04 by scripts/verify_boards.sh (310 jobs). Remote-first, hires
+  #                   worldwide incl. graduate roles (spec S8; the only board added this iteration).
   lever_sites: []
   #   Left empty: verified Lever accounts (Spotify, Palantir, Plaid, Zoox, WHOOP, Aircall, …) skew
   #   US/hub-based; none was a clear worldwide-remote internship fit. Add a verified slug when one is.
