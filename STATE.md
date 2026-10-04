@@ -1,13 +1,12 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: ab4e919 S7: WIP — Himalayas adapter, fixture, tests (1 test failing: test_mapping_from_recorded_fixture)
-Step in progress: S6 (review RETURNED, findings not yet actioned) + S7 (WIP)
+Branch: next-iteration      Last commit: 0ef22b7 S7: strip a tag cut off by truncated HTML (fixes test_mapping_from_recorded_fixture)
+Step in progress: S6 (review RETURNED, findings being actioned)
   Sub-progress S6: [x] data model + table  [x] verdicts/evidence/embargo  [x] timing/identity/titles/report  [x] acceptance A/B/C  [x] heartbeat lines  [x] independent review run on 3a3118e..5cd289f  [ ] findings → tests → fixes (see "S6 review findings (OPEN)" in the pass log — do NOT re-launch the reviewer)
-  Sub-progress S7: [x] fixture recorded (tests/fixtures/himalayas_search.json, 5 live listings 2026-10-04)  [x] sources/himalayas.py + _REGISTRY + SourceConfig.himalayas_queries  [x] profile.yaml enables "himalayas"  [x] tests written (tests/test_himalayas.py)  [ ] fix 1 failing test: test_mapping_from_recorded_fixture (247 others pass; cause not yet diagnosed — likely a fixture title/field assumption)  [ ] commit as done
-Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed)
+Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S7 (ab4e919, 0ef22b7)
 Reviews: S2 closed, S5 closed, S6 returned/open (findings in pass log), final open
-Next action: diagnose + fix test_mapping_from_recorded_fixture and finish S7; then action the S6 review findings (test first per finding); then S8 (canonical token), then the final whole-branch review and end-of-pass STATE.
+Next action: action the S6 review findings (test first per finding); then S8 (canonical token), then the final whole-branch review and end-of-pass STATE.
 Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up. (3) DECISION for Dagi (S5 review M1): an onsite/hybrid role in Addis Ababa is UNKNOWN@0.4 (Gate-0 Decision #1), so a NEW_GRAD one is never notified (`eligibility_unknown`) and an INTERNSHIP one lands in "Check eligibility" using a cap slot — though the user can certainly take it. Fixing it needs either a gate rule ("own-country onsite UNKNOWN → select") or E2's proposed new EligibilityCategory (spine change). Not changed in this pass.
 Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD. (j) S6: gate checks `already_notified` before `not_new` (spec Case A requires it). (k) S6: `US_EMBARGOED` = Cuba, Iran, North Korea, Crimea, Donetsk, Luhansk — composed from OFAC's active program list (which has no single "embargoed countries" list); what is verified is that no Ethiopia program exists. (l) S6: program-level `report` key for a program with no future round is its name; a program's last-checked date in that message is the latest of its geo/round checks.
 Unverified facts still in code: MLH "no anticipated projects" 29-country list (not extracted → MLH geo_scope "unknown"; no round, so no effect); all 2027 round dates are `expected` extrapolations (Outreachy ~Feb 5–12, GSoC Mar 24–Apr 7 kept from the old table, LFX mid-Jan/Apr/Jul + 4 weeks); Himalayas freshness per listing (E1 used pubDate).
@@ -173,6 +172,23 @@ Unverified facts still in code: MLH "no anticipated projects" 29-country list (n
   (fact): Case A asserts `gate["already_notified"] == 1` on a re-run, but the record is ACTIVE and
   the spec's gate lists `not_new` first → `already_notified` is now checked first (label only;
   selection identical). **236 passed** (after the S5 review fixes).
+- 2026-10-04 — **Resumed after context clear.** git and the resume block agreed; tree clean; 247
+  passed / 1 failed as recorded. **S7 done and verified** (`ab4e919`, `0ef22b7`). Failing test
+  cause: the recorded fixture truncates each description at 1,500 chars, leaving a dangling `</li`;
+  `_text.html_to_text` now also strips a tag cut off at the end of the string (only `</?letter…`,
+  so a literal "a < b" stays). **248 passed.** Live acceptance (local, copy of `data/scout.db` in
+  the scratchpad, model loaded), run `b98c1c4d89a3`: discovered 318 (greenhouse 221, ashby 8,
+  himalayas 89, known_programs 0 with a reason per round) → merged 7 → rejects 219 (remote_excludes
+  201, requires_work_auth 6, seniority_title 8, onsite_foreign 2, type_unwanted 2) → survived 92 →
+  gate role_family 80, not_new 4, not_target_class 2 → **notified 6**, all Himalayas and all
+  genuine technical roles: Software Engineer Intern + Research Intern @ Ritual, Research Engineer
+  Intern (Video/Multimodal LLM) @ Tether, Junior DevOps / Cloud Engineer @ CloudCops, QA/QC Intern @
+  Flowmingo, CRM Developer @ NightOwl. by_type: unknown 221, new_grad 60, internship 29, full_time 8
+  (**S3 acceptance: new_grad non-zero ✓**). Invariant holds (318−7−219−86 = 6). Observations, not
+  changed: entry-level queries hit the 3-page cap (60 of totalCount ~306); title similarity is
+  ~0.8–0.9 for any "… Intern" title (UX/Recruiting interns top the near-miss list) — the
+  role_family gate, not the score, is what separates them. Himalayas' feed now says cursor
+  pagination is preferred and `offset` is deprecated; `page=N` (what we use) still worked live.
 
 ---
 
