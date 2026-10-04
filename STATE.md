@@ -1,17 +1,17 @@
 # STATE
 
 ## RESUME — iteration-2
-Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last commit: 69df1b3 S10: stage fit — …
-Step in progress: S10
-  Sub-progress S10: [x] tests first  [x] profile.education  [x] normalize `_GRAD_PROGRAM_TITLE` split  [x] score.stage_fit → Relevance `stage:` strings  [x] gate stage:graduate_only / stage:experience / Aspirational cap 2  [x] rendering + rejected_samples evidence  [x] commit 69df1b3  [ ] fresh-context review (spawned on 1608ab3..69df1b3; if context is cleared before its report is recorded, re-run it) → findings → tests → fixes
-Steps done and verified: S9 (1608ab3 — unit level; email arrival = pending human check 1). Baseline: spec §12 43422e0; c54fe46.
-Reviews: S10 open, final open
-Next action: action the S10 review findings test-first (recorded above the pass log); then S11.
+Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last commit: 1213ac8 S10: close independent review — …
+Step in progress: S11
+  Sub-progress S11: [ ] tests first (regression fixture → sections; synthetic Junior Backend / Frontend Intern / QA Automation Linux Kernel; interest_veto; profile alias)  [ ] profile interests / not_interested / strong_interest_terms (target_roles alias)  [ ] remove `qa` from role family; golden set re-reported  [ ] interest_veto + note in Relevance  [ ] gate/sections: Apply · Check eligibility · Aspirational · Eligible, outside your stated interests (cap 5, interest:cap)  [ ] commit  [ ] final fresh-context review → findings → tests → fixes  [ ] push iteration-2
+Steps done and verified: S9 (1608ab3 — unit level; email arrival = pending human check 1), S10 (69df1b3, 1213ac8 — review closed). Baseline: spec §12 43422e0; c54fe46.
+Reviews: S10 closed (1213ac8), final open
+Next action: S11 — interest and sections (tests first).
 Pending human checks: (1) S9 — Dagi checks https://github.com/notifications for the 2026-10-04 issue and the email settings in §12 S9, then dispatches `gh workflow run scout --ref iteration-2 -f seed=true` and confirms an email arrived; if not, Telegram fallback becomes primary. (2) DECISION carried over (onsite/hybrid in Addis = UNKNOWN@0.4, see next-iteration block).
-Deviations from spec: (i2-a) S10 `advanced_degree` is Aspirational only with POSITIVE eligibility; with UNKNOWN it falls through to the eligibility branch (UNKNOWN intern → Check eligibility; UNKNOWN new-grad → eligibility_unknown) — §9: UNKNOWN is never auto-selected. (i2-b) S10 `advanced_degree` context words accept plurals (internships, students, …) — Tether's own sentence uses them. (i2-c) `accept_graduate_programs` is applied at score time (verdict `graduate_only_accepted`, positive) because `gate_reason(opp, threshold)` has no profile. (i2-d) `profile.education` replaces an unused free-text field of the same name; a string still loads (defaults).
+Deviations from spec: (i2-a) S10 `advanced_degree` is Aspirational only with POSITIVE eligibility; with UNKNOWN it falls through to the eligibility branch (UNKNOWN intern → Check eligibility; UNKNOWN new-grad → eligibility_unknown) — §9: UNKNOWN is never auto-selected. (i2-b) S10 `advanced_degree` context words accept plurals (internships, students, …) — Tether's own sentence uses them. (i2-c) `accept_graduate_programs` is applied at score time (verdict `graduate_only_accepted`, positive) because `gate_reason(opp, threshold)` has no profile. (i2-d) `profile.education` replaces an unused free-text field of the same name; a string still loads (defaults). (i2-e) S10 review H1: `experience_required`/`stretch` read only a requirement-shaped phrase "<N>[+][-M] years|yrs [of] [≤3 words] experience|hands-on" (spec: 60-char window with experience|hands-on|working|professional), skipping company-subject phrases ("we bring 25 years…"); numbers may be words (one–ten) or decimals. (i2-f) S10 review M1/M2: MSc/PhD exclusions and context are read within ±60 chars of the degree word (undergraduate/bachelor only as an or/and/'/' alternative within ±40), not across the whole tag-stripped "sentence"; company-blurb phrases (founded, our mission, team of…) are not requirements. (i2-g) S10 review M4: only "graduated by/in/before/between <month> 20xx" is graduate-only (spec regex also "graduating", which describes a current student); "undergraduate(s)" joins the student exception; a negated mention ("students are not eligible") is no exception. (i2-h) S10 review M6: a body sentence is `fits` evidence only when it addresses candidates (you/candidates/applicants/role/hiring/open to/eligible…). (i2-i) S10 review H2: `internship_funnel` now covers NEW_GRAD too (target classes), so stage rejections are sampled with their quote; labelled "Target-class funnel". (i2-j) `_GRAD_PROGRAM_TITLE` lookahead also excludes "graduate research/teaching/assistant" (graduate-student roles).
 Unverified facts still in code: as in the next-iteration block; plus whether the Himalayas API truncates descriptions (§12 "Limit").
 
-### S10 review findings (OPEN — reviewer report on 1608ab3..69df1b3, recorded in substance; action test-first; do NOT re-run)
+### S10 review findings (CLOSED `1213ac8` — outcomes in the pass log entry "S10 review CLOSED")
 - H1 `_EXPERIENCE` reads non-requirements: company age ("we bring 25 years of experience", "10+ years working with"), age limits ("18 years old … working"), vesting ("4 years, plus a professional development budget"), decimal "1.5 years" → 5, "within 3 years working", boilerplate max beats the real requirement ("0-1 years of experience. Our founders have 20 years of experience") → `stage:experience` (dropped).
 - H2 NEW_GRAD stage rejections never reach `internship_funnel.rejected_samples` (funnel types = INTERNSHIP/STIPEND only) — Graduate SWE and every Junior `stage:experience` invisible in the heartbeat; the pipeline test hid it with an Intern title.
 - M1 sentence splitting: merged list blocks attach a far "nice to have" to Tether's real "Requirements MSc/PhD candidate…" (Tether is Aspirational only via blurb); "Currently enrolled in a PhD program … Bachelor's degree" → fits; abbreviations split ("Ph.D. are preferred", "e.g. … Master's or PhD") → false advanced_degree.
@@ -48,6 +48,21 @@ Unverified facts still in code: as in the next-iteration block; plus whether the
   (`4c6a095~1`, so the 9 are NEW again): 628 → merged 17 → rejects 413 → survived 198 → gate 190 (not_target_class
   100, role_family 85, not_new 4, **stage:graduate_only 1**) → **notified 8**: Actionable 7 (incl. QA/QC and CRM —
   S11's job), Aspirational 1 (Tether). Invariant 628−17−413−190 = 8 ✓. **351 passed.**
+- 2026-10-04 — **S10 review CLOSED** (`1213ac8`). Reviewer (general-purpose, Opus, read-only; given §12 S10 +
+  acceptance, §9, CLAUDE.md, the diff 1608ab3..69df1b3, the tests, and the 9 stored records). Findings →
+  `tests/test_stage_review_s10.py` first: **31 failed → confirmed → fixed** (H1 non-requirement years ×7, decimal,
+  boilerplate max; H2 NEW_GRAD stage sample; M1 Tether's real Requirements block, merged-list "enrolled in a PhD",
+  "Ph.D. … preferred/a plus", "e.g. … Master's or PhD"; M2 blurbs ×2; M3/L3 titles ×4; M4 ×3; M5; M6 ×2; L1 ×3;
+  L2). Passed before the fix (guards, kept): real requirements still caught (3+ years → experience, 1+ → stretch),
+  "must have graduated by June 2026" still graduate_only, the Linux-Kernel candidate sentence still `fits` with a
+  neutral title, and the cap interaction (3 positive MSc/PhD + 6 UNKNOWN interns → 2 + advanced_cap 1, 5 +
+  unknown_cap 1). L6 fixed (readable stage line in the HTML digest; none for programs) with a test. My own S10 row
+  "graduating in May 2026 → graduate_only" changed to "graduated in May 2026" (justified inline, M4). Kept: L4
+  (Junior/early-career title switches off the body graduate rules — spec-literal), L5 (`education.status` has no
+  rule in the spec; it is recorded config only), L7 (MSc/PhD + UNKNOWN intern sits in Check eligibility and uses
+  an UNKNOWN-intern slot — spec silent; deviation i2-a), L8 (dedupe gains a "graduate" level so graduate titles
+  never fuzzy-merge with entry ones; pipeline carries the stage samples — both needed by S10), L9 (S11). The 9
+  records: unchanged verdicts (7 fits, Tether advanced_degree, Graduate SWE graduate_only, CRM stretch). **387 passed.**
 
 ## RESUME — next-iteration (COMPLETE — merged to main as bc4154c; kept for history)
 Branch: next-iteration      Last commit: b911406 Merge origin/main (a39feaa, bot run 2026-10-04) into next-iteration
