@@ -1,17 +1,30 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: d1f055e S8: add the canonical Greenhouse board (verified live: 310 jobs)
-Step in progress: final whole-branch review
-  Sub-progress: [x] reviewer run on 7ec0b85..48745df — report recorded under "Final review findings"  [ ] findings → tests → fixes  [ ] end-of-pass STATE (pending human checks + exact commands)
+Branch: next-iteration      Last commit: 96c10db final: close whole-branch review — …
+Step in progress: none — **PASS COMPLETE** (all steps S0–S8 done; all four reviews closed). Not pushed, not merged.
 Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S6 (5cd289f, 3e7d379 — review closed), S7 (ab4e919, 0ef22b7), S8 (d1f055e)
-Reviews: S2 closed, S5 closed, S6 closed, final open
-Next action: run the final whole-branch review (spec §11: general-purpose, same model, read-only; give it §5, §8, §9, §11 review brief, the diff 7ec0b85..HEAD and the tests), action findings test-first, then write the end-of-pass STATE.
-Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up. (3) DECISION for Dagi (S5 review M1): an onsite/hybrid role in Addis Ababa is UNKNOWN@0.4 (Gate-0 Decision #1), so a NEW_GRAD one is never notified (`eligibility_unknown`) and an INTERNSHIP one lands in "Check eligibility" using a cap slot — though the user can certainly take it. Fixing it needs either a gate rule ("own-country onsite UNKNOWN → select") or E2's proposed new EligibilityCategory (spine change). Not changed in this pass.
-Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD. (j) S6: gate checks `already_notified` before `not_new` (spec Case A requires it). (k) S6: `US_EMBARGOED` = Cuba, Iran, North Korea, Crimea, Donetsk, Luhansk — composed from OFAC's active program list (which has no single "embargoed countries" list); what is verified is that no Ethiopia program exists. (l) S6: program-level `report` key for a program with no future round is its name; a program's last-checked date in that message is the latest of its geo/round checks. (m) S6 review H1: `ats_job_id = <key>@<recorded state>`, not `@<effective_state>` as the spec writes — otherwise a stale `open` round is re-announced as "expected"; staleness still changes title and lead window. (n) S6 review M3: MLH `geo_scope="worldwide"` with the form's verified no-projects list as `geo_exclusions` (spec gave no scope; the earlier "unknown" was only because the list was not extracted).
+Reviews: S2 closed, S5 closed, S6 closed, final closed (96c10db)
+Next action: Dagi does the pending human checks below, in order. Nothing else is in flight.
+Pending human checks (in this order; commands run from `job-scout/`):
+  (1) Push the branch (nothing has been pushed): `git push -u origin next-iteration`
+  (2) S0 + S1 — dispatch on the branch with a seeded delivery test:
+      `gh workflow run scout --ref next-iteration -f seed=true` then `gh run watch` (or the Actions tab).
+      Confirm (a) the funnel table is on the run page (step summary), (b) an issue "Job Scout: N new — <date>"
+      exists (`gh issue list --label scout`) — on today's data it should list the real items (9 in the local
+      run), not just the seeded one — and (c) it reached a real device (email or GitHub mobile). If it did not
+      arrive, the Telegram fallback is the first follow-up. Note: this run commits `data/scout.db` to
+      `next-iteration`, and the items are then marked notified on that branch's DB.
+  (3) Merge when satisfied: `git checkout main && git pull --ff-only && git merge --no-ff next-iteration && git push`
+      (`main` gains a daily bot commit to `data/scout.db`; the branch does not touch it except via step 2's run —
+      on a conflict in `data/scout.db`, keep the branch's copy so items delivered in step 2 are not re-sent:
+      `git checkout --theirs data/scout.db && git add data/scout.db`).
+  (4) DECISION for Dagi (S5 review M1): an onsite/hybrid role in Addis Ababa is UNKNOWN@0.4 (Gate-0 Decision #1), so a NEW_GRAD one is never notified (`eligibility_unknown`) and an INTERNSHIP one lands in "Check eligibility" using a cap slot — though the user can certainly take it. Fixing it needs either a gate rule ("own-country onsite UNKNOWN → select") or E2's proposed new EligibilityCategory (spine change). Not changed in this pass.
+Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) [withdrawn — §6 `skipped_records` now implemented, final review M5]. (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD. (j) S6: gate checks `already_notified` before `not_new` (spec Case A requires it). (k) S6: `US_EMBARGOED` = Cuba, Iran, North Korea, Crimea, Donetsk, Luhansk — composed from OFAC's active program list (which has no single "embargoed countries" list); what is verified is that no Ethiopia program exists. (l) S6: program-level `report` key for a program with no future round is its name; a program's last-checked date in that message is the latest of its geo/round checks. (m) S6 review H1: `ats_job_id = <key>@<recorded state>`, not `@<effective_state>` as the spec writes — otherwise a stale `open` round is re-announced as "expected"; staleness still changes title and lead window. (n) S6 review M3: MLH `geo_scope="worldwide"` with the form's verified no-projects list as `geo_exclusions` (spec gave no scope; the earlier "unknown" was only because the list was not extracted).
+  Final-review deviations: (o) M1 — step 2 (work authorization) is no longer "unchanged": a residency phrase naming the user's region/"anywhere" ("must be based in EMEA") is not foreign auth, and a visa-sponsorship line does not count when the location is decisively worldwide or includes the user (a remote hire needs no visa); a foreign right-to-work phrase still disqualifies first. (p) H2 — a body worldwide phrase plus "located/reside/based/live in <place elsewhere>" → UNKNOWN 0.5. (q) M2/L9 — exclusion wording in the location ("Global (excluding US)") labels only the part before it, or excludes when it names the user; a WORLD location next to an ELSEWHERE title marker is MIXED → UNKNOWN 0.5 (spec: "any WORLD" wins). (r) M4 — `role_family_ok` judges the title's role head (before ", " / " - " / "(") alone when it names a family; discipline vetoes (psychology, mechanical, technician, guard, participants, study, data entry, annotation, …) count anywhere; golden set still 1.0/1.0 (in-sample). (s) H3 — dedupe tier 3 never merges titles of different level (intern/entry/senior).
 Unverified facts still in code: all 2027 round dates are `expected` extrapolations (Outreachy ~Feb 5–12, GSoC Mar 24–Apr 7 kept from the old table, LFX mid-Jan/Apr/Jul + 4 weeks); Himalayas freshness per listing (E1 used pubDate).
 
-### Final review findings (OPEN — reviewer report on 7ec0b85..48745df, recorded in substance; action each test-first; do NOT re-run the reviewer)
+### Final review findings (CLOSED `96c10db` — outcomes in the pass log entry "Final review CLOSED")
 - H1 `\bus\b` in the step-4 body exclusion matches the pronoun ("join us") → plain "Remote" + neutral body → REMOTE_EXCLUDES_USER 0.8 → hard reject (UNKNOWN made disqualifying).
 - H2 Sourcegraph "hire almost anywhere in the world, we do require successful candidates to be located in the United States" → WORLDWIDE 0.7 (place outside the 60-char window) → Actionable for US-only roles; 9 stored rows.
 - H3 dedupe tier 3 fuzzy ratio ≥0.90 merges "Junior Data Engineer" into "Senior Data Engineer" (same company+location); the senior survives and is rejected → junior lost.
@@ -228,6 +241,40 @@ Unverified facts still in code: all 2027 round dates are `expected` extrapolatio
   Himalayas items from S7 plus 3 Canonical — Junior Ubuntu Software Engineer, Junior Linux Kernel
   Engineer - Ubuntu, Graduate Software Engineer, Open Source and Linux (all "Home based -
   Worldwide"). by_type new_grad 73. Invariant 628−19−413−187 = 9 ✓. **268 passed.**
+- 2026-10-04 — **Final review CLOSED** (`96c10db`). Reviewer (general-purpose, Opus, read-only, given
+  only §5–§9, CLAUDE.md, the diff 7ec0b85..48745df and the tests). Findings → `tests/test_final_review.py`
+  (+ `test_reclassify_stored::test_body_residency_oracle`); every fix-targeting test was run against the
+  pre-fix code and **failed** (eligibility 14 written first; H3/M4/M5/L4/L7 tests written alongside the
+  fix and then confirmed failing on the stashed old code). Fixed: H1 "US" matched case-sensitively in
+  the body rule (pronoun "us" no longer excludes); H2 body residency requirement elsewhere cancels a
+  worldwide phrase → UNKNOWN 0.5; H3 no cross-level fuzzy merge; M1 work-auth vs decisive location
+  (deviation o); M2 exclusion wording; M3 `_geo.SUBNATIONAL` (Canadian provinces, Australian/Indian
+  states, UK nations, Bay Area, …); M4 role head + discipline vetoes; M5 `skipped_records` per source in
+  the run record and a "skipped" column in `funnel.md` (deviation b withdrawn); L4 `rejected_samples`
+  exclude not_new/already_notified; L7 checker also flags a positive whose body requires residence in a
+  named non-user country; L8 one-line justification per deleted pre-S6 known_programs test; L9 WORLD +
+  ELSEWHERE title marker → MIXED; L10 "Fully Remote" → BARE 0.5 and "EMEA, excluding Ethiopia" → excluded.
+  Guard tests that passed before the fixes (kept): `test_h1_country_us_still_restricts`,
+  `test_h2_worldwide_phrase_alone_still_worldwide`, `test_m1_foreign_right_to_work_still_disqualifies`,
+  `test_m1_sponsorship_still_disqualifies_without_decisive_location`, "New South Wales" (already via
+  "wales"), M4's three must-veto titles. Refuted / kept as recorded deviations: L1 (= j), L2 (= h),
+  L3 (= m). Kept, not changed: L5 — the invariant is algebraic by construction (one reason per record
+  from one map); the new M5 test covers a source whose records are all skipped; L6 — lexical-mode body
+  reading only matters without the model (same as S5 review L4); "Remote (GMT+3)" stays UNKNOWN 0.3
+  (spec has no time-zone rule for the location field). H2 on the stored rows: the real Sourcegraph text
+  is "we have a **preference** … welcome to apply regardless of location", not a requirement, so 7 stored
+  Sourcegraph rows stay worldwide (0.5 where US/EST hours are required); the two "require … located in
+  the United States" rows are "…, US" titles and were already excluded. Re-classification: **0 bad**
+  (checker now also body-aware). Golden set 1.000/1.000. Live re-run `5e2c7dedde72` (copy of the DB):
+  628 → merged 17 (was 19 — the level guard keeps 2 cross-level pairs apart) → rejects 413 → survived
+  198 → gate 189 (not_target_class 100, role_family 85, not_new 4) → **notified 9**, the same 9 items;
+  skipped 0 for every source. Invariant 628−17−413−189 = 9 ✓. **301 passed.**
+
+  **End of pass.** §8 status: (1) invariant holds on every run record, skipped records now attributed ✓;
+  (2) 0 bad stored rows ✓; (3) delivery on a real device — pending human check (2); (4) golden 1.0/1.0 ✓
+  (in-sample); (5) S6 acceptance A/B/C ✓, today's shipped table → 0 program notifications with a
+  reason per round ✓; (6) 14-day observation — starts after merge; (7) pre-existing tests pass or carry
+  a one-line justification ✓. Nothing pushed; `main` untouched.
 
 ---
 
