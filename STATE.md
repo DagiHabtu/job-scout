@@ -2,7 +2,7 @@
 
 ## RESUME — iteration-2
 Branch: iteration-2 (cut from origin/main bc4154c)      Last code commit: 1dc90fd iteration-2: close final review (followed only by STATE-only commits)
-Step in progress: none — **PASS COMPLETE** (S9, S10, S11 done; final review CLOSED)
+Step in progress: none — **PASS COMPLETE** (S9, S10, S11 done; final review CLOSED). Branch PUSHED: `git push -u origin iteration-2` → origin/iteration-2 at e125fc3 (+ this STATE line). Not merged; no workflow dispatched.
 Steps done and verified: S9 (1608ab3 — unit level; email arrival = pending human check 1), S10 (69df1b3, 1213ac8 — review closed), S11 (e6b94e4, 1dc90fd — final review closed). Baseline: spec §12 43422e0; c54fe46.
 Reviews: S10 closed (1213ac8), final closed (1dc90fd)
 Next action: Dagi does the pending human checks below, in order. Nothing else is in flight. Do not dispatch, do not merge without Dagi.
