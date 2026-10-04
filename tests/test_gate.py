@@ -59,8 +59,11 @@ def test_unknown_internship_cap():
 
 
 def test_issue_sections_order_by_title_similarity():
+    # score and similarity disagree, so only a sort by title similarity passes (S5 review M2)
     low = _o(title="Data Engineer Intern", sim=0.3)
+    low.relevance.score = 0.9
     high = _o(title="Software Engineer Intern", sim=0.7)
+    high.relevance.score = 0.1
     doubt = _o(title="Backend Intern", cat=EC.UNKNOWN, sim=0.9)
     md = render_issue_md([low, doubt, high], AppConfig())
     assert md.index("Software Engineer Intern") < md.index("Data Engineer Intern") < md.index("Check eligibility")

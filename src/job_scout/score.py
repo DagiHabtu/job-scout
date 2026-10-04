@@ -169,8 +169,10 @@ _ROLE_FAMILY = re.compile(
 _ROLE_VETO = re.compile(
     r"\b(sales|account executive|marketing|recruit(er|ing)|talent|legal|counsel|finance|accounting|"
     r"customer success|people|hr|designer?|content|community|partnerships?|curriculum|renewals|support|"
-    r"manager|participants?|stud(y|ies)|annotat(or|ion)|data entry|keyer|service desk|help ?desk|"
-    r"business development|social|customer|opportunities|ad quality|professional services)\b",
+    r"(engineering|product|program|project|account|office) managers?|participants?|stud(y|ies)|"
+    r"annotat(or|ion)|data entry|keyer|service desk|help ?desk|business development|social (growth|media)|"
+    r"customer (research|service|experience)|opportunities|ad quality|professional services|needed|"
+    r"financial|business analyst|operations analyst|mechanical|civil|chemical|policy|psychology|technician)\b",
     re.IGNORECASE,
 )
 

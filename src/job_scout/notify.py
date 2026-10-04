@@ -63,17 +63,15 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
 
 def gate_reasons(opps: list[Opportunity], threshold: float) -> list[str | None]:
     """`gate_reason` for each record in order, plus the per-run cap on UNKNOWN-eligibility
-    internships (overflow → `unknown_cap`). Records are taken in the given (ranked) order."""
-    out: list[str | None] = []
-    unknown_interns = 0
-    for o in opps:
-        r = gate_reason(o, threshold)
-        if (r is None and o.employment_type == EmploymentType.INTERNSHIP
-                and (o.eligibility is None or o.eligibility.category == EligibilityCategory.UNKNOWN)):
-            unknown_interns += 1
-            if unknown_interns > UNKNOWN_INTERN_CAP:
-                r = "unknown_cap"
-        out.append(r)
+    internships: the best title matches are kept, the overflow gets `unknown_cap`."""
+    out = [gate_reason(o, threshold) for o in opps]
+    capped = [
+        i for i, (o, r) in enumerate(zip(opps, out))
+        if r is None and o.employment_type == EmploymentType.INTERNSHIP
+        and (o.eligibility is None or o.eligibility.category == EligibilityCategory.UNKNOWN)
+    ]
+    for i in sorted(capped, key=lambda i: -_title_fit(opps[i]))[UNKNOWN_INTERN_CAP:]:
+        out[i] = "unknown_cap"
     return out
 
 

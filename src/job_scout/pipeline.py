@@ -217,7 +217,7 @@ def run_once(
     try:
         lifecycle = upsert_and_reconcile(conn, ranked, run_id)
 
-        # 9. notify (new/updated ∧ ≥ threshold ∧ not already notified) → digest → mark notified
+        # 9. notify (deterministic gate: new/updated, not notified, class ∧ role family ∧ eligibility) → deliver
         threshold = cfg.scoring.relevance_threshold
         to_notify = select_for_notification(ranked, threshold)
         for o, r in zip(ranked, gate_reasons(ranked, threshold)):
