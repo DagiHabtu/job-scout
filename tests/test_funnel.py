@@ -37,7 +37,8 @@ def test_funnel_invariants_hold_on_both_runs(tmp_path):
     assert s1.rejects == {"eligibility:requires_work_auth": 1}
     s2 = run_once(cfg, gate0_sources())
     _invariants(s2)
-    assert s2.gate == {"not_new": s2.after_filter}       # everything known → one reason each
+    # everything known → one reason each (S6: a delivered record reads already_notified first)
+    assert sum(s2.gate.values()) == s2.after_filter and set(s2.gate) <= {"not_new", "already_notified"}
 
 
 def test_run_record_carries_histograms_and_funnel_file(tmp_path):
@@ -70,7 +71,7 @@ def test_near_misses_are_unselected_survivors_ordered_by_score(tmp_path):
     nm = s2.near_misses
     assert 0 < len(nm) <= 5
     assert [n["score"] for n in nm] == sorted((n["score"] for n in nm), reverse=True)
-    assert all(n["gate_reason"] == "not_new" for n in nm)
+    assert all(n["gate_reason"] in ("not_new", "already_notified") for n in nm)
 
 
 def test_source_report_is_copied_into_the_run_record(tmp_path):

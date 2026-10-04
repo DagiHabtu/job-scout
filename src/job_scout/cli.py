@@ -80,7 +80,10 @@ def write_heartbeat(cfg: AppConfig, runs: int = 7) -> str:
     import json
     from pathlib import Path
 
+    from datetime import date
+
     from .notify import render_heartbeat_md
+    from .sources.known_programs import maintenance_notes
     from .store import connect
 
     conn = connect(cfg.db_path)
@@ -91,7 +94,7 @@ def write_heartbeat(cfg: AppConfig, runs: int = 7) -> str:
     records = [json.loads(r["summary"]) for r in rows if r["summary"]]
     path = Path(cfg.notify.digest_path).parent / "heartbeat.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_heartbeat_md(records), encoding="utf-8")
+    path.write_text(render_heartbeat_md(records, maintenance_notes(date.today())), encoding="utf-8")
     return str(path)
 
 

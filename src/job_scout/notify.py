@@ -33,7 +33,7 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
     """Why `opp` is NOT notified, or None if it is selected. Deterministic rules, first match wins,
     so every unselected record carries exactly one reason (spec S5):
 
-    not_new → already_notified → stipend program (positive or UNKNOWN eligibility → selected; never
+    already_notified → not_new → stipend program (positive or UNKNOWN eligibility → selected; never
     dropped for uncertainty) → not_target_class (not INTERNSHIP/NEW_GRAD) → role_family (title is not
     a technical role) → eligibility: positive → selected; UNKNOWN internship → selected under "Check
     eligibility" (capped per run by `gate_reasons`); UNKNOWN new-grad → eligibility_unknown.
@@ -41,10 +41,12 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
     `threshold` stays in the signature (frozen) but is no longer consulted: relevance orders items,
     it does not gate them (C3).
     """
-    if opp.status not in _NOTIFIABLE:
-        return "not_new"
+    # already_notified is checked first (spec lists not_new first): the reason label only — selection is
+    # identical — but a record seen again after delivery reads as delivered, which S6's Case A asserts.
     if opp.notified_at is not None:
         return "already_notified"
+    if opp.status not in _NOTIFIABLE:
+        return "not_new"
     cat = opp.eligibility.category if opp.eligibility else EligibilityCategory.UNKNOWN
     if opp.employment_type == EmploymentType.STIPEND_PROGRAM:
         return None if cat in _POSITIVE or cat == EligibilityCategory.UNKNOWN else "eligibility_negative"

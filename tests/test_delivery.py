@@ -64,5 +64,6 @@ def test_heartbeat_aggregates_runs(tmp_path):
     assert "2 run(s)" in md
     assert "eligibility:requires_work_auth | 2" in md            # summed over both runs
     assert "Near misses" in md
+    assert "MLH Fellowship: no_published_round" in md             # S6 programs maintenance lines
     assert "has not run" in render_heartbeat_md([])
     assert s1.run_id                                             # sanity
