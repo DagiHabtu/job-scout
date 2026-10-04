@@ -1,12 +1,12 @@
 # STATE
 
 ## RESUME — iteration-2
-Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last commit: c54fe46 iteration-2 baseline: body restriction also reads 'position/role … based in <places>'
-Step in progress: S9
-  Sub-progress S9: [ ] `--assignee ${{ github.repository_owner }}` on both `gh issue create` calls  [ ] `cc @<owner>` line from env GITHUB_REPOSITORY_OWNER in render_issue_md + heartbeat (omitted when unset)  [ ] tests  [ ] commit
-Steps done and verified: none yet (baseline: spec §12 committed 43422e0; 311 passed after the baseline fix)
+Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last commit: 1608ab3 S9: assign issues to the repo owner and end bodies with cc @owner
+Step in progress: S10
+  Sub-progress S10: [ ] tests first (stage_fit table incl. the 4 real sentences + negatives; gate; normalize split)  [ ] profile.education  [ ] normalize `_GRAD_PROGRAM_TITLE` split  [ ] score.stage_fit → Relevance `stage:` strings  [ ] gate stage:graduate_only / stage:experience / Aspirational cap 2  [ ] rendering + rejected_samples evidence  [ ] commit  [ ] fresh-context review → findings → tests → fixes
+Steps done and verified: S9 (1608ab3 — unit level; email arrival = pending human check 1). Baseline: spec §12 43422e0; c54fe46.
 Reviews: S10 open, final open
-Next action: S9 — assignee + cc @owner in the workflow and renderers.
+Next action: S10 — stage fit (tests first).
 Pending human checks: (1) S9 — Dagi checks https://github.com/notifications for the 2026-10-04 issue and the email settings in §12 S9, then dispatches `gh workflow run scout --ref iteration-2 -f seed=true` and confirms an email arrived; if not, Telegram fallback becomes primary. (2) DECISION carried over (onsite/hybrid in Addis = UNKNOWN@0.4, see next-iteration block).
 Deviations from spec: none yet.
 Unverified facts still in code: as in the next-iteration block; plus whether the Himalayas API truncates descriptions (§12 "Limit").
