@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from job_scout.config import UserProfile
-from job_scout.eligibility import BARE, ELSEWHERE, OTHER, USER, WORLD, _classify_location, classify_eligibility
+from job_scout.eligibility import BARE, ELSEWHERE, MIXED, OTHER, USER, WORLD, _classify_location, classify_eligibility
 from job_scout.models import EligibilityCategory as EC
 from job_scout.models import Opportunity, RemoteStatus
 
@@ -75,14 +75,16 @@ def test_no_location_neutral_body_is_unknown_low():
     assert e.category == EC.UNKNOWN and e.confidence == pytest.approx(0.3)
 
 
-def test_user_country_code_in_location_is_user():
-    assert _classify_location("Remote, ET", "Engineer", PROFILE)[0] == USER
+def test_bare_country_code_is_not_read_as_the_user():
+    # Updated (S2 review H3): "ET" also means Eastern Time; the spec's USER rule names country and
+    # city only. A bare code is unrecognized (OTHER → UNKNOWN), never ELSEWHERE.
+    assert _classify_location("Remote, ET", "Engineer", PROFILE)[0] == OTHER
 
 
 @pytest.mark.parametrize("location,label", [
     ("Remote", BARE),
     ("Remote, Canada; Remote, United States", ELSEWHERE),
-    ("Remote; Remote, Canada; Remote, United States", BARE),   # a bare segment keeps it undecided
+    ("Remote; Remote, Canada; Remote, United States", MIXED),  # S2 review M1: undecided, body may not decide
     ("Remote, Mid-Market", OTHER),
     ("Remote - US, UK, EMEA", USER),
     ("International", WORLD),

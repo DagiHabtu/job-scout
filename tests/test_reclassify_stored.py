@@ -23,3 +23,4 @@ def test_no_stored_row_is_positive_on_an_elsewhere_location(monkeypatch):
     # the oracle itself: a named-elsewhere location fails, "Remote" and EMEA do not
     assert names_only_elsewhere("Bangalore, India") and names_only_elsewhere("Remote, France")
     assert not names_only_elsewhere("Remote") and not names_only_elsewhere("Remote, EMEA")
+    assert names_only_elsewhere("Remote, South Africa") and names_only_elsewhere("Remote - Anywhere in the US")

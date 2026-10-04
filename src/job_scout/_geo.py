@@ -50,11 +50,24 @@ REGIONS_EXCLUDING_AFRICA: frozenset[str] = frozenset({
     "americas", "amer", "north america", "latam", "latin america", "south america", "central america",
     "apac", "asia pacific", "asia", "oceania", "europe", "eu", "european union", "eea", "dach",
     "nordics", "benelux", "anz", "middle east",
+    # African sub-regions that do not contain Ethiopia (they contain the word "africa")
+    "north africa", "northern africa", "west africa", "western africa", "southern africa", "central africa",
 })
 
 # Named regions that DO include Ethiopia.
 REGIONS_INCLUDING_AFRICA: frozenset[str] = frozenset({
-    "africa", "emea", "mea", "middle east and africa", "east africa", "sub-saharan africa",
+    "africa", "emea", "mea", "middle east and africa", "east africa", "eastern africa", "horn of africa",
+    "sub-saharan africa",
+})
+
+US_STATES: frozenset[str] = frozenset({
+    "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut", "delaware",
+    "florida", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", "kentucky", "louisiana",
+    "maine", "maryland", "massachusetts", "michigan", "minnesota", "mississippi", "missouri", "montana",
+    "nebraska", "nevada", "new hampshire", "new jersey", "new mexico", "north carolina", "north dakota",
+    "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina", "south dakota",
+    "tennessee", "texas", "utah", "vermont", "virginia", "washington", "west virginia", "wisconsin",
+    "wyoming",
 })
 
 WORLDWIDE_TOKENS: frozenset[str] = frozenset({"worldwide", "global", "anywhere", "international"})

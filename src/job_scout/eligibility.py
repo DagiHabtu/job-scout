@@ -112,29 +112,49 @@ def _find_term(text: str, terms) -> str | None:
     return None
 
 
-def _label_segment(raw: str, profile: UserProfile) -> tuple[str, str]:
+MIXED = "MIXED"   # verdict only: places elsewhere plus an unqualified/unrecognized segment
+
+_ELSEWHERE_TERMS = _geo.COUNTRIES | _geo.REGIONS_EXCLUDING_AFRICA | set(_geo.CITIES) | _geo.US_STATES
+# Multi-word names that contain " and " must survive segment splitting ("Bosnia and Herzegovina").
+_AND_NAMES = sorted((t for t in _ELSEWHERE_TERMS | _geo.REGIONS_INCLUDING_AFRICA if " and " in t), key=len, reverse=True)
+
+
+def _label_segment(raw: str, profile: UserProfile, remote_mode: bool = True) -> tuple[str, str]:
     """Label one location segment: (label, the token that decided it).
 
-    USER beats everything (a segment naming the user's region includes them even if it also names
-    others: "US, UK, EMEA"); a named elsewhere-place beats a worldwide word in the SAME segment
-    ("Anywhere in the US" is a US restriction, not worldwide).
+    * USER: the user's country or city; or — for a remote role only — a region that includes them.
+      A region does not make an onsite job in a foreign city reachable ("London, UK (EMEA HQ)").
+      Region words inside another place's name don't count ("South Africa", "North Africa").
+    * ELSEWHERE beats USER when the segment says "<elsewhere> only" ("EMEA (Europe only)"), and
+      beats a worldwide word in the same segment ("Anywhere in the US").
     """
-    raw = raw.strip()
+    raw = raw.strip().replace(" & ", " and ")
     low = re.sub(r"(?<![a-z])remote(?![a-z])", " ", raw.lower())
     low = re.sub(r"\s+", " ", low).strip(_EDGE_CHARS).strip()
+    if not low:
+        return BARE, "remote"
     own_country = profile.location.country_name.lower()
     own_city = (profile.location.city or "").lower()
     own_code = profile.location.country_code.upper()
 
-    user_terms = {own_country, own_city, *_geo.REGIONS_INCLUDING_AFRICA} - {""}
-    hit = _find_term(low, user_terms)
-    if hit or re.search(rf"(?<![A-Za-z]){re.escape(own_code)}(?![A-Za-z])", raw):
-        return USER, hit or own_code
-    if not low:
-        return BARE, "remote"
-    elsewhere = _find_term(low, (_geo.COUNTRIES - {own_country}) | _geo.REGIONS_EXCLUDING_AFRICA | set(_geo.CITIES))
-    if elsewhere is None and _geo.US_STATE.search(raw.rstrip(_EDGE_CHARS)):
-        elsewhere = raw.rstrip(_EDGE_CHARS)[-2:]
+    elsewhere_terms = _ELSEWHERE_TERMS - {own_country, own_city}
+    elsewhere = _find_term(low, elsewhere_terms)
+    if elsewhere is None:
+        tail = raw.rstrip(_EDGE_CHARS)
+        if _geo.US_STATE.search(tail) and tail[-2:] != own_code:
+            elsewhere = tail[-2:]
+    if elsewhere and re.search(r"\b(only|exclusively)\b", low):
+        return ELSEWHERE, f"{elsewhere} only"
+
+    # Mask elsewhere names that contain a user term before looking for the user's region.
+    masked = low
+    for t in sorted(elsewhere_terms, key=len, reverse=True):
+        if any(u in t for u in _geo.REGIONS_INCLUDING_AFRICA | {own_country}) and t in masked:
+            masked = re.sub(rf"(?<![a-z0-9]){re.escape(t)}(?![a-z0-9])", " ", masked)
+    user_terms = {own_country, own_city} | (set(_geo.REGIONS_INCLUDING_AFRICA) if remote_mode else set())
+    hit = _find_term(masked, user_terms - {""})
+    if hit:
+        return USER, hit
     if elsewhere:
         return ELSEWHERE, elsewhere
     world = _find_term(low, _geo.WORLDWIDE_TOKENS)
@@ -143,16 +163,22 @@ def _label_segment(raw: str, profile: UserProfile) -> tuple[str, str]:
     return OTHER, low
 
 
-def _classify_location(loc_raw: str | None, title: str, profile: UserProfile) -> tuple[str, str] | None:
+def _classify_location(loc_raw: str | None, title: str, profile: UserProfile,
+                       remote_mode: bool = True) -> tuple[str, str] | None:
     """Read the LOCATION field (plus a trailing region marker in the title) into one verdict.
 
-    Returns (verdict, evidence) with verdict in USER / WORLD / ELSEWHERE — decisive — or BARE / OTHER
-    — the location does not decide, fall back to the body. None when there is no location at all.
+    Returns (verdict, evidence) with verdict in USER / WORLD / ELSEWHERE — decisive; MIXED — names
+    places elsewhere next to an unqualified segment ("Remote; Remote, Canada"), never positive and
+    never decided by body text; BARE / OTHER — the location does not decide, read the body. None
+    when there is no location at all.
     """
-    labelled = [_label_segment(s, profile) for s in _SEGMENT_SPLIT.split(loc_raw or "") if s.strip()]
+    loc = loc_raw or ""
+    for name in _AND_NAMES:   # protect "bosnia and herzegovina" from the " and " split
+        loc = re.sub(re.escape(name), name.replace(" and ", " & "), loc, flags=re.IGNORECASE)
+    labelled = [_label_segment(s, profile, remote_mode) for s in _SEGMENT_SPLIT.split(loc) if s.strip()]
     m = _TITLE_MARKER.search(title or "")
     if m:
-        t_label, t_hit = _label_segment(m.group(1), profile)
+        t_label, _ = _label_segment(m.group(1), profile, remote_mode)
         if t_label == ELSEWHERE:
             # The title says where the role is; a bare "Remote" location is qualified by it.
             labelled = [x for x in labelled if x[0] != BARE] + [(ELSEWHERE, f"title marker '{m.group(1)}'")]
@@ -162,9 +188,30 @@ def _classify_location(loc_raw: str | None, title: str, profile: UserProfile) ->
     for decisive in (USER, WORLD):
         if decisive in labels:
             return decisive, next(h for lab, h in labelled if lab == decisive)
-    if ELSEWHERE in labels and not labels & {BARE, OTHER}:
-        return ELSEWHERE, ", ".join(h for _, h in labelled)
+    if ELSEWHERE in labels:
+        hits = ", ".join(h for lab, h in labelled if lab == ELSEWHERE)
+        return (MIXED if labels & {BARE, OTHER} else ELSEWHERE), hits
     return (BARE if BARE in labels else OTHER), ""
+
+
+_QUALIFIER_WINDOW = 60
+
+
+def _unqualified_worldwide_phrase(hay: str, own_country: str) -> str | None:
+    """The first `_WORLDWIDE` phrase in `hay` not followed (within a short window) by a named place.
+
+    US-hours phrases are removed from the window first: "worldwide, but overlap with US business
+    hours" is a practical penalty, not a location restriction.
+    """
+    places = (_ELSEWHERE_TERMS - {own_country}) - {"us"} | {"us only", "the us", "in us", "u.s."}
+    for p in _WORLDWIDE:
+        for m in re.finditer(re.escape(p), hay):
+            window = hay[m.end(): m.end() + _QUALIFIER_WINDOW]
+            for h in _US_HOURS:
+                window = window.replace(h, " ")
+            if _find_term(window, places) is None:
+                return p
+    return None
 
 
 def _program_verdict(opp: Opportunity, profile: UserProfile) -> Eligibility:
@@ -218,13 +265,19 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
             ev.append(f"requires work authorization the user lacks ('{hit}')")
             return Eligibility(EligibilityCategory.REQUIRES_WORK_AUTH, 0.85, ev)
 
-    # 3) The LOCATION field decides first; description text cannot override it.
-    loc = _classify_location(opp.location_raw, opp.title, profile)
+    # 3) The LOCATION field decides first; description text cannot override it. A region that includes
+    #    the user only counts for a remote role (an onsite job in London is not reachable via "EMEA").
+    loc_low = (opp.location_raw or "").lower()
+    remote_mode = opp.remote_status == RemoteStatus.REMOTE or "remote" in loc_low
+    onsite = opp.remote_status in (RemoteStatus.ONSITE, RemoteStatus.HYBRID) or (
+        opp.remote_status == RemoteStatus.UNKNOWN and _has(hay, ("on-site", "on site", "onsite", "in-office", "in office"))
+    )
+    loc = _classify_location(opp.location_raw, opp.title, profile, remote_mode=remote_mode)
     where = f"location '{opp.location_raw}'" if opp.location_raw else "location"
     if loc is not None:
         verdict, hit = loc
         if verdict == USER:
-            if opp.remote_status in (RemoteStatus.ONSITE, RemoteStatus.HYBRID) and hit in (own_country, own_city, own_code.upper()):
+            if onsite and hit in (own_country, own_city):
                 # Onsite in the user's own country: eligible but not remote. No category fits; keep the
                 # Gate-0 decision (STATE Decisions #1) — honest UNKNOWN, never dropped.
                 ev.append(f"{where}: onsite in the user's own country — eligible but not remote; category gap flagged")
@@ -236,10 +289,15 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
             return Eligibility(EligibilityCategory.WORLDWIDE_REMOTE, 0.85, ev)
         if verdict == ELSEWHERE:
             ev.append(f"{where} names only places outside {profile.location.country_name} ({hit})")
-            remote = opp.remote_status == RemoteStatus.REMOTE or "remote" in (opp.location_raw or "").lower()
-            if remote:
+            if remote_mode:
                 return Eligibility(EligibilityCategory.REMOTE_EXCLUDES_USER, 0.85, ev)
             return Eligibility(EligibilityCategory.ONSITE_FOREIGN, 0.8, ev)
+        if verdict == MIXED:
+            # Places elsewhere next to an unqualified segment: not positive, not confidently negative,
+            # and not something body boilerplate may decide either way.
+            ev.append(f"{where} names places outside {profile.location.country_name} ({hit}) "
+                      "next to an unqualified segment — eligibility unknown")
+            return Eligibility(EligibilityCategory.UNKNOWN, 0.5, ev)
 
     # 4) The location is bare ("Remote"), unrecognized, or absent → read the body, conservatively.
     #    Kept from before: a body that names an excluding region, with no sign of the user's region.
@@ -255,8 +313,9 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
         ev.append(f"remote restricted to a region excluding {profile.location.country_name} ('{hit}')")
         return Eligibility(EligibilityCategory.REMOTE_EXCLUDES_USER, 0.8, ev)
 
-    #    An explicit worldwide phrase in the body (never a bare "global"/"EMEA" word).
-    phrase = next((p for p in _WORLDWIDE if p in hay), None)
+    #    An explicit worldwide phrase in the body (never a bare "global"/"EMEA" word), and only when
+    #    the words right after it do not name a place ("work from anywhere within the US").
+    phrase = _unqualified_worldwide_phrase(hay, own_country)
     if phrase:
         ev.append(f"{where} not decisive; body states worldwide ('{phrase}')")
         conf = 0.7

@@ -30,6 +30,9 @@ def names_only_elsewhere(location: str | None) -> bool:
     loc = (location or "").lower().strip()
     if loc in ("", "remote"):
         return False
+    # names that contain an "open" word but are not open to the user (S2 review: oracle blind spots)
+    for closed in ("south africa", "north africa", "west africa", "southern africa", "central africa", "anywhere in the"):
+        loc = loc.replace(closed, " ")
     return not any(w in loc for w in _OPEN_WORDS)
 
 

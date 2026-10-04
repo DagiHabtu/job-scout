@@ -43,7 +43,7 @@ def test_stipend_program_from_another_source_uses_location_rules():
 def test_program_name_in_text_is_not_a_program_round():
     # Inverted (S2): a posting that mentions GSoC is not a GSoC round — the same boilerplate defect as C4.
     e = classify_eligibility(_opp(description="Apply to Google Summer of Code (GSoC) this year."), PROFILE)
-    assert e.category != EC.STIPEND_PROGRAM_GLOBAL
+    assert e.category == EC.UNKNOWN and e.confidence == 0.3      # pinned (S2 review)
 
 
 def test_requires_work_auth_is_a_confident_disqualifier():
