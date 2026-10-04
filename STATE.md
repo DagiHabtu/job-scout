@@ -154,6 +154,7 @@ Unverified facts still in code: MLH "no anticipated projects" 29-country list (n
 - 2026-10-04 — **PAUSED by Dagi** (context clear requested) mid-S7 after committing WIP `ab4e919`.
   S6 review report received and recorded above (OPEN). Tests at pause: 247 passed, 1 failed
   (`test_himalayas.py::test_mapping_from_recorded_fixture`). Nothing pushed; `main` untouched.
+  `.claude/settings.json` edit (adds `claude-opus-5-5`) committed at Dagi's request (`12c70a9`).
 - 2026-10-04 — **S6 acceptance passed** (`5cd289f`; review pending). `known_programs.py` rewritten:
   `_Program` (geo_scope, geo_quote, geo_url, geo_checked_on, geo_exclusions, embargo_rule,
   conditions), `_Round` (state, state_url, state_checked_on); `rolling` dropped; leads 30
