@@ -1,14 +1,14 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: 1c086a1 docs(spec): §11 execution mode — one session, one pass, resumable
-Step in progress: S0
-  Sub-progress: [ ] filter_reason + hard_filter via it  [ ] gate_reason (interim)  [ ] RunSummary rejects/gate/by_type/by_eligibility/near_misses/internship_funnel/source report  [ ] data/funnel.md + workflow step summary  [ ] tests (invariants)  [ ] E1 probe script + run  [ ] local funnel run on a COPY of data/scout.db → table here
-Steps done and verified: none
+Branch: next-iteration      Last commit: e4535c9 S0: E1 Himalayas probe script; role_family_ok (spec S5 regex) used by it; funnel table headers
+Step in progress: S1
+  Sub-progress: [ ] render_issue_md + data/notify.md (write / delete stale)  [ ] heartbeat (Mondays, 7-run aggregate + near-misses)  [ ] workflow: issues:write, gh issue create before commit state  [ ] .gitignore notify.md  [ ] tests (renderer, notify.md absent when empty)
+Steps done and verified: S0 (6bcbce7, e4535c9)
 Reviews: S2 open, S5 open, S6 open, final open
-Next action: implement S0 in score.py / notify.py / pipeline.py (no behaviour change).
-Pending human checks: none yet
-Deviations from spec: none
+Next action: implement S1 (issue delivery) in notify.py, pipeline.py, scout.yml.
+Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page.
+Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex.
 Unverified facts still in code: none yet
 
 ### Pass log (next-iteration, single pass per spec §11)
@@ -18,6 +18,45 @@ Unverified facts still in code: none yet
   single session, single branch) moved from repo root into `docs/` and committed (`1c086a1`).
   Branch `next-iteration` created from `main` @ `7ec0b85`. Baseline: **89 passed**.
   §11 supersedes the per-step branches (`s0-funnel`, …) described in §Next iteration below.
+- 2026-10-04 — **S0 done and verified** (`6bcbce7`, `e4535c9`). `filter_reason` / `gate_reason`;
+  `RunSummary` gains `rejects`, `gate`, `by_type`, `by_eligibility`, `near_misses`,
+  `internship_funnel`, per-source `report`; runtime invariant check (warning); `data/funnel.md`
+  written beside the digest and appended to `$GITHUB_STEP_SUMMARY`. Tests: 89 existing unchanged +
+  7 new (`tests/test_funnel.py`) → **96 passed**. Acceptance (per §11: local live run against a
+  COPY of `data/scout.db`, model loaded), run `b760ad8582a3`:
+
+  | stage | count |
+  |---|--:|
+  | discovered (greenhouse 221, ashby 8, lever 0, known_programs 0) | 229 |
+  | merged by dedupe | 24 |
+  | hard-filter rejects | 175 |
+  | — `eligibility:remote_excludes_user` | 169 |
+  | — `eligibility:requires_work_auth` | 3 |
+  | — `type_unwanted:full_time` | 2 |
+  | — `eligibility:onsite_foreign` | 1 |
+  | survived | 30 |
+  | gate `not_new` | 30 |
+  | notified | 0 |
+
+  by_type: unknown 221, full_time 8. by_eligibility: remote_excludes_user 169, worldwide_remote 23,
+  remote_region_includes_user 9, requires_work_auth 3, onsite_foreign 1. Internship funnel:
+  fetched 0. Near misses include "Intermediate Support Engineer — Bangalore, India →
+  remote_region_includes_user" and "Enterprise AE — Remote, Singapore → worldwide_remote" (C4 live).
+  **§1 INFERENCE confirmed:** the 85% loss is 97% location exclusion (169/175); 6 of the 8 Ashby
+  FT jobs are rejected on eligibility first (filter order), 2 on type.
+- 2026-10-04 — **E1 probe: PASS** (`scripts/probe_himalayas.py`, 12 requests, no 429). Intern ∧
+  worldwide: totalCount 29 (25 ≤30d); Intern ∧ ET: identical 29; Entry-level ∧ worldwide: 306;
+  Entry-level ∧ ET: 333 (one ET-restricted listing seen — H1 supported: `country=ET` returns
+  worldwide + ET-scoped). Distinct `role_family_ok` listings ≤30d: **20** (≥10 → pass). Honest
+  caveat: by hand, roughly 7 of the 20 are genuine technical roles (Software Engineer Intern and
+  Research Intern @ Ritual, QA/QC Intern @ Flowmingo, Junior DevOps/Cloud Engineer @ CloudCops,
+  CRM Developer, L1-L2 Service Desk Engineer, Data Annotator); the rest are paid "AI study
+  participant" / data-entry posts that the regex admits ("AI", "Research", "Data"), plus
+  "Business Development … Intern - Nearby.ai" (matches `\bai\b` in the company suffix). S5's golden
+  set includes these as negatives. Paging: `page=N` works (offset advances); `offset=` is ignored;
+  no `nextCursor` field returned. Flywheel candidates (≥2 open-to-ET target-class ≤30d): Ritual
+  (2, genuine), Your Personal AI / Growe Talents / Xperteez (study / data-entry posts — not
+  candidates on inspection). → S7 will be built.
 
 ---
 
