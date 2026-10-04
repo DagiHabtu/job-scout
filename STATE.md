@@ -17,6 +17,36 @@ verification for executed evidence.
 
 ---
 
+## NEXT ITERATION — started 2026-10-04 (this section supersedes the freeze below)
+
+**The observation/calibration freeze is ENDED** (2026-10-04, by the user's instruction and spec
+§9). The plan is `docs/SPEC-2026-10-04-next-iteration.md` (revision 2): the spec decides what to
+build; the repo decides what is true. Order = spec §10; delegation/gates = spec §11; scope limits =
+spec §9. One branch per step (`s0-funnel`, `s1-delivery`, …), merged to `main` only after that
+step's acceptance criteria pass, rebased first (the bot commits `data/scout.db` to `main` daily).
+
+**Single next action: S0 — reason-coded funnel (no behaviour change)**, branch `s0-funnel`.
+
+### Spec-vs-repo checks (2026-10-04)
+- FACT: `origin/main` HEAD = `a2f685b` ("scout: run 2026-10-03T09:30Z"), as the spec states.
+  Local `main` was 25 bot commits behind (data only); fast-forwarded.
+- FACT: `PYTHONPATH=src python -m pytest -q` → **89 passed** on `a2f685b` (spec: 89). The 85 in
+  the header above is stale (commit `fe8a9fe` added tests after it was written).
+- FACT: S0 "current" claims match the code — `hard_filter` returns survivors only
+  (`score.py`), `select_for_notification` returns the selection only (`notify.py`), `RunSummary`
+  has scalar counts (`pipeline.py`), `runs.summary` is a JSON text column (`store.py`).
+- FACT: configured sources match spec §2 — greenhouse `gitlab`, `sourcegraph91`; ashby `posthog`,
+  `deel`; lever none; `known_programs`.
+- Note for S0 (no behaviour change): `select_for_notification` also passes a confident
+  `STIPEND_PROGRAM_GLOBAL` below threshold (Decision #8). S0's `gate_reason` must keep that, so
+  `below_threshold` applies only to non-best-fit records.
+
+### Step log
+*(One entry per step: what changed · acceptance evidence in numbers · single next action.)*
+- 2026-10-04 — spec committed (`80ae5b6`); freeze ended; S0 next.
+
+---
+
 ## Current position
 
 | Field | Value |
@@ -36,7 +66,7 @@ verification for executed evidence.
 
 ---
 
-## OPERATING MODE — OBSERVATION / CALIBRATION FREEZE (set 2026-09-03 by the user)
+## OPERATING MODE — OBSERVATION / CALIBRATION FREEZE (set 2026-09-03; ENDED 2026-10-04 — see §Next iteration; kept for history)
 
 The deployed system is left **running as-is**. This is an observation/calibration period.
 
@@ -186,6 +216,9 @@ filtered; the cross-source duplicate merged with **unioned provenance** (this al
 a second run marks records ACTIVE, not NEW.
 
 ## Single next action
+
+**Superseded 2026-10-04: the single next action is S0 — see §Next iteration.** The list below is
+the pre-spec state, kept for history.
 
 **Deployed + verified at `$0`. The core project is COMPLETE and operating.** Remaining items are
 optional and were consciously deferred:
@@ -356,6 +389,9 @@ Decisions #3–6.)*
 ## Resume note
 
 *(Written only when a checkpoint interrupts work mid-task. Empty = nothing in flight.)*
+
+**2026-10-04: the freeze described below is ENDED.** Work in flight = the spec iteration; resume
+from §Next iteration (top of file).
 
 **Nothing in flight. DEPLOYED + VERIFIED. Now in an OBSERVATION / CALIBRATION FREEZE** (see
 §Operating mode). The project is live at `https://github.com/DagiHabtu/job-scout` (PUBLIC) and runs

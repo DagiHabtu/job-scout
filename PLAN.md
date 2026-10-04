@@ -6,6 +6,8 @@ deduplicates, ranks, persists, and presents a digest — repeatedly, without bab
 
 It is a **deterministic pipeline with a narrow local-ML component**, not an agentic loop.
 
+> **Current iteration (2026-10-04):** `docs/SPEC-2026-10-04-next-iteration.md` decides what is built next; progress in `STATE.md` §Next iteration.
+
 ---
 
 ## 1. The two things that shaped this design
