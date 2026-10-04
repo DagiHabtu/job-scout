@@ -259,9 +259,35 @@ def _residency_elsewhere(hay: str, own_country: str) -> str | None:
 
 
 def _followed_by(hay: str, phrase: str, terms: set[str]) -> bool:
-    """Every occurrence of `phrase` is followed (within 40 chars) by one of `terms`."""
+    """Every occurrence of `phrase` is followed (within 40 chars, same sentence) by one of `terms`."""
     ends = [m.end() for m in re.finditer(re.escape(phrase), hay)]
-    return bool(ends) and all(_find_term(hay[e: e + 40], terms) for e in ends)
+    return bool(ends) and all(_find_term(re.split(r"[.;:\n]", hay[e: e + 40])[0], terms) for e in ends)
+
+
+# A body sentence that limits who may apply to named places: "must be based/located/reside in …",
+# "candidates/applicants in …", "open to residents of …". The captured clause runs to the sentence end.
+_BODY_RESTRICTION = re.compile(
+    r"\b(?:must\s+(?:be\s+)?(?:based|located|resid(?:e|ing)|liv(?:e|ing))\s+in"
+    r"|(?:candidates|applicants|residents)\s+(?:(?:based|located|residing|living)\s+)?(?:in|of))"
+    r"\s+([^.;:\n]{1,80})"
+)
+_CLAUSE_SPLIT = re.compile(r",|\band\b|\bor\b|/")
+
+
+def _body_restriction_elsewhere(description: str, profile: UserProfile) -> str | None:
+    """The clause of a body restriction whose places are ALL outside the user's scope, or None.
+
+    Every part of the clause must name a place elsewhere ("the US and Canada only", "Europe or North
+    America"); a part naming the user, the world, or no recognised place ("any time zone") means the
+    sentence is not a restriction that excludes the user.
+    """
+    for m in _BODY_RESTRICTION.finditer((description or "").lower()):
+        clause = m.group(1)
+        parts = [re.sub(r"^\s*(?:the|either)\s+", "", p).strip() for p in _CLAUSE_SPLIT.split(clause)]
+        parts = [p for p in parts if p]
+        if parts and all(_label_segment(p, profile)[0] == ELSEWHERE for p in parts):
+            return clause.strip()
+    return None
 
 
 def _program_verdict(opp: Opportunity, profile: UserProfile) -> Eligibility:
@@ -342,6 +368,15 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
                 # Gate-0 decision (STATE Decisions #1) — honest UNKNOWN, never dropped.
                 ev.append(f"{where}: onsite in the user's own country — eligible but not remote; category gap flagged")
                 return Eligibility(EligibilityCategory.UNKNOWN, 0.4, ev)
+        if verdict in (USER, WORLD):
+            # A worldwide / user-region location (Himalayas synthesizes "Worldwide" from an empty
+            # field) does not override a body sentence restricting applicants to places elsewhere.
+            restricted = _body_restriction_elsewhere(opp.description, profile)
+            if restricted:
+                ev.append(f"{where} {'is worldwide' if verdict == WORLD else 'includes the user'}, but the "
+                          f"description restricts applicants to '{restricted}' — eligibility unknown")
+                return Eligibility(EligibilityCategory.UNKNOWN, 0.5, ev)
+        if verdict == USER:
             ev.append(f"{where} includes {profile.location.country_name} ('{hit}')")
             return Eligibility(EligibilityCategory.REMOTE_REGION_INCLUDES_USER, 0.8, ev)
         if verdict == WORLD:

@@ -158,3 +158,31 @@ def test_l4_rejected_samples_exclude_known_records(tmp_path):
     run_once(cfg, gate0_sources())
     s2 = run_once(cfg, gate0_sources())
     assert all(x["reason"] not in ("not_new", "already_notified") for x in s2.internship_funnel["rejected_samples"])
+
+
+# Follow-up (Dagi, 2026-10-04): a WORLD/USER location does not override a body restriction that names
+# only places outside the user's scope → UNKNOWN 0.5 ("Check eligibility") or excluded, never positive.
+NOT_POSITIVE = {EC.UNKNOWN, EC.REMOTE_EXCLUDES_USER, EC.ONSITE_FOREIGN, EC.REQUIRES_WORK_AUTH}
+
+
+@pytest.mark.parametrize("loc,body", [
+    ("Worldwide", "This role is open to candidates in the US and Canada only."),
+    ("Worldwide", "Applicants must reside in Europe or North America."),
+    ("Remote, EMEA", "Must be based in the United Kingdom."),
+])
+def test_body_restriction_elsewhere_beats_world_or_user_location(loc, body):
+    e = _c(loc, body)
+    assert e.category in NOT_POSITIVE
+    if e.category == EC.UNKNOWN:
+        assert e.confidence == 0.5
+
+
+@pytest.mark.parametrize("loc,body,expected", [
+    ("Worldwide", "Fully remote. We do not sponsor visas.", EC.WORLDWIDE_REMOTE),          # M1 kept
+    ("Worldwide", "Candidates in any time zone are welcome.", EC.WORLDWIDE_REMOTE),
+    ("Worldwide", "Candidates in Africa, Europe or Asia are welcome.", EC.WORLDWIDE_REMOTE),  # names the user
+    ("Remote, EMEA", "Candidates must be based in EMEA.", EC.REMOTE_REGION_INCLUDES_USER),
+    ("Worldwide", "Our customers are based in the US and Canada.", EC.WORLDWIDE_REMOTE),  # not a requirement
+])
+def test_body_restriction_guards(loc, body, expected):
+    assert _c(loc, body).category == expected
