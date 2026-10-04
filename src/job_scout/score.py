@@ -124,32 +124,79 @@ def lexical_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], 
 # --------------------------------------------------------------------------------------------- #
 
 _SENTENCE = re.compile(r"(?<=[.!?])\s+|\n+|\s+[•·]\s+")
+# Abbreviations whose dots must not end a sentence ("Ph.D. preferred", "e.g. Master's or PhD").
+_ABBREV = re.compile(r"\b(?:e\.g|i\.e|etc|ph\.d|m\.sc|b\.sc|m\.s|b\.s|vs|incl|approx)\.", re.IGNORECASE)
+_DOT = "\u2024"     # placeholder for a protected dot while splitting
 _ADVANCED = re.compile(r"\b(ph\.?d|doctoral|m\.?sc|master'?s)\b", re.IGNORECASE)
 # §12 lists these words in the singular; plurals are accepted ("MSc/PhD Internships … students").
 _ADVANCED_CONTEXT = re.compile(
     r"\b(internships?|interns?|students?|candidates?|degrees?|enrolled|pursuing|required|must)\b", re.IGNORECASE)
-_ADVANCED_SOFT = re.compile(
-    r"\b(undergraduate|bachelor'?s?|high school|all backgrounds|or equivalent|preferred|a plus|nice to have)\b",
-    re.IGNORECASE)
+# The exclusions are read near the degree mention, not across a whole tag-stripped list block (S10
+# review M1): softening phrases within 60 chars; undergraduate/bachelor only as an alternative ("or",
+# "and", "/") within 40 chars.
+_ADVANCED_SOFT = re.compile(r"\b(high school|all backgrounds|or equivalent|preferred|a plus|nice to have)\b",
+                            re.IGNORECASE)
+_UNDERGRAD = re.compile(r"\b(undergraduates?|bachelor'?s?)\b", re.IGNORECASE)
+_ALTERNATIVE = re.compile(r"\bor\b|\band\b|/", re.IGNORECASE)
+# Company copy about the company, not a requirement ("founded by a team of PhD scientists").
+_BLURB = re.compile(r"\b(founded|our mission|team of|our team|our founders?|our (users|customers|community))\b",
+                    re.IGNORECASE)
 _GRADUATE_BODY = (
     re.compile(r"\b(hiring|for)\s+(20\d\d\b[\s,and/&-]*)+\s*graduates?\b", re.IGNORECASE),
     re.compile(r"\b(must|will)\s+have\s+(graduated|completed\s+(a|your)\s+(bachelor|undergraduate|degree))",
                re.IGNORECASE),
-    re.compile(r"\bgraduat(ed|ing)\s+(by|in|before|between)\s+\w+\s+20\d\d", re.IGNORECASE),
+    # "graduated" only: "graduating in May 2027" describes a current student (S10 review M4)
+    re.compile(r"\bgraduated\s+(by|in|before|between)\s+\w+\s+20\d\d", re.IGNORECASE),
 )
-_EARLY_CAREER = re.compile(r"\b(early[- ]career|junior|students?)\b", re.IGNORECASE)
+_EARLY_CAREER = re.compile(r"\b(early[- ]career|junior|students?|undergraduates?)\b", re.IGNORECASE)
+_NEGATED = re.compile(r"\bnot\s+(eligible|open|accepted|considered)\b|\bineligible\b|\bcannot apply\b",
+                      re.IGNORECASE)
+_NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8,
+                 "nine": 9, "ten": 10}
+# A requirement-shaped years phrase: "<N>[+] [- M] years|yrs [of] [≤3 words] experience|hands-on". The
+# spec's 60-char window with working/professional read company age, age limits and vesting (review H1).
 _EXPERIENCE = re.compile(
-    r"(\d+)\s*\+?\s*(?:[-–]\s*\d+\s*)?years?\b[^.]{0,60}\b(experience|hands-on|working|professional)",
+    r"(?<![\d.])(\d+(?:\.\d+)?|" + "|".join(_NUMBER_WORDS) + r")\s*\+?\s*(?:(?:[-–]|to)\s*\d+\s*)?"
+    r"(?:years?|yrs?)\b(?:\s+of)?\s+(?:[\w/&-]+\s+){0,3}?(?:experience|hands-on)\b",
     re.IGNORECASE)
+_COMPANY_SUBJECT = re.compile(r"\b(we|we've|our\s+\w+|founders?|company|team)\s+(?:\w+\s+){0,2}$", re.IGNORECASE)
 _FITS = re.compile(
     r"\b(students?|interns?|internships?|junior|jr\.?|early[- ]careers?|entry[- ]level|new[- ]grads?"
     r"|recent (?:university )?graduates?|trainees?|apprentices?)\b", re.IGNORECASE)
+# A body sentence counts as stage evidence only when it addresses candidates (review M6).
+_ADDRESSED = re.compile(
+    r"\b(you|your|candidates?|applicants?|role|position|hiring|looking for|open to|apply|eligible|"
+    r"we select|available to)\b", re.IGNORECASE)
 NO_STAGE_EVIDENCE = "requirements not present in the feed text — check the posting"
 STAGE_POSITIVE = frozenset({"fits", "stretch", "graduate_only_accepted"})
 
 
 def _sentences(text: str) -> list[str]:
-    return [s.strip() for s in _SENTENCE.split(text or "") if s.strip()]
+    t = (text or "").replace("\u2019", "'").replace("\u2018", "'")
+    t = _ABBREV.sub(lambda m: m.group(0).replace(".", _DOT), t)
+    return [s.strip().replace(_DOT, ".") for s in _SENTENCE.split(t) if s.strip()]
+
+
+def _advanced_requirement(s: str) -> bool:
+    for m in _ADVANCED.finditer(s):
+        win = s[max(0, m.start() - 60): m.end() + 60]
+        near = s[max(0, m.start() - 40): m.end() + 40]
+        if not _ADVANCED_CONTEXT.search(win) or _ADVANCED_SOFT.search(win) or _BLURB.search(win):
+            continue
+        if _UNDERGRAD.search(near) and _ALTERNATIVE.search(near):
+            continue
+        return True
+    return False
+
+
+def _years(s: str) -> list[float]:
+    out = []
+    for m in _EXPERIENCE.finditer(s):
+        if _COMPANY_SUBJECT.search(s[: m.start()]):        # "we bring 25 years of experience"
+            continue
+        g = m.group(1).lower()
+        out.append(float(_NUMBER_WORDS.get(g, g)))
+    return out
 
 
 def stage_fit(opp: Opportunity, profile: UserProfile) -> tuple[str, list[str]]:
@@ -158,24 +205,27 @@ def stage_fit(opp: Opportunity, profile: UserProfile) -> tuple[str, list[str]]:
     graduate_only (most junior postings carry it). With no stage evidence the verdict says so."""
     from .normalize import _GRAD_PROGRAM_TITLE
 
-    title = opp.title or ""
+    title = (opp.title or "").replace("\u2019", "'")
     sentences = _sentences(opp.description)
 
-    advanced = [s for s in sentences
-                if _ADVANCED.search(s) and _ADVANCED_CONTEXT.search(s) and not _ADVANCED_SOFT.search(s)]
+    advanced = [s for s in sentences if _advanced_requirement(s)]
     if advanced:
         return "advanced_degree", advanced[:2]
 
-    title_early = bool(_EARLY_CAREER.search(title))
+    title_early = bool(_EARLY_CAREER.search(title))       # incl. "Undergraduate/Graduate" titles
     if _GRAD_PROGRAM_TITLE.search(title) and not title_early:
         grad_ev = [s for s in sentences if any(rx.search(s) for rx in _GRADUATE_BODY)]
         return "graduate_only", [f"title: {title}", *grad_ev[:1]]
+
+    def student_exception(s: str) -> bool:
+        return bool(_EARLY_CAREER.search(s)) and not _NEGATED.search(s)
+
     grad = [s for s in sentences
-            if any(rx.search(s) for rx in _GRADUATE_BODY) and not _EARLY_CAREER.search(s) and not title_early]
+            if any(rx.search(s) for rx in _GRADUATE_BODY) and not student_exception(s) and not title_early]
     if grad:
         return "graduate_only", grad[:2]
 
-    years = [(int(m.group(1)), s) for s in sentences for m in _EXPERIENCE.finditer(s)]
+    years = [(n, s) for s in sentences for n in _years(s)]
     if years:
         n, s = max(years, key=lambda x: x[0])
         if n > profile.education.max_required_years:
@@ -185,7 +235,7 @@ def stage_fit(opp: Opportunity, profile: UserProfile) -> tuple[str, list[str]]:
 
     if _FITS.search(title):
         return "fits", [f"title: {title}"]
-    fits = [s for s in sentences if _FITS.search(s)]
+    fits = [s for s in sentences if _FITS.search(s) and _ADDRESSED.search(s) and not _NEGATED.search(s)]
     if fits:
         return "fits", fits[:1]
     return "no_evidence", [NO_STAGE_EVIDENCE]

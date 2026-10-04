@@ -68,7 +68,7 @@ def test_stage_fit_negatives(title, body, not_verdict):
     ("2-4 years of working experience required.", "stretch"),          # largest N captured is 2
     ("At least 5 years experience building backends.", "experience_required"),
     ("You must have graduated by June 2026.", "graduate_only"),
-    ("Candidates graduating in May 2026 are welcome.", "graduate_only"),
+    ("Candidates who graduated in May 2026 are welcome.", "graduate_only"),   # "graduating" = still a student (S10 review M4)
     ("You will have completed a bachelor's degree before starting.", "graduate_only"),
 ])
 def test_stage_fit_rules(body, verdict):

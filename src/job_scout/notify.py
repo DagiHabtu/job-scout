@@ -115,8 +115,12 @@ def _fmt_relevance(opp: Opportunity) -> str:
     r = opp.relevance
     if r is None:
         return ""
-    matched = "".join(f"<li>{escape(x)}</li>" for x in r.matched_signals)
-    concerns = "".join(f"<li class='concern'>{escape(x)}</li>" for x in r.concerns)
+    matched = "".join(f"<li>{escape(x)}</li>" for x in r.matched_signals if not x.startswith("stage:"))
+    concerns = "".join(f"<li class='concern'>{escape(x)}</li>" for x in r.concerns if not x.startswith("stage:"))
+    stage, stage_ev = stage_of(opp)
+    if stage and opp.employment_type != EmploymentType.STIPEND_PROGRAM:
+        quotes = "; ".join(stage_ev)
+        concerns += f"<li class='concern'>stage: <b>{escape(stage)}</b> — {escape(quotes)}</li>"
     sim = f" · semantic {r.semantic_similarity:.2f}" if r.semantic_similarity is not None else ""
     return (
         f"<div class='rel'>relevance: <b>{r.score:.2f}</b>{sim}"
@@ -308,7 +312,7 @@ def render_funnel_md(rec: dict) -> str:
     out.append(_counts_table("Eligibility (after classify)", rec.get("by_eligibility", {}), "category"))
 
     f = rec.get("internship_funnel", {})
-    out.append(f"**Internship / stipend-program funnel:** fetched {f.get('fetched', 0)}\n")
+    out.append(f"**Target-class funnel (internship / new grad / stipend program):** fetched {f.get('fetched', 0)}\n")
     if f.get("outcomes"):
         out.append(_counts_table("Internship outcomes", f["outcomes"]))
     if f.get("rejected_samples"):
@@ -357,7 +361,7 @@ def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> 
         out.append(_counts_table("Hard-filter rejects (7 runs)", _sum_counts(r.get("rejects") for r in records)))
         out.append(_counts_table("Notify-gate reasons (7 runs)", _sum_counts(r.get("gate") for r in records)))
         f_fetched = sum(r.get("internship_funnel", {}).get("fetched", 0) for r in records)
-        out.append(f"**Internship / stipend-program records fetched (7 runs):** {f_fetched}\n")
+        out.append(f"**Target-class records fetched — internship / new grad / stipend program (7 runs):** {f_fetched}\n")
         out.append(_counts_table("Internship outcomes (7 runs)",
                                  _sum_counts(r.get("internship_funnel", {}).get("outcomes") for r in records)))
         best: dict[tuple, dict] = {}

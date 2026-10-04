@@ -31,7 +31,8 @@ _INTERN_TITLE = re.compile(
 # S10 split: "graduate / new grad" titles mean a completed degree, so they are not the same stage as
 # junior / early-career for a current student. Both are typed NEW_GRAD; stage_fit marks the former.
 _GRAD_PROGRAM_TITLE = re.compile(
-    r"\b(graduate|new[- ]grad(uate)?|recent graduate)\b(?!\s+(student|degree))", re.IGNORECASE
+    r"\b(graduate|new[- ]grad(uate)?|recent graduate)\b(?!\s+(student|degree|research|teaching|assistant))",
+    re.IGNORECASE
 )
 _ENTRY_TITLE = re.compile(
     r"\b(junior|jr\.?|entry[- ]level|early[- ]career|associate (software|data|ml|"

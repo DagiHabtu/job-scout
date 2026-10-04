@@ -49,7 +49,8 @@ from .store import connect, mark_notified, record_run, upsert_and_reconcile
 log = logging.getLogger("job_scout.pipeline")
 
 # Types tracked by the internship funnel — the scarce target class whose absence must be explained.
-_FUNNEL_TYPES = frozenset({EmploymentType.INTERNSHIP, EmploymentType.STIPEND_PROGRAM})
+# Target classes (S10 review H2: NEW_GRAD too, so stage rejections of graduate/junior roles are sampled).
+_FUNNEL_TYPES = frozenset({EmploymentType.INTERNSHIP, EmploymentType.NEW_GRAD, EmploymentType.STIPEND_PROGRAM})
 _MAX_SAMPLES = 5
 
 
