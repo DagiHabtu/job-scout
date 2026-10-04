@@ -6,8 +6,8 @@ check. Each round carries its state (`open` / `announced` / `expected`) with its
 check date. Every emitted record says how sure it is:
 
   * eligibility comes from `geo_verdict` (the program's own rule, never "stipend ⇒ worldwide");
-  * a round is announced once per state (`ats_job_id = "<round>@<state>"`), so a heads-up while
-    `expected` does not suppress the "now open" notice;
+  * a round is announced once per recorded state (`ats_job_id = "<round>@<state>"`), so a heads-up
+    while `expected` does not suppress the "now open" notice;
   * a stale check degrades: an open/announced round checked >45 days ago is treated as expected, a
     geographic rule checked >365 days ago makes the verdict "unknown";
   * rounds and programs that emit nothing say why in `KnownProgramsSource.report`.
@@ -37,7 +37,12 @@ RECHECK_DAYS = 30            # heartbeat asks for a re-check after this
 # U.S.-embargoed country". Checked 2026-10-04 against OFAC's active program list: comprehensive
 # programs Cuba, Iran, North Korea and the Crimea / so-called DNR / LNR regions; Syria's program is
 # now the targeted PAARSS program; no Ethiopia-related program is active.
-US_EMBARGOED: frozenset[str] = frozenset({"cuba", "iran", "north korea", "crimea", "donetsk", "luhansk"})
+US_EMBARGOED: frozenset[str] = frozenset({
+    "cuba", "iran", "north korea", "crimea", "donetsk", "luhansk",
+    # the same places as ISO codes / official or common names
+    "cu", "ir", "kp", "republic of cuba", "islamic republic of iran", "dprk",
+    "democratic people's republic of korea", "lugansk", "donetsk people's republic", "luhansk people's republic",
+})
 US_EMBARGOED_URL = "https://ofac.treasury.gov/sanctions-programs-and-country-information"
 US_EMBARGOED_CHECKED_ON: date | None = date(2026, 10, 4)     # None = not verified → embargo-rule programs "unknown"
 
@@ -149,14 +154,24 @@ _PROGRAMS: tuple[_Program, ...] = (
         url="https://fellowship.mlh.com/",
         stipend="stipend varies by batch/track",
         summary="Remote, collaborative software-engineering fellowship.",
-        # The form's list of countries with no anticipated projects was not extracted, so the
-        # exclusions are unverified → "unknown". No round: Fall 2026 closed 2026-08-31 and no later
-        # batch is published; add one only when the official form shows it.
-        geo_scope="unknown",
+        # Rule and exclusions come from the application form that fellowship.mlh.com's "Apply" links
+        # to (geo_url), checked 2026-10-04: the embargo rule plus the form's verbatim list of
+        # countries with "no anticipated projects" ("your application will likely be closed without
+        # review"). With both verified this is treated like GSoC → "worldwide" minus the list. No
+        # round: Fall 2026 closed 2026-08-31 and no later batch is published; add one only when the
+        # official form shows it.
+        geo_scope="worldwide",
         geo_quote="Residency: I do not reside in a country embargoed by the United States.",
         geo_url="https://www.tfaforms.com/4956119",
         geo_checked_on=date(2026, 10, 4),
         embargo_rule=True,
+        geo_exclusions=(
+            "Afghanistan", "Australia", "Bangladesh", "Bhutan", "Cambodia", "China", "India", "Indonesia",
+            "Japan", "Kazakhstan", "Korea", "South Korea", "Kyrgyzstan", "Laos", "Malaysia",
+            "Micronesia and the Pacific Islands", "Mongolia", "Myanmar", "Nepal", "New Zealand", "Pakistan",
+            "Papua New Guinea", "Philippines", "Singapore", "Sri Lanka", "Tajikistan", "Thailand",
+            "Turkmenistan", "Uzbekistan", "Vietnam",
+        ),                                   # the form's 29, plus "South Korea" for its "Korea"
         conditions=(
             "must have participated in at least one MLH Hackathon or Global Hack Week event",
             "20 hours/week",
@@ -168,23 +183,32 @@ _PROGRAMS: tuple[_Program, ...] = (
 )
 
 # round key → (program, the `today` of the fetch that emitted it). Lets the eligibility stage, which
-# only sees `ats_job_id`, find the program — including injected test programs.
+# only sees `ats_job_id`, find the program — including injected test programs. Each fetch replaces
+# it; a key it does not hold is looked up in the shipped table (without touching the index).
 _INDEX: dict[str, tuple[_Program, date]] = {}
 
 
-def _index(programs: tuple[_Program, ...], today: date) -> None:
+def _build_index(programs: tuple[_Program, ...], today: date) -> dict[str, tuple[_Program, date]]:
+    index: dict[str, tuple[_Program, date]] = {}
     for p in programs:
         for r in p.rounds:
-            _INDEX[r.key] = (p, today)
+            if r.key in index:
+                raise ValueError(f"duplicate round key {r.key!r} ({index[r.key][0].name} and {p.name})")
+            index[r.key] = (p, today)
+    return index
 
 
 def _lookup(ats_job_id: str | None) -> tuple[_Program, date] | None:
     if not ats_job_id:
         return None
     key = ats_job_id.split("@", 1)[0]
-    if key not in _INDEX:
-        _index(_PROGRAMS, date.today())
-    return _INDEX.get(key)
+    if key in _INDEX:
+        return _INDEX[key]
+    return _build_index(_PROGRAMS, date.today()).get(key)
+
+
+def _embargo_list_fresh(today: date) -> bool:
+    return US_EMBARGOED_CHECKED_ON is not None and (today - US_EMBARGOED_CHECKED_ON).days <= STALE_GEO_DAYS
 
 
 def geo_verdict(ats_job_id: str | None, country: str) -> str:
@@ -202,11 +226,12 @@ def geo_verdict(ats_job_id: str | None, country: str) -> str:
     if c in {x.lower() for x in p.geo_exclusions}:
         return "excluded"
     if p.embargo_rule:
-        if US_EMBARGOED_CHECKED_ON is None:
+        if not _embargo_list_fresh(today):        # unverified/stale list: never exclude on it
             return "unknown"
         if c in US_EMBARGOED:
             return "excluded"
-    if p.geo_scope == "worldwide" and (today - p.geo_checked_on).days <= STALE_GEO_DAYS:
+    if (p.geo_scope == "worldwide" and p.geo_quote and p.geo_url
+            and (today - p.geo_checked_on).days <= STALE_GEO_DAYS):
         return "eligible"
     return "unknown"
 
@@ -216,9 +241,9 @@ def geo_evidence(ats_job_id: str | None) -> list[str]:
     found = _lookup(ats_job_id)
     if found is None:
         return []
-    p, _ = found
+    p, today = found
     ev = [f'program rule: "{p.geo_quote}"', f"source: {p.geo_url} (checked {p.geo_checked_on.isoformat()})"]
-    if p.embargo_rule and US_EMBARGOED_CHECKED_ON:
+    if p.embargo_rule and _embargo_list_fresh(today):
         ev.append(f"U.S. embargo list checked {US_EMBARGOED_CHECKED_ON.isoformat()} ({US_EMBARGOED_URL})")
     ev += [f"condition (not checked): {c}" for c in p.conditions]
     return ev
@@ -268,7 +293,9 @@ def _to_opportunity(p: _Program, r: _Round, today: date) -> Opportunity:
         apply_url=p.url,
         canonical_url="",                              # pipeline.normalize computes this
         ats_provider="known_programs",
-        ats_job_id=f"{r.key}@{state}",                 # one announcement per state
+        # One announcement per RECORDED state. Staleness changes the title and lead window only: a
+        # stale "open" round must not be re-announced as "expected" (S6 review H1).
+        ats_job_id=f"{r.key}@{r.state}",
         remote_status=RemoteStatus.REMOTE,
         employment_type=EmploymentType.STIPEND_PROGRAM,
         description=description,
@@ -279,7 +306,12 @@ def _to_opportunity(p: _Program, r: _Round, today: date) -> Opportunity:
 def validate_table(programs: tuple[_Program, ...]) -> list[str]:
     """Problems that make the table untrustworthy (empty list = OK)."""
     problems: list[str] = []
+    seen: set[str] = set()
     for p in programs:
+        for r in p.rounds:
+            if r.key in seen:
+                problems.append(f"{r.key}: duplicate round key")
+            seen.add(r.key)
         if p.geo_scope not in ("worldwide", "unknown"):
             problems.append(f"{p.name}: bad geo_scope {p.geo_scope!r}")
         if p.geo_scope == "worldwide" and not (p.geo_quote and p.geo_url and p.geo_checked_on):
@@ -297,6 +329,9 @@ def validate_table(programs: tuple[_Program, ...]) -> list[str]:
 def maintenance_notes(today: date, programs: tuple[_Program, ...] = _PROGRAMS) -> list[str]:
     """Heartbeat lines: every stale check ("re-check: <url>") and every program with no future round."""
     notes: list[str] = []
+    if any(p.embargo_rule for p in programs) and (
+            US_EMBARGOED_CHECKED_ON is None or (today - US_EMBARGOED_CHECKED_ON).days > RECHECK_DAYS):
+        notes.append(f"- re-check: {US_EMBARGOED_URL} (U.S. embargo list, last checked {US_EMBARGOED_CHECKED_ON})")
     for p in programs:
         if (today - p.geo_checked_on).days > RECHECK_DAYS:
             notes.append(f"- re-check: {p.geo_url} ({p.name} geographic rule, last checked {p.geo_checked_on})")
@@ -319,8 +354,9 @@ class KnownProgramsSource:
         self.report: dict[str, str] = {}
 
     def fetch(self, cfg: SourceConfig) -> list[Opportunity]:
+        global _INDEX
         today = self._today or date.today()
-        _index(self._programs, today)
+        _INDEX = _build_index(self._programs, today)     # raises on a duplicate round key
         self.report = {}
         out: list[Opportunity] = []
         for p in self._programs:

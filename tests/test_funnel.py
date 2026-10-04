@@ -38,7 +38,7 @@ def test_funnel_invariants_hold_on_both_runs(tmp_path):
     s2 = run_once(cfg, gate0_sources())
     _invariants(s2)
     # everything known → one reason each (S6: a delivered record reads already_notified first)
-    assert sum(s2.gate.values()) == s2.after_filter and set(s2.gate) <= {"not_new", "already_notified"}
+    assert s2.gate == {"already_notified": 4}    # all 4 survivors were delivered on run 1 (pinned, S6 review L3)
 
 
 def test_run_record_carries_histograms_and_funnel_file(tmp_path):

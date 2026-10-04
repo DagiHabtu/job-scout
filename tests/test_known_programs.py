@@ -63,7 +63,8 @@ def test_stale_open_state_becomes_expected_and_title_says_so():
     r = _round(state="open", checked=T - timedelta(days=46))
     assert effective_state(r, T) == "expected"
     o = _fetch(T, _prog(rounds=[r]))[0][0]
-    assert o.ats_job_id == "r1@expected" and "dates not published" in o.title
+    # identity keeps the recorded state (S6 review H1: staleness must not re-announce an open round)
+    assert o.ats_job_id == "r1@open" and "dates not published" in o.title
     assert effective_state(_round(state="open", checked=T - timedelta(days=45)), T) == "open"
 
 
