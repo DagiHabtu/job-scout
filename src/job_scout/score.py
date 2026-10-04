@@ -151,6 +151,28 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
 
 
 # --------------------------------------------------------------------------------------------- #
+# Role family — is this title the kind of work the user targets? (pure regex, testable in CI)
+# --------------------------------------------------------------------------------------------- #
+
+_ROLE_FAMILY = re.compile(
+    r"\b(engineer(ing)?|developer|programmer|software|data|machine learning|ml|ai|devops|sre|"
+    r"site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|analyst|analytics|"
+    r"scientist|security|qa|research)\b",
+    re.IGNORECASE,
+)
+_ROLE_VETO = re.compile(
+    r"\b(sales|account executive|marketing|recruit(er|ing)|talent|legal|counsel|finance|accounting|"
+    r"customer success|people|hr|designer?|content|community|partnerships?|curriculum|renewals|support)\b",
+    re.IGNORECASE,
+)
+
+
+def role_family_ok(title: str) -> bool:
+    """True when the title names a technical role family and no non-technical veto word."""
+    return bool(_ROLE_FAMILY.search(title or "")) and not _ROLE_VETO.search(title or "")
+
+
+# --------------------------------------------------------------------------------------------- #
 # Hard filter + rank
 # --------------------------------------------------------------------------------------------- #
 

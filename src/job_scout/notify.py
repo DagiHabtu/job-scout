@@ -164,11 +164,11 @@ def _md(s) -> str:
     return str(s).replace("|", "\\|").replace("\n", " ")
 
 
-def _counts_table(title: str, counts: dict) -> str:
+def _counts_table(title: str, counts: dict, head: str = "reason") -> str:
     if not counts:
         return f"**{title}:** none\n"
     rows = "".join(f"| {_md(k)} | {v} |\n" for k, v in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
-    return f"**{title}**\n\n| reason | count |\n|---|--:|\n{rows}"
+    return f"**{title}**\n\n| {head} | count |\n|---|--:|\n{rows}"
 
 
 def render_funnel_md(rec: dict) -> str:
@@ -195,8 +195,8 @@ def render_funnel_md(rec: dict) -> str:
     )
     out.append(_counts_table("Hard-filter rejects", rec.get("rejects", {})))
     out.append(_counts_table("Notify-gate reasons", rec.get("gate", {})))
-    out.append(_counts_table("Employment type (after normalize)", rec.get("by_type", {})))
-    out.append(_counts_table("Eligibility (after classify)", rec.get("by_eligibility", {})))
+    out.append(_counts_table("Employment type (after normalize)", rec.get("by_type", {}), "type"))
+    out.append(_counts_table("Eligibility (after classify)", rec.get("by_eligibility", {}), "category"))
 
     f = rec.get("internship_funnel", {})
     out.append(f"**Internship / stipend-program funnel:** fetched {f.get('fetched', 0)}\n")
