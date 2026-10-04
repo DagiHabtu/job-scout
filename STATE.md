@@ -6,10 +6,22 @@ Step in progress: S10
   Sub-progress S10: [x] tests first  [x] profile.education  [x] normalize `_GRAD_PROGRAM_TITLE` split  [x] score.stage_fit → Relevance `stage:` strings  [x] gate stage:graduate_only / stage:experience / Aspirational cap 2  [x] rendering + rejected_samples evidence  [x] commit 69df1b3  [ ] fresh-context review (spawned on 1608ab3..69df1b3; if context is cleared before its report is recorded, re-run it) → findings → tests → fixes
 Steps done and verified: S9 (1608ab3 — unit level; email arrival = pending human check 1). Baseline: spec §12 43422e0; c54fe46.
 Reviews: S10 open, final open
-Next action: record the S10 review report, action findings test-first; then S11.
+Next action: action the S10 review findings test-first (recorded above the pass log); then S11.
 Pending human checks: (1) S9 — Dagi checks https://github.com/notifications for the 2026-10-04 issue and the email settings in §12 S9, then dispatches `gh workflow run scout --ref iteration-2 -f seed=true` and confirms an email arrived; if not, Telegram fallback becomes primary. (2) DECISION carried over (onsite/hybrid in Addis = UNKNOWN@0.4, see next-iteration block).
 Deviations from spec: (i2-a) S10 `advanced_degree` is Aspirational only with POSITIVE eligibility; with UNKNOWN it falls through to the eligibility branch (UNKNOWN intern → Check eligibility; UNKNOWN new-grad → eligibility_unknown) — §9: UNKNOWN is never auto-selected. (i2-b) S10 `advanced_degree` context words accept plurals (internships, students, …) — Tether's own sentence uses them. (i2-c) `accept_graduate_programs` is applied at score time (verdict `graduate_only_accepted`, positive) because `gate_reason(opp, threshold)` has no profile. (i2-d) `profile.education` replaces an unused free-text field of the same name; a string still loads (defaults).
 Unverified facts still in code: as in the next-iteration block; plus whether the Himalayas API truncates descriptions (§12 "Limit").
+
+### S10 review findings (OPEN — reviewer report on 1608ab3..69df1b3, recorded in substance; action test-first; do NOT re-run)
+- H1 `_EXPERIENCE` reads non-requirements: company age ("we bring 25 years of experience", "10+ years working with"), age limits ("18 years old … working"), vesting ("4 years, plus a professional development budget"), decimal "1.5 years" → 5, "within 3 years working", boilerplate max beats the real requirement ("0-1 years of experience. Our founders have 20 years of experience") → `stage:experience` (dropped).
+- H2 NEW_GRAD stage rejections never reach `internship_funnel.rejected_samples` (funnel types = INTERNSHIP/STIPEND only) — Graduate SWE and every Junior `stage:experience` invisible in the heartbeat; the pipeline test hid it with an Intern title.
+- M1 sentence splitting: merged list blocks attach a far "nice to have" to Tether's real "Requirements MSc/PhD candidate…" (Tether is Aspirational only via blurb); "Currently enrolled in a PhD program … Bachelor's degree" → fits; abbreviations split ("Ph.D. are preferred", "e.g. … Master's or PhD") → false advanced_degree.
+- M2 boilerplate triggers advanced_degree ("Founded by a team of PhD scientists, we are looking for candidates…", "help every student get a master's degree").
+- M3 "Software Engineering Intern (Undergraduate/Graduate)", "Graduate or Undergraduate Software Intern" → graduate_only.
+- M4 "graduating between Dec 2026 and Jun 2027" / "graduating in May 2027" (future = still a student) → graduate_only; "2026 graduates and undergraduates" → graduate_only (exception lacks "undergraduate").
+- M5 negation: "current students are not eligible" escapes graduate_only and then yields `fits` quoting it.
+- M6 body boilerplate `fits` ("app used by 2 million students") — §12: no evidence must be said, not assumed.
+- L1 word numbers ("Five years"), "yrs", keyword-before-number missed. L2 curly apostrophe "Master’s". L3 "Graduate Research/Teaching Assistant" → graduate_only. L4 Junior/early-career title switches off every body graduate rule (spec-literal). L5 `education.status` never read. L6 HTML digest prints raw `stage:` strings (also for stipend programs). L7 MSc/PhD + UNKNOWN intern uses an UNKNOWN-intern cap slot (spec silent). L8 dedupe.py/pipeline.py touched outside S10's file list. L9 fixture not yet read by a test (S11).
+- Weak tests: "5 years in business" trivially passes; "PhD preferred" only without dots; empty-body undergrad title; Ritual exclusion never exercised; Junior titles decide before the body; Tether blurb not its Requirements line; Intern-typed pipeline test; no cap-interaction test.
 
 ### Iteration-2 pass log
 - 2026-10-04 — Part A done (Dagi-authorised): PR #2 merged → origin/main `bc4154c`; local `main` realigned with
