@@ -5,6 +5,10 @@ profile:
   target_technologies: ["python", "sql", "docker", "postgres", "kubernetes", "go"]
   employment_types: ["internship", "stipend_program", "new_grad"]
   experience_level: "entry"
+  education:                          # candidate stage (spec §12 S10)
+    status: "undergraduate"           # undergraduate | graduate
+    accept_graduate_programs: false   # graduate-only roles (completed degree required)
+    max_required_years: 2             # roles demanding more years of experience are not surfaced
   location:
     country_code: "ET"
     country_name: "Ethiopia"

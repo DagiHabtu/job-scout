@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Literal
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .models import EmploymentType, RemoteStatus
 
@@ -22,6 +23,14 @@ class Location(BaseModel):
     country_name: str = "Ethiopia"
     city: str | None = "Addis Ababa"
     timezone: str = "Africa/Addis_Ababa"     # EAT, UTC+3 — used for scheduling and TZ-overlap scoring
+
+
+class Education(BaseModel):
+    """Candidate stage (spec §12 S10): decides which stated requirements the user can meet now."""
+
+    status: Literal["undergraduate", "graduate"] = "undergraduate"
+    accept_graduate_programs: bool = False     # graduate-only roles (completed degree required)
+    max_required_years: int = 2                # roles demanding more years of experience are not surfaced
 
 
 class UserProfile(BaseModel):
@@ -35,7 +44,13 @@ class UserProfile(BaseModel):
         default_factory=lambda: [EmploymentType.INTERNSHIP, EmploymentType.STIPEND_PROGRAM]
     )
     experience_level: str = "entry"          # free text used as an embedding signal
-    education: str | None = None
+    education: Education = Field(default_factory=lambda: Education())
+
+    @field_validator("education", mode="before")
+    @classmethod
+    def _legacy_education(cls, v):
+        # the old field was free text and unused; a string (or null) loads as the defaults
+        return {} if v is None or isinstance(v, str) else v
 
     # where they are / what they can take (drives eligibility — see eligibility.py)
     location: Location = Field(default_factory=Location)

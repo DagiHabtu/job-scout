@@ -42,7 +42,7 @@ from .notify import (
     select_for_notification,
     write_digest,
 )
-from .score import filter_reason, hard_filter, rank, score_opportunity
+from .score import filter_reason, hard_filter, rank, score_opportunity, stage_of
 from .sources.base import Source
 from .store import connect, mark_notified, record_run, upsert_and_reconcile
 
@@ -132,7 +132,9 @@ def _internship_funnel(target_raw: list[Opportunity], kept_ids: set[int], reason
             b = _brief(o)
             samples.append({
                 "title": b["title"], "company": b["company"], "location": b["location"], "reason": reason,
-                "evidence": "; ".join(o.eligibility.evidence) if o.eligibility else "",
+                # a stage rejection quotes its sentence (§12), so a wrong one is visible in the heartbeat
+                "evidence": ("; ".join(stage_of(o)[1]) if reason.startswith("stage:")
+                             else "; ".join(o.eligibility.evidence) if o.eligibility else ""),
             })
     return {"fetched": len(target_raw), "outcomes": dict(outcomes), "rejected_samples": samples}
 

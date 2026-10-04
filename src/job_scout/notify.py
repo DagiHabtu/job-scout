@@ -20,13 +20,14 @@ from pathlib import Path
 
 from .config import AppConfig
 from .models import EligibilityCategory, EmploymentType, Lifecycle, Opportunity
-from .score import role_family_ok
+from .score import role_family_ok, stage_of
 
 # Statuses that are worth telling the user about. ACTIVE (seen again, unchanged) is deliberately
 # excluded — re-announcing an unchanged posting is exactly the noise we are avoiding.
 _NOTIFIABLE = frozenset({Lifecycle.NEW, Lifecycle.UPDATED})
 
 UNKNOWN_INTERN_CAP = 5     # "Check eligibility" internships per run (stipend programs are outside it)
+ASPIRATIONAL_CAP = 2       # advanced-degree (MSc/PhD) roles per run (§12 S10)
 _TARGET_CLASS = frozenset({EmploymentType.INTERNSHIP, EmploymentType.NEW_GRAD})
 
 
@@ -55,6 +56,13 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
         return "not_target_class"
     if not role_family_ok(opp.title):
         return "role_family"
+    # Stage fit (§12 S10): stated conditions a current student cannot meet now. An advanced-degree
+    # role with positive eligibility is selected into "Aspirational" (capped in `gate_reasons`).
+    stage, _ = stage_of(opp)
+    if stage == "graduate_only":
+        return "stage:graduate_only"
+    if stage == "experience_required":
+        return "stage:experience"
     if cat in _POSITIVE:
         return None
     if cat == EligibilityCategory.UNKNOWN:
@@ -73,6 +81,9 @@ def gate_reasons(opps: list[Opportunity], threshold: float) -> list[str | None]:
     ]
     for i in sorted(capped, key=lambda i: -_title_fit(opps[i]))[UNKNOWN_INTERN_CAP:]:
         out[i] = "unknown_cap"
+    aspirational = [i for i, (o, r) in enumerate(zip(opps, out)) if r is None and section_of(o) == ASPIRATIONAL]
+    for i in sorted(aspirational, key=lambda i: -_title_fit(opps[i]))[ASPIRATIONAL_CAP:]:
+        out[i] = "stage:advanced_cap"
     return out
 
 
@@ -181,6 +192,7 @@ def write_digest(digest_html: str, cfg: AppConfig) -> str:
 
 ACTIONABLE = "Actionable"
 CHECK_ELIGIBILITY = "Check eligibility"
+ASPIRATIONAL = "Aspirational"
 _POSITIVE = frozenset({
     EligibilityCategory.STIPEND_PROGRAM_GLOBAL,
     EligibilityCategory.WORLDWIDE_REMOTE,
@@ -189,8 +201,13 @@ _POSITIVE = frozenset({
 
 
 def section_of(opp: Opportunity) -> str:
-    """A positive eligibility verdict is actionable; anything else is surfaced with its doubt."""
-    return ACTIONABLE if opp.eligibility and opp.eligibility.category in _POSITIVE else CHECK_ELIGIBILITY
+    """A positive eligibility verdict is actionable — or aspirational when the role states an MSc/PhD
+    requirement (stipend programs never are); anything else is surfaced with its doubt."""
+    if not (opp.eligibility and opp.eligibility.category in _POSITIVE):
+        return CHECK_ELIGIBILITY
+    if opp.employment_type != EmploymentType.STIPEND_PROGRAM and stage_of(opp)[0] == "advanced_degree":
+        return ASPIRATIONAL
+    return ACTIONABLE
 
 
 def _issue_item(opp: Opportunity) -> str:
@@ -203,8 +220,13 @@ def _issue_item(opp: Opportunity) -> str:
     if e is not None:
         lines.append(f"  - eligibility: **{e.category.value}** (confidence {e.confidence:.2f})")
         lines += [f"    - {x}" for x in e.evidence]
-    if opp.relevance and opp.relevance.matched_signals:
-        lines.append(f"  - matched: {', '.join(opp.relevance.matched_signals)}")
+    stage, stage_ev = stage_of(opp)
+    if stage and opp.employment_type != EmploymentType.STIPEND_PROGRAM:
+        lines.append(f"  - stage: **{stage}**")
+        lines += [f"    - {x}" for x in stage_ev]
+    matched = [x for x in (opp.relevance.matched_signals if opp.relevance else []) if not x.startswith("stage:")]
+    if matched:
+        lines.append(f"  - matched: {', '.join(matched)}")
     if opp.ats_provider == "himalayas":
         listing = opp.ats_job_id if (opp.ats_job_id or "").startswith("http") else url
         lines.append(f"  - via [Himalayas]({listing})")
@@ -224,7 +246,7 @@ def render_issue_md(opps: list[Opportunity], cfg: AppConfig) -> str:
     "Check eligibility", each with its eligibility evidence and matched signals."""
     out = [f"Job Scout — {len(opps)} new for {cfg.profile.location.country_name}. "
            "Tick the items worth applying to.\n"]
-    for section in (ACTIONABLE, CHECK_ELIGIBILITY):
+    for section in (ACTIONABLE, CHECK_ELIGIBILITY, ASPIRATIONAL):
         items = sorted((o for o in opps if section_of(o) == section), key=_title_fit, reverse=True)
         if items:
             out.append(f"## {section}\n")

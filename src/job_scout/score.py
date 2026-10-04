@@ -118,6 +118,101 @@ def lexical_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], 
     return matched, concerns, score
 
 
+# --------------------------------------------------------------------------------------------- #
+# Stage fit (spec §12 S10) — can a current student meet the role's stated candidate stage? Rules with
+# quoted evidence, like location eligibility. Carried in Relevance as "stage:" strings (no spine change).
+# --------------------------------------------------------------------------------------------- #
+
+_SENTENCE = re.compile(r"(?<=[.!?])\s+|\n+|\s+[•·]\s+")
+_ADVANCED = re.compile(r"\b(ph\.?d|doctoral|m\.?sc|master'?s)\b", re.IGNORECASE)
+# §12 lists these words in the singular; plurals are accepted ("MSc/PhD Internships … students").
+_ADVANCED_CONTEXT = re.compile(
+    r"\b(internships?|interns?|students?|candidates?|degrees?|enrolled|pursuing|required|must)\b", re.IGNORECASE)
+_ADVANCED_SOFT = re.compile(
+    r"\b(undergraduate|bachelor'?s?|high school|all backgrounds|or equivalent|preferred|a plus|nice to have)\b",
+    re.IGNORECASE)
+_GRADUATE_BODY = (
+    re.compile(r"\b(hiring|for)\s+(20\d\d\b[\s,and/&-]*)+\s*graduates?\b", re.IGNORECASE),
+    re.compile(r"\b(must|will)\s+have\s+(graduated|completed\s+(a|your)\s+(bachelor|undergraduate|degree))",
+               re.IGNORECASE),
+    re.compile(r"\bgraduat(ed|ing)\s+(by|in|before|between)\s+\w+\s+20\d\d", re.IGNORECASE),
+)
+_EARLY_CAREER = re.compile(r"\b(early[- ]career|junior|students?)\b", re.IGNORECASE)
+_EXPERIENCE = re.compile(
+    r"(\d+)\s*\+?\s*(?:[-–]\s*\d+\s*)?years?\b[^.]{0,60}\b(experience|hands-on|working|professional)",
+    re.IGNORECASE)
+_FITS = re.compile(
+    r"\b(students?|interns?|internships?|junior|jr\.?|early[- ]careers?|entry[- ]level|new[- ]grads?"
+    r"|recent (?:university )?graduates?|trainees?|apprentices?)\b", re.IGNORECASE)
+NO_STAGE_EVIDENCE = "requirements not present in the feed text — check the posting"
+STAGE_POSITIVE = frozenset({"fits", "stretch", "graduate_only_accepted"})
+
+
+def _sentences(text: str) -> list[str]:
+    return [s.strip() for s in _SENTENCE.split(text or "") if s.strip()]
+
+
+def stage_fit(opp: Opportunity, profile: UserProfile) -> tuple[str, list[str]]:
+    """(verdict, quoted evidence) — first match wins: advanced_degree → graduate_only →
+    experience_required → stretch → fits → no_evidence. A bare "degree in Computer Science" is not
+    graduate_only (most junior postings carry it). With no stage evidence the verdict says so."""
+    from .normalize import _GRAD_PROGRAM_TITLE
+
+    title = opp.title or ""
+    sentences = _sentences(opp.description)
+
+    advanced = [s for s in sentences
+                if _ADVANCED.search(s) and _ADVANCED_CONTEXT.search(s) and not _ADVANCED_SOFT.search(s)]
+    if advanced:
+        return "advanced_degree", advanced[:2]
+
+    title_early = bool(_EARLY_CAREER.search(title))
+    if _GRAD_PROGRAM_TITLE.search(title) and not title_early:
+        grad_ev = [s for s in sentences if any(rx.search(s) for rx in _GRADUATE_BODY)]
+        return "graduate_only", [f"title: {title}", *grad_ev[:1]]
+    grad = [s for s in sentences
+            if any(rx.search(s) for rx in _GRADUATE_BODY) and not _EARLY_CAREER.search(s) and not title_early]
+    if grad:
+        return "graduate_only", grad[:2]
+
+    years = [(int(m.group(1)), s) for s in sentences for m in _EXPERIENCE.finditer(s)]
+    if years:
+        n, s = max(years, key=lambda x: x[0])
+        if n > profile.education.max_required_years:
+            return "experience_required", [s]
+        if n >= 1:
+            return "stretch", [s]
+
+    if _FITS.search(title):
+        return "fits", [f"title: {title}"]
+    fits = [s for s in sentences if _FITS.search(s)]
+    if fits:
+        return "fits", fits[:1]
+    return "no_evidence", [NO_STAGE_EVIDENCE]
+
+
+def stage_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], list[str]]:
+    """(matched, concerns) entries carrying the stage verdict: "stage:<verdict>" then one
+    'stage:evidence: "<sentence>"' per quote. A graduate-only role the profile accepts is recorded as
+    `graduate_only_accepted` (positive) so the gate, which has no profile, can read it."""
+    verdict, evidence = stage_fit(opp, profile)
+    if verdict == "graduate_only" and profile.education.accept_graduate_programs:
+        verdict = "graduate_only_accepted"
+    entries = [f"stage:{verdict}", *(f'stage:evidence: "{e}"' for e in evidence)]
+    return (entries, []) if verdict in STAGE_POSITIVE else ([], entries)
+
+
+def stage_of(opp: Opportunity) -> tuple[str | None, list[str]]:
+    """Read the stage verdict and evidence back from `opp.relevance` (None when not scored)."""
+    r = opp.relevance
+    if r is None:
+        return None, []
+    entries = [x for x in (*r.matched_signals, *r.concerns) if x.startswith("stage:")]
+    verdict = next((x[len("stage:"):] for x in entries if not x.startswith("stage:evidence:")), None)
+    evidence = [x[len('stage:evidence: "'):-1] for x in entries if x.startswith("stage:evidence:")]
+    return verdict, evidence
+
+
 def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig, model=None) -> Relevance:
     matched, concerns, lexical = lexical_signals(opp, profile)
     sim = embed_similarity(opp, profile, model)
@@ -147,6 +242,10 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
         elif opp.eligibility.category == EligibilityCategory.UNKNOWN:
             final = max(0.0, final - 0.05)
     # No per-concern damping: seniority is a hard filter now (S4); concerns stay listed for the reader.
+    # Stage fit is a gate input, not a score input (§12: the score stays an ordering signal only).
+    stage_matched, stage_concerns = stage_signals(opp, profile)
+    matched += stage_matched
+    concerns += stage_concerns
 
     return Relevance(score=round(final, 4), matched_signals=matched, concerns=concerns, semantic_similarity=sim)
 
