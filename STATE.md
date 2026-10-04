@@ -1,14 +1,14 @@
 # STATE
 
 ## RESUME — iteration-2
-Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last commit: 1608ab3 S9: assign issues to the repo owner and end bodies with cc @owner
+Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last commit: 69df1b3 S10: stage fit — …
 Step in progress: S10
-  Sub-progress S10: [ ] tests first (stage_fit table incl. the 4 real sentences + negatives; gate; normalize split)  [ ] profile.education  [ ] normalize `_GRAD_PROGRAM_TITLE` split  [ ] score.stage_fit → Relevance `stage:` strings  [ ] gate stage:graduate_only / stage:experience / Aspirational cap 2  [ ] rendering + rejected_samples evidence  [ ] commit  [ ] fresh-context review → findings → tests → fixes
+  Sub-progress S10: [x] tests first  [x] profile.education  [x] normalize `_GRAD_PROGRAM_TITLE` split  [x] score.stage_fit → Relevance `stage:` strings  [x] gate stage:graduate_only / stage:experience / Aspirational cap 2  [x] rendering + rejected_samples evidence  [x] commit 69df1b3  [ ] fresh-context review (spawned on 1608ab3..69df1b3; if context is cleared before its report is recorded, re-run it) → findings → tests → fixes
 Steps done and verified: S9 (1608ab3 — unit level; email arrival = pending human check 1). Baseline: spec §12 43422e0; c54fe46.
 Reviews: S10 open, final open
-Next action: S10 — stage fit (tests first).
+Next action: record the S10 review report, action findings test-first; then S11.
 Pending human checks: (1) S9 — Dagi checks https://github.com/notifications for the 2026-10-04 issue and the email settings in §12 S9, then dispatches `gh workflow run scout --ref iteration-2 -f seed=true` and confirms an email arrived; if not, Telegram fallback becomes primary. (2) DECISION carried over (onsite/hybrid in Addis = UNKNOWN@0.4, see next-iteration block).
-Deviations from spec: none yet.
+Deviations from spec: (i2-a) S10 `advanced_degree` is Aspirational only with POSITIVE eligibility; with UNKNOWN it falls through to the eligibility branch (UNKNOWN intern → Check eligibility; UNKNOWN new-grad → eligibility_unknown) — §9: UNKNOWN is never auto-selected. (i2-b) S10 `advanced_degree` context words accept plurals (internships, students, …) — Tether's own sentence uses them. (i2-c) `accept_graduate_programs` is applied at score time (verdict `graduate_only_accepted`, positive) because `gate_reason(opp, threshold)` has no profile. (i2-d) `profile.education` replaces an unused free-text field of the same name; a string still loads (defaults).
 Unverified facts still in code: as in the next-iteration block; plus whether the Himalayas API truncates descriptions (§12 "Limit").
 
 ### Iteration-2 pass log
@@ -22,6 +22,20 @@ Unverified facts still in code: as in the next-iteration block; plus whether the
   Test first (2 failed) → `_BODY_RESTRICTION` also reads "position/role/job … (will be|is) based/located in"
   (`c54fe46`). **311 passed**; re-classification 244 rows, 0 bad. The 9 records delivered on 2026-10-04 are in
   `data/scout.db` with `notified_at 2026-10-04T11:51:55Z` (fixture source for §12 acceptance).
+- 2026-10-04 — **S9 done (unit level)** (`1608ab3`): both `gh issue create` calls get `--assignee
+  "${{ github.repository_owner }}"`; `render_issue_md` and `render_heartbeat_md` end with `cc @<owner>` from env
+  `GITHUB_REPOSITORY_OWNER` (Actions sets it by default; omitted when unset); the seeded test item also ends
+  with `cc @owner`. Tests `tests/test_delivery_s9.py` (2 of 3 failed on the old code; the third is the
+  "omitted when unset" guard). Workflow YAML parses. Email arrival = pending human check (1).
+- 2026-10-04 — **S10 acceptance** (`69df1b3`; review pending). Spec facts verified first: all four §12 quotes are
+  in the stored descriptions verbatim. Tests first (`tests/test_stage_s10.py`, collection failed before the
+  code existed). `stage_fit` on the 9 delivered records: 7 `fits` (5 by title token, Linux Kernel/Junior Ubuntu
+  by title too), Tether `advanced_degree` ("MSc/PhD Internships at Tether aim to provide students…"),
+  Graduate SWE `graduate_only` (title + "We are hiring 2025 and 2026 Graduate Software Engineers"), CRM
+  `stretch` ("1+ years of hands-on Salesforce…"). Live run `70235d635740` on the PRE-delivery DB
+  (`4c6a095~1`, so the 9 are NEW again): 628 → merged 17 → rejects 413 → survived 198 → gate 190 (not_target_class
+  100, role_family 85, not_new 4, **stage:graduate_only 1**) → **notified 8**: Actionable 7 (incl. QA/QC and CRM —
+  S11's job), Aspirational 1 (Tether). Invariant 628−17−413−190 = 8 ✓. **351 passed.**
 
 ## RESUME — next-iteration (COMPLETE — merged to main as bc4154c; kept for history)
 Branch: next-iteration      Last commit: b911406 Merge origin/main (a39feaa, bot run 2026-10-04) into next-iteration
