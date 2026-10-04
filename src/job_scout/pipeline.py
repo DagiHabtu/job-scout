@@ -34,7 +34,14 @@ from .dedupe import dedupe
 from .eligibility import classify_eligibility
 from .models import EmploymentType, Opportunity, Provenance
 from .normalize import normalize
-from .notify import gate_reason, render_digest, render_funnel_md, select_for_notification, write_digest
+from .notify import (
+    gate_reason,
+    render_digest,
+    render_funnel_md,
+    render_issue_md,
+    select_for_notification,
+    write_digest,
+)
 from .score import filter_reason, hard_filter, rank, score_opportunity
 from .sources.base import Source
 from .store import connect, mark_notified, record_run, upsert_and_reconcile
@@ -223,8 +230,14 @@ def run_once(
         ]
         digest = render_digest(to_notify, cfg)
         digest_path = write_digest(digest, cfg)
+        # The issue body exists only when there is something to deliver; a stale one is removed so
+        # the workflow never re-posts a previous run's selection.
+        notify_path = Path(digest_path).parent / "notify.md"
         if to_notify:
+            notify_path.write_text(render_issue_md(to_notify, cfg), encoding="utf-8")
             mark_notified(conn, to_notify)
+        else:
+            notify_path.unlink(missing_ok=True)
 
         finished = datetime.now(timezone.utc).isoformat()
         summary = RunSummary(

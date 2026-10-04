@@ -155,6 +155,55 @@ def write_digest(digest_html: str, cfg: AppConfig) -> str:
 
 
 # --------------------------------------------------------------------------------------------- #
+# Issue body (Markdown) — the push channel: the workflow posts it as a GitHub Issue
+# --------------------------------------------------------------------------------------------- #
+
+ACTIONABLE = "Actionable"
+CHECK_ELIGIBILITY = "Check eligibility"
+_POSITIVE = frozenset({
+    EligibilityCategory.STIPEND_PROGRAM_GLOBAL,
+    EligibilityCategory.WORLDWIDE_REMOTE,
+    EligibilityCategory.REMOTE_REGION_INCLUDES_USER,
+})
+
+
+def section_of(opp: Opportunity) -> str:
+    """A positive eligibility verdict is actionable; anything else is surfaced with its doubt."""
+    return ACTIONABLE if opp.eligibility and opp.eligibility.category in _POSITIVE else CHECK_ELIGIBILITY
+
+
+def _issue_item(opp: Opportunity) -> str:
+    url = opp.canonical_url or opp.apply_url
+    meta = " · ".join(x for x in (opp.company, opp.employment_type.value, opp.location_raw) if x)
+    lines = [f"- [ ] [{opp.title}]({url}) — {meta}"]
+    if opp.deadline:
+        lines.append(f"  - deadline: {opp.deadline.isoformat()}")
+    e = opp.eligibility
+    if e is not None:
+        lines.append(f"  - eligibility: **{e.category.value}** (confidence {e.confidence:.2f})")
+        lines += [f"    - {x}" for x in e.evidence]
+    if opp.relevance and opp.relevance.matched_signals:
+        lines.append(f"  - matched: {', '.join(opp.relevance.matched_signals)}")
+    if opp.ats_provider == "himalayas":
+        listing = opp.ats_job_id if (opp.ats_job_id or "").startswith("http") else url
+        lines.append(f"  - via [Himalayas]({listing})")
+    return "\n".join(lines)
+
+
+def render_issue_md(opps: list[Opportunity], cfg: AppConfig) -> str:
+    """One task-list line per item (tick the ones worth applying to), grouped into "Actionable" and
+    "Check eligibility", each with its eligibility evidence and matched signals."""
+    out = [f"Job Scout — {len(opps)} new for {cfg.profile.location.country_name}. "
+           "Tick the items worth applying to.\n"]
+    for section in (ACTIONABLE, CHECK_ELIGIBILITY):
+        items = [o for o in opps if section_of(o) == section]
+        if items:
+            out.append(f"## {section}\n")
+            out.append("\n".join(_issue_item(o) for o in items) + "\n")
+    return "\n".join(out)
+
+
+# --------------------------------------------------------------------------------------------- #
 # Funnel report (Markdown) — the run's reason-coded account, for the Actions step summary
 # --------------------------------------------------------------------------------------------- #
 
@@ -221,4 +270,53 @@ def render_funnel_md(rec: dict) -> str:
             "| title | company | location | type | eligibility | score | gate reason |\n"
             "|---|---|---|---|---|--:|---|\n" + rows
         )
+    return "\n".join(out)
+
+
+def _sum_counts(dicts) -> dict[str, int]:
+    total: dict[str, int] = {}
+    for d in dicts:
+        for k, v in (d or {}).items():
+            total[k] = total.get(k, 0) + v
+    return total
+
+
+def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> str:
+    """Weekly heartbeat: the funnel summed over the given run records (newest first) plus their
+    near misses, so silence is distinguishable from failure. `extra` lines are appended verbatim."""
+    out = [f"## Job Scout weekly funnel — {len(records)} run(s)\n"]
+    if not records:
+        out.append("No run records found — the scout has not run. Check the Actions tab.\n")
+    else:
+        rows = "".join(
+            f"| {r['started'][:10]} | {r['discovered']} | {r['after_filter']} | {r['notified']} | "
+            f"{_md(', '.join(n for n, s in r.get('sources', {}).items() if not s.get('ok')) or '—')} |\n"
+            for r in records
+        )
+        out.append("| run | discovered | survived | notified | failed sources |\n|---|--:|--:|--:|---|\n" + rows)
+        out.append(_counts_table("Hard-filter rejects (7 runs)", _sum_counts(r.get("rejects") for r in records)))
+        out.append(_counts_table("Notify-gate reasons (7 runs)", _sum_counts(r.get("gate") for r in records)))
+        f_fetched = sum(r.get("internship_funnel", {}).get("fetched", 0) for r in records)
+        out.append(f"**Internship / stipend-program records fetched (7 runs):** {f_fetched}\n")
+        out.append(_counts_table("Internship outcomes (7 runs)",
+                                 _sum_counts(r.get("internship_funnel", {}).get("outcomes") for r in records)))
+        best: dict[tuple, dict] = {}
+        for r in records:
+            for n in r.get("near_misses", []):
+                k = (n["title"], n["company"])
+                if k not in best or n["score"] > best[k]["score"]:
+                    best[k] = n
+        nm = sorted(best.values(), key=lambda n: -n["score"])[:10]
+        if nm:
+            rows = "".join(
+                f"| {_md(n['title'])} | {_md(n['company'])} | {_md(n['location'])} | {_md(n['type'])} | "
+                f"{_md(n['eligibility'])} | {n['score']} | {_md(n['gate_reason'])} |\n"
+                for n in nm
+            )
+            out.append(
+                "**Near misses (7 runs)**\n\n| title | company | location | type | eligibility | score | gate reason |\n"
+                "|---|---|---|---|---|--:|---|\n" + rows
+            )
+    if extra:
+        out.append("\n".join(extra) + "\n")
     return "\n".join(out)

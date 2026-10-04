@@ -75,16 +75,40 @@ def _load_embedding_model(cfg: AppConfig):
     return load_model(cfg.scoring.embedding_model)
 
 
-def run(argv: list[str] | None = None) -> RunSummary:
+def write_heartbeat(cfg: AppConfig, runs: int = 7) -> str:
+    """Write the weekly heartbeat (last `runs` run records) beside the digest. Returns its path."""
+    import json
+    from pathlib import Path
+
+    from .notify import render_heartbeat_md
+    from .store import connect
+
+    conn = connect(cfg.db_path)
+    try:
+        rows = conn.execute("SELECT summary FROM runs ORDER BY started DESC LIMIT ?", (runs,)).fetchall()
+    finally:
+        conn.close()
+    records = [json.loads(r["summary"]) for r in rows if r["summary"]]
+    path = Path(cfg.notify.digest_path).parent / "heartbeat.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_heartbeat_md(records), encoding="utf-8")
+    return str(path)
+
+
+def run(argv: list[str] | None = None) -> RunSummary | None:
     parser = argparse.ArgumentParser(prog="job-scout", description="Zero-cost, eligibility-first job scout — one run.")
     parser.add_argument("-c", "--config", default="config/profile.yaml", help="path to the YAML profile")
     parser.add_argument("--no-model", action="store_true", help="skip the embedding model; use lexical scoring only")
+    parser.add_argument("--heartbeat", action="store_true", help="write the weekly funnel heartbeat and exit (no scout run)")
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose logging")
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
     cfg = AppConfig.load(args.config)
+    if args.heartbeat:
+        log.info("heartbeat written to %s", write_heartbeat(cfg))
+        return None
     sources = build_sources(cfg)
     if not sources:
         log.warning("no sources resolved — running an empty pass (Phase 0 has no adapters yet)")
