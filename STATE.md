@@ -1,16 +1,16 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: 452e3ed S5: title-only similarity; deterministic notify gate (class, role family, eligibility, unknown cap); golden set + calibrate.py
-Step in progress: S5 (review open) + S6
-  Sub-progress S5: [x] embed_similarity title-only  [x] score_opportunity  [x] gate_reason/gate_reasons + unknown_cap  [x] golden_titles.csv (67) + calibrate.py  [x] tests  [ ] independent review (launched on b34b338..452e3ed) → findings → tests/fixes
-  Sub-progress S6: [ ] _Program/_Round data model + table (verify live facts)  [ ] geo_verdict/geo_evidence + US_EMBARGOED  [ ] timing/identity/titles/report  [ ] conditions in evidence  [ ] acceptance test A/B/C  [ ] heartbeat re-check lines  [ ] independent review
-Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8), S4 (b34b338)
-Reviews: S2 closed, S5 open (reviewer running; if context was cleared, re-launch per §11 on b34b338..452e3ed), S6 open, final open
-Next action: S6 (programs calendar) while the S5 review runs; then close the S5 review.
-Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up.
-Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD.
-Unverified facts still in code: none yet
+Branch: next-iteration      Last commit: 5ecb953 S5: close independent review — narrow role-family vetoes + non-software negatives (H1), cap keeps best title matches (M3), discriminating ordering test (M2), gate/pipeline code coverage (L3)
+Step in progress: S6 (review open) + S7
+  Sub-progress S6: [x] data model + table (live facts verified)  [x] geo_verdict/geo_evidence + US_EMBARGOED  [x] timing/identity/titles/report  [x] conditions in evidence  [x] acceptance A/B/C  [x] heartbeat re-check lines  [ ] independent review (launched on 3a3118e..5cd289f) → findings → tests/fixes
+  Sub-progress S7: [ ] fixture recorded  [ ] sources/himalayas.py + registry + himalayas_queries  [ ] tests (mapping, 429, worldwide)  [ ] profile enable
+Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed)
+Reviews: S2 closed, S5 closed, S6 open (reviewer running; if context was cleared, re-launch per §11 on 3a3118e..5cd289f), final open
+Next action: S7 (Himalayas adapter) while the S6 review runs; then close the S6 review.
+Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up. (3) DECISION for Dagi (S5 review M1): an onsite/hybrid role in Addis Ababa is UNKNOWN@0.4 (Gate-0 Decision #1), so a NEW_GRAD one is never notified (`eligibility_unknown`) and an INTERNSHIP one lands in "Check eligibility" using a cap slot — though the user can certainly take it. Fixing it needs either a gate rule ("own-country onsite UNKNOWN → select") or E2's proposed new EligibilityCategory (spine change). Not changed in this pass.
+Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD. (j) S6: gate checks `already_notified` before `not_new` (spec Case A requires it). (k) S6: `US_EMBARGOED` = Cuba, Iran, North Korea, Crimea, Donetsk, Luhansk — composed from OFAC's active program list (which has no single "embargoed countries" list); what is verified is that no Ethiopia program exists. (l) S6: program-level `report` key for a program with no future round is its name; a program's last-checked date in that message is the latest of its geo/round checks.
+Unverified facts still in code: MLH "no anticipated projects" 29-country list (not extracted → MLH geo_scope "unknown"; no round, so no effect); all 2027 round dates are `expected` extrapolations (Outreachy ~Feb 5–12, GSoC Mar 24–Apr 7 kept from the old table, LFX mid-Jan/Apr/Jul + 4 weeks); Himalayas freshness per listing (E1 used pubDate).
 
 ### Pass log (next-iteration, single pass per spec §11)
 - 2026-10-04 — Pass started. Partial work found from earlier session: `.claude/settings.json`
@@ -128,6 +128,39 @@ Unverified facts still in code: none yet
   titles fall to 0.09–0.21, backend titles rise to 0.59–0.68. §7 integration test: EMEA intern +
   same-title US intern + senior + sales intern + program → exactly the EMEA intern and the program
   are selected; invariant holds. Tests → **203 passed**.
+- 2026-10-04 — **S5 independent review CLOSED** (`5ecb953`). Findings → `tests/test_gate_review_s5.py`
+  (16 failed → confirmed → fixed): H1 my broad vetoes (`customer`, `social`, `manager`) rejected
+  real technical internships ("Software Engineer Intern, Customer Platform", "Package Manager
+  Engineer Intern", …) → narrowed to phrases; non-software titles passed ("Financial/Business/
+  Operations Analyst Intern", "Mechanical/Civil/Chemical Engineering Intern", "Policy Research
+  Intern", "Data Center Technician Intern", "Mac Users Needed … $25") → vetoed; these 13 rows were
+  added to the golden set (now 80 rows: precision 1.0 / recall 1.0 — **in-sample, so not evidence of
+  generalisation**; §8.6's ticked-item observation is the real measure). M3 cap kept top-5 by
+  nudged score → now by title similarity. M2 ordering test did not discriminate score vs
+  similarity → fixed. L3 gate gaps (None eligibility, NEW_GRAD role_family, stipend negative, ACTIVE
+  intern not using a cap slot, pipeline run producing `unknown_cap`/`not_target_class`/
+  `eligibility_unknown` with the invariant) → tests added, passed after the fixes. L5 stale comment
+  fixed. Kept/refuted: L1 `eligibility_negative` (deviation h); L2 obsolete test removed in S6's
+  rewrite; L4 lexical-mode double count of body tech (spec-literal; model mode unaffected). M1 →
+  Pending human checks (3), a decision not a bug. **236 passed.**
+- 2026-10-04 — **S6 acceptance passed** (`5cd289f`; review pending). `known_programs.py` rewritten:
+  `_Program` (geo_scope, geo_quote, geo_url, geo_checked_on, geo_exclusions, embargo_rule,
+  conditions), `_Round` (state, state_url, state_checked_on); `rolling` dropped; leads 30
+  (announced) / 51 (expected); staleness 45 d (state) / 365 d (geo); identity `<key>@<state>`;
+  titles per state; `report` (deadline_passed / outside_lead_window / no_published_round);
+  `geo_verdict` / `geo_evidence` (quote, URL, date, embargo check, every condition);
+  `validate_table`; `maintenance_notes` in the Monday heartbeat. **Live facts verified 2026-10-04**:
+  Outreachy "open to applicants around the world", $7,000, 42-day and Northern-Hemisphere rules;
+  GSoC "Not residing in a U.S. embargoed country" (2027 timeline not published); LFX eligibility
+  wording (no explicit worldwide statement → `unknown`) and term timeline; MLH form: Fall 2026
+  deadline Aug 31, 2026, no later batch, embargo rule; OFAC active-program list has no Ethiopia
+  program (Cuba, Iran, North Korea comprehensive; Syria now targeted PAARSS). Spec acceptance test
+  `tests/test_known_programs_acceptance.py`: Case A, B1–B4, C, state change once per state, shipped
+  table on 2026-10-04 → **0 program notifications** with a reason per round — all pass. Old
+  `test_known_programs.py` rewritten for the new model (justified in its docstring). Spec conflict
+  (fact): Case A asserts `gate["already_notified"] == 1` on a re-run, but the record is ACTIVE and
+  the spec's gate lists `not_new` first → `already_notified` is now checked first (label only;
+  selection identical). **236 passed** (after the S5 review fixes).
 
 ---
 
