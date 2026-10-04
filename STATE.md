@@ -1,14 +1,15 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: ed728ba S2: close independent review — fixes for H1-H4, M1-M4, L2 with a test per finding
-Step in progress: S5
-  Sub-progress: [ ] embed_similarity title-only vs target_roles  [ ] score_opportunity (tech hits cap, drop seniority damping)  [ ] gate_reason (deterministic, sections, unknown_cap)  [ ] golden_titles.csv + scripts/calibrate.py  [ ] tests (golden precision/recall, gate table, ordering)  [ ] independent review
+Branch: next-iteration      Last commit: 452e3ed S5: title-only similarity; deterministic notify gate (class, role family, eligibility, unknown cap); golden set + calibrate.py
+Step in progress: S5 (review open) + S6
+  Sub-progress S5: [x] embed_similarity title-only  [x] score_opportunity  [x] gate_reason/gate_reasons + unknown_cap  [x] golden_titles.csv (67) + calibrate.py  [x] tests  [ ] independent review (launched on b34b338..452e3ed) → findings → tests/fixes
+  Sub-progress S6: [ ] _Program/_Round data model + table (verify live facts)  [ ] geo_verdict/geo_evidence + US_EMBARGOED  [ ] timing/identity/titles/report  [ ] conditions in evidence  [ ] acceptance test A/B/C  [ ] heartbeat re-check lines  [ ] independent review
 Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8), S4 (b34b338)
-Reviews: S2 closed, S5 open, S6 open, final open
-Next action: implement S5 (title scoring + deterministic notify gate + golden set).
+Reviews: S2 closed, S5 open (reviewer running; if context was cleared, re-launch per §11 on b34b338..452e3ed), S6 open, final open
+Next action: S6 (programs calendar) while the S5 review runs; then close the S5 review.
 Pending human checks: (1) S0 — dispatch the workflow on branch `next-iteration` and confirm the funnel table appears on the run page. (2) S1 — dispatch with `seed=true` and confirm the "Job Scout: 1 new" issue reached a real device (email or GitHub mobile); if not, Telegram fallback is the first follow-up.
-Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC).
+Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) §6 `skipped_records` per source not added — adapters' per-record skips stay log-only (S0's list does not include it). (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD.
 Unverified facts still in code: none yet
 
 ### Pass log (next-iteration, single pass per spec §11)
@@ -113,6 +114,20 @@ Unverified facts still in code: none yet
   `(canon(company), canon(location))`. Tests: C7 reproduction → 2 records (EMEA one included, US one
   excluded); same-location near-dup merges; "Senior Backend Engineer" → `seniority_title:senior`;
   "Intern, Engineering Manager's Office" kept.
+- 2026-10-04 — **S5 acceptance passed** (`452e3ed`; review pending). `embed_similarity` = max
+  cosine(title, each target role); score = base + 0.03×body tech hits (cap 0.15) + existing nudges;
+  per-concern damping dropped. Gate (`notify.gate_reason` / `gate_reasons`): not_new →
+  already_notified → stipend program (positive/UNKNOWN → select) → not_target_class → role_family →
+  eligibility (positive → Actionable; UNKNOWN intern → Check eligibility, cap 5 → `unknown_cap`;
+  UNKNOWN new-grad → `eligibility_unknown`). Threshold no longer consulted. Golden set 67 titles
+  (31 stored DB titles, 19 Himalayas probe titles, 17 hand-written incl. 3 hard positives):
+  precision **0.962**, recall **1.000** (spec regex alone: 0.61 / 0.88 — see deviation g).
+  `scripts/calibrate.py` with the real model: title-only similarity positives p10/p50/p90 =
+  0.47/0.67/1.00, negatives 0.19/0.36/0.65. **C3 confirmed** on 10 GitLab rows: old (profile blob
+  vs title+description) sd 0.021, range 0.081; new (title vs roles) sd 0.198, range 0.583 — sales
+  titles fall to 0.09–0.21, backend titles rise to 0.59–0.68. §7 integration test: EMEA intern +
+  same-title US intern + senior + sales intern + program → exactly the EMEA intern and the program
+  are selected; invariant holds. Tests → **203 passed**.
 
 ---
 
