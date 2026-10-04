@@ -155,25 +155,29 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
 # --------------------------------------------------------------------------------------------- #
 
 
-def hard_filter(opps: list[Opportunity], profile: UserProfile, cfg: ScoringConfig, today: date | None = None) -> list[Opportunity]:
-    """Drop opportunities disqualified by a HARD constraint. Binary, not a score penalty.
+def filter_reason(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig, today: date | None = None) -> str | None:
+    """The first HARD constraint `opp` fails, as a reason code — or None if it survives.
 
-    Filters: confident-disqualifying eligibility, a deadline already passed, and an employment type
-    the user explicitly does not want (UNKNOWN type is never dropped — that would penalize missing
-    data). Runs BEFORE scoring so we never embed dead-on-arrival postings.
+    Codes: `eligibility:<category>` (a confident disqualifier), `deadline_passed`,
+    `type_unwanted:<type>` (a known type the user does not want; UNKNOWN is never dropped — that
+    would penalize missing data). One record → at most one reason, so reasons can be counted.
     """
     today = today or date.today()
     wanted = set(profile.employment_types)
-    kept: list[Opportunity] = []
-    for opp in opps:
-        if opp.eligibility and opp.eligibility.is_confident_disqualifier(cfg.eligibility_disqualify_confidence):
-            continue
-        if opp.deadline and opp.deadline < today:
-            continue
-        if opp.employment_type != EmploymentType.UNKNOWN and wanted and opp.employment_type not in wanted:
-            continue
-        kept.append(opp)
-    return kept
+    if opp.eligibility and opp.eligibility.is_confident_disqualifier(cfg.eligibility_disqualify_confidence):
+        return f"eligibility:{opp.eligibility.category.value}"
+    if opp.deadline and opp.deadline < today:
+        return "deadline_passed"
+    if opp.employment_type != EmploymentType.UNKNOWN and wanted and opp.employment_type not in wanted:
+        return f"type_unwanted:{opp.employment_type.value}"
+    return None
+
+
+def hard_filter(opps: list[Opportunity], profile: UserProfile, cfg: ScoringConfig, today: date | None = None) -> list[Opportunity]:
+    """Drop opportunities disqualified by a HARD constraint (see `filter_reason`). Binary, not a
+    score penalty. Runs BEFORE scoring so we never embed dead-on-arrival postings."""
+    today = today or date.today()
+    return [o for o in opps if filter_reason(o, profile, cfg, today) is None]
 
 
 def rank(opps: list[Opportunity]) -> list[Opportunity]:

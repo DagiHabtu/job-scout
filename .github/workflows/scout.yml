@@ -54,6 +54,11 @@ jobs:
       - name: Run scout
         run: python -m job_scout -c config/profile.yaml -v
 
+      # The reason-coded funnel on the run page: every zero reads as a specific cause.
+      - name: Funnel summary
+        if: always()
+        run: if [ -f data/funnel.md ]; then cat data/funnel.md >> "$GITHUB_STEP_SUMMARY"; fi
+
       # Surface the digest without committing it (it is gitignored) — downloadable from the run.
       - name: Upload digest
         if: always()

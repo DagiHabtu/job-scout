@@ -42,18 +42,22 @@ def _is_best_fit_class(opp: Opportunity) -> bool:
     )
 
 
+def gate_reason(opp: Opportunity, threshold: float) -> str | None:
+    """Why `opp` is NOT notified (`not_new`, `already_notified`, `below_threshold`), or None if it
+    is selected. First match wins, so every unselected record carries exactly one reason."""
+    if opp.status not in _NOTIFIABLE:
+        return "not_new"
+    if opp.notified_at is not None:
+        return "already_notified"
+    relevant = opp.relevance is not None and opp.relevance.score >= threshold
+    if relevant or _is_best_fit_class(opp):
+        return None
+    return "below_threshold"
+
+
 def select_for_notification(opps: list[Opportunity], threshold: float) -> list[Opportunity]:
     """new/updated ∧ not already notified ∧ (relevance ≥ threshold OR best-fit class). Order preserved."""
-    out: list[Opportunity] = []
-    for o in opps:
-        if o.status not in _NOTIFIABLE:
-            continue
-        if o.notified_at is not None:
-            continue
-        relevant = o.relevance is not None and o.relevance.score >= threshold
-        if relevant or _is_best_fit_class(o):
-            out.append(o)
-    return out
+    return [o for o in opps if gate_reason(o, threshold) is None]
 
 
 # --------------------------------------------------------------------------------------------- #
@@ -148,3 +152,73 @@ def write_digest(digest_html: str, cfg: AppConfig) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(digest_html, encoding="utf-8")
     return str(path)
+
+
+# --------------------------------------------------------------------------------------------- #
+# Funnel report (Markdown) — the run's reason-coded account, for the Actions step summary
+# --------------------------------------------------------------------------------------------- #
+
+
+def _md(s) -> str:
+    """Make a value safe inside a Markdown table cell."""
+    return str(s).replace("|", "\\|").replace("\n", " ")
+
+
+def _counts_table(title: str, counts: dict) -> str:
+    if not counts:
+        return f"**{title}:** none\n"
+    rows = "".join(f"| {_md(k)} | {v} |\n" for k, v in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
+    return f"**{title}**\n\n| reason | count |\n|---|--:|\n{rows}"
+
+
+def render_funnel_md(rec: dict) -> str:
+    """Render one run record (`RunSummary.as_record()`) as Markdown: sources, stage counts, and the
+    reason histograms, so a zero-result run reads as a specific cause rather than a bare zero."""
+    out = [f"## Job Scout funnel — run `{rec['run_id']}` ({rec['started'][:16]}Z)\n"]
+
+    src_rows = ""
+    for name, s in rec.get("sources", {}).items():
+        status = "ok" if s.get("ok") else f"FAILED: {s.get('error', '')}"
+        report = "; ".join(f"{k}: {v}" for k, v in (s.get("report") or {}).items())
+        src_rows += f"| {_md(name)} | {_md(status)} | {s.get('count', '—')} | {_md(report)} |\n"
+    out.append("| source | status | fetched | report |\n|---|---|--:|---|\n" + src_rows)
+
+    merged = rec["discovered"] - rec["after_dedupe"]
+    out.append(
+        "| stage | count |\n|---|--:|\n"
+        f"| discovered | {rec['discovered']} |\n"
+        f"| merged by dedupe | {merged} |\n"
+        f"| rejected by hard filter | {sum(rec.get('rejects', {}).values())} |\n"
+        f"| survived | {rec['after_filter']} |\n"
+        f"| not selected at notify gate | {sum(rec.get('gate', {}).values())} |\n"
+        f"| **notified** | **{rec['notified']}** |\n"
+    )
+    out.append(_counts_table("Hard-filter rejects", rec.get("rejects", {})))
+    out.append(_counts_table("Notify-gate reasons", rec.get("gate", {})))
+    out.append(_counts_table("Employment type (after normalize)", rec.get("by_type", {})))
+    out.append(_counts_table("Eligibility (after classify)", rec.get("by_eligibility", {})))
+
+    f = rec.get("internship_funnel", {})
+    out.append(f"**Internship / stipend-program funnel:** fetched {f.get('fetched', 0)}\n")
+    if f.get("outcomes"):
+        out.append(_counts_table("Internship outcomes", f["outcomes"]))
+    if f.get("rejected_samples"):
+        rows = "".join(
+            f"| {_md(s['title'])} | {_md(s['company'])} | {_md(s['location'])} | {_md(s['reason'])} | {_md(s['evidence'])} |\n"
+            for s in f["rejected_samples"]
+        )
+        out.append("| title | company | location | reason | evidence |\n|---|---|---|---|---|\n" + rows)
+
+    nm = rec.get("near_misses", [])
+    if nm:
+        rows = "".join(
+            f"| {_md(n['title'])} | {_md(n['company'])} | {_md(n['location'])} | {_md(n['type'])} | "
+            f"{_md(n['eligibility'])} | {n['score']} | {_md(n['gate_reason'])} |\n"
+            for n in nm
+        )
+        out.append(
+            "**Near misses** (top unselected survivors by score)\n\n"
+            "| title | company | location | type | eligibility | score | gate reason |\n"
+            "|---|---|---|---|---|--:|---|\n" + rows
+        )
+    return "\n".join(out)
