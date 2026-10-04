@@ -14,6 +14,7 @@ dependency; the file digest is the always-available default.
 
 from __future__ import annotations
 
+import os
 from html import escape
 from pathlib import Path
 
@@ -228,7 +229,15 @@ def render_issue_md(opps: list[Opportunity], cfg: AppConfig) -> str:
         if items:
             out.append(f"## {section}\n")
             out.append("\n".join(_issue_item(o) for o in items) + "\n")
-    return "\n".join(out)
+    return _with_cc("\n".join(out))
+
+
+def _with_cc(body: str) -> str:
+    """End an issue body with `cc @<owner>` (S9): a mention is a "participating" notification, which
+    GitHub sends even when the owner does not watch the repository. Omitted when the env var is
+    unset (local runs)."""
+    owner = os.environ.get("GITHUB_REPOSITORY_OWNER", "").strip()
+    return f"{body.rstrip()}\n\ncc @{owner}\n" if owner else body
 
 
 # --------------------------------------------------------------------------------------------- #
@@ -348,4 +357,4 @@ def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> 
             )
     if extra:
         out.append("\n".join(extra) + "\n")
-    return "\n".join(out)
+    return _with_cc("\n".join(out))
