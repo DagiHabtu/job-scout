@@ -1,6 +1,29 @@
 # STATE
 
-## RESUME — next-iteration
+## RESUME — iteration-2
+Branch: iteration-2 (cut from origin/main bc4154c; no upstream until the final push)      Last commit: c54fe46 iteration-2 baseline: body restriction also reads 'position/role … based in <places>'
+Step in progress: S9
+  Sub-progress S9: [ ] `--assignee ${{ github.repository_owner }}` on both `gh issue create` calls  [ ] `cc @<owner>` line from env GITHUB_REPOSITORY_OWNER in render_issue_md + heartbeat (omitted when unset)  [ ] tests  [ ] commit
+Steps done and verified: none yet (baseline: spec §12 committed 43422e0; 311 passed after the baseline fix)
+Reviews: S10 open, final open
+Next action: S9 — assignee + cc @owner in the workflow and renderers.
+Pending human checks: (1) S9 — Dagi checks https://github.com/notifications for the 2026-10-04 issue and the email settings in §12 S9, then dispatches `gh workflow run scout --ref iteration-2 -f seed=true` and confirms an email arrived; if not, Telegram fallback becomes primary. (2) DECISION carried over (onsite/hybrid in Addis = UNKNOWN@0.4, see next-iteration block).
+Deviations from spec: none yet.
+Unverified facts still in code: as in the next-iteration block; plus whether the Himalayas API truncates descriptions (§12 "Limit").
+
+### Iteration-2 pass log
+- 2026-10-04 — Part A done (Dagi-authorised): PR #2 merged → origin/main `bc4154c`; local `main` realigned with
+  `git branch -f main origin/main` (tree was clean — the settings.json edit had already been committed in `12c70a9`).
+  Updated spec copied from `D:\Downloads` (contains §12; diff is §12 only, +178 lines) and committed on the new
+  branch `iteration-2` (`43422e0`). Baseline on origin/main: **1 failed / 308 passed** — the merged `data/scout.db`
+  (bot commit `4c6a095`, the delivery-test run) now holds 244 rows, and the stored-row check found one
+  positive: GitLab "Business Development Representative", location "Remote, EMEA; …", body "this position is
+  100% remote and will be based in the UK, Ireland, Germany, the Netherlands" → was REMOTE_REGION_INCLUDES_USER.
+  Test first (2 failed) → `_BODY_RESTRICTION` also reads "position/role/job … (will be|is) based/located in"
+  (`c54fe46`). **311 passed**; re-classification 244 rows, 0 bad. The 9 records delivered on 2026-10-04 are in
+  `data/scout.db` with `notified_at 2026-10-04T11:51:55Z` (fixture source for §12 acceptance).
+
+## RESUME — next-iteration (COMPLETE — merged to main as bc4154c; kept for history)
 Branch: next-iteration      Last commit: b911406 Merge origin/main (a39feaa, bot run 2026-10-04) into next-iteration
 Step in progress: none — **PASS COMPLETE** + Dagi's follow-ups done (body-restriction rule `5819288`; origin/main merged; branch PUSHED to origin/next-iteration). Not merged to main.
 Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S6 (5cd289f, 3e7d379 — review closed), S7 (ab4e919, 0ef22b7), S8 (d1f055e)
