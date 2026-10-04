@@ -1,13 +1,13 @@
 # STATE
 
 ## RESUME — next-iteration
-Branch: next-iteration      Last commit: 96c10db final: close whole-branch review — …
-Step in progress: none — **PASS COMPLETE** (all steps S0–S8 done; all four reviews closed). Not pushed, not merged.
+Branch: next-iteration      Last commit: b911406 Merge origin/main (a39feaa, bot run 2026-10-04) into next-iteration
+Step in progress: none — **PASS COMPLETE** + Dagi's follow-ups done (body-restriction rule `5819288`; origin/main merged; branch PUSHED to origin/next-iteration). Not merged to main.
 Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S6 (5cd289f, 3e7d379 — review closed), S7 (ab4e919, 0ef22b7), S8 (d1f055e)
 Reviews: S2 closed, S5 closed, S6 closed, final closed (96c10db)
 Next action: Dagi does the pending human checks below, in order. Nothing else is in flight.
 Pending human checks (in this order; commands run from `job-scout/`):
-  (1) Push the branch (nothing has been pushed): `git push -u origin next-iteration`
+  (1) [DONE 2026-10-04] Branch pushed: `git push -u origin next-iteration` (carries origin/main a39feaa's data/scout.db).
   (2) S0 + S1 — dispatch on the branch with a seeded delivery test:
       `gh workflow run scout --ref next-iteration -f seed=true` then `gh run watch` (or the Actions tab).
       Confirm (a) the funnel table is on the run page (step summary), (b) an issue "Job Scout: N new — <date>"
@@ -15,13 +15,18 @@ Pending human checks (in this order; commands run from `job-scout/`):
       run), not just the seeded one — and (c) it reached a real device (email or GitHub mobile). If it did not
       arrive, the Telegram fallback is the first follow-up. Note: this run commits `data/scout.db` to
       `next-iteration`, and the items are then marked notified on that branch's DB.
-  (3) Merge when satisfied: `git checkout main && git pull --ff-only && git merge --no-ff next-iteration && git push`
-      (`main` gains a daily bot commit to `data/scout.db`; the branch does not touch it except via step 2's run —
-      on a conflict in `data/scout.db`, keep the branch's copy so items delivered in step 2 are not re-sent:
-      `git checkout --theirs data/scout.db && git add data/scout.db`).
+  (3) Merge by pull request — never via local `main` (local `main` has diverged from `origin/main`: it holds
+      the 4 pre-branch commits 80ae5b6..7ec0b85, which are already in next-iteration, and lacks a39feaa):
+      `gh pr create --base main --head next-iteration --title "Next iteration: funnel, delivery, eligibility, gate, programs, Himalayas, canonical" --body "Implements docs/SPEC-2026-10-04-next-iteration.md (S0–S8). Evidence, reviews and deviations: STATE.md (RESUME block + pass log)."`
+      then `gh pr merge --merge`.
+      If the PR reports a conflict in `data/scout.db` (the bot commits it to `main` daily, and step 2's run commits it
+      to the branch), keep the branch's copy so items delivered in step 2 are not re-sent:
+      `git checkout next-iteration && git pull && git merge origin/main` → on conflict
+      `git checkout --ours data/scout.db && git add data/scout.db && git commit --no-edit && git push`, then `gh pr merge --merge`.
+      Afterwards, realign local main: `git checkout main && git reset --hard origin/main`.
   (4) DECISION for Dagi (S5 review M1): an onsite/hybrid role in Addis Ababa is UNKNOWN@0.4 (Gate-0 Decision #1), so a NEW_GRAD one is never notified (`eligibility_unknown`) and an INTERNSHIP one lands in "Check eligibility" using a cap slot — though the user can certainly take it. Fixing it needs either a gate rule ("own-country onsite UNKNOWN → select") or E2's proposed new EligibilityCategory (spine change). Not changed in this pass.
 Deviations from spec: (a) S0 `internship_funnel.outcomes` adds a `merged` outcome (records folded by dedupe) so outcomes sum to `fetched`. (b) [withdrawn — §6 `skipped_records` now implemented, final review M5]. (c) `role_family_ok` (S5) was added to score.py during S0 because the E1 probe needs it; unchanged regex. (d) S1: `workflow_dispatch` input `seed` (boolean) writes a test item into an empty `notify.md` — needed so the seeded acceptance run can be done without fabricating a DB record; the workflow also runs `gh label create scout --force` because `--label` fails on a missing label. (e) S1 heartbeat is produced by `python -m job_scout --heartbeat` (reads last 7 `runs` records) and posted after "Commit state" on Mondays (UTC). (f) S2 interpretations (i)–(v) and review fixes (step log): body-independent `MIXED` verdict → UNKNOWN 0.5; bare country code not USER; region tokens count only for remote roles; worldwide body phrase must not be followed by a named place; OTHER-only location → UNKNOWN 0.3. (g) S5 `role_family_ok`: the spec's exact regexes measured precision 0.61 on the golden set; family + `embedded|computer vision|database`, veto + `manager|participant(s)|study/studies|annotator/annotation|data entry|keyer|service desk|help desk|business development|social|customer|opportunities|ad quality|professional services` → 0.962 / 1.0. Tuned on the same 67 rows — overfitting risk; §8.6's 14-day observation is the real check. (h) S5 adds gate code `eligibility_negative` (a low-confidence disqualifier that survived the hard filter, or a non-positive program) so every unselected record still has one reason. (i) S3: "Graduate Partner Marketing Manager" stays UNKNOWN (spec's exact regex marks "manager" senior), not NEW_GRAD. (j) S6: gate checks `already_notified` before `not_new` (spec Case A requires it). (k) S6: `US_EMBARGOED` = Cuba, Iran, North Korea, Crimea, Donetsk, Luhansk — composed from OFAC's active program list (which has no single "embargoed countries" list); what is verified is that no Ethiopia program exists. (l) S6: program-level `report` key for a program with no future round is its name; a program's last-checked date in that message is the latest of its geo/round checks. (m) S6 review H1: `ats_job_id = <key>@<recorded state>`, not `@<effective_state>` as the spec writes — otherwise a stale `open` round is re-announced as "expected"; staleness still changes title and lead window. (n) S6 review M3: MLH `geo_scope="worldwide"` with the form's verified no-projects list as `geo_exclusions` (spec gave no scope; the earlier "unknown" was only because the list was not extracted).
-  Final-review deviations: (o) M1 — step 2 (work authorization) is no longer "unchanged": a residency phrase naming the user's region/"anywhere" ("must be based in EMEA") is not foreign auth, and a visa-sponsorship line does not count when the location is decisively worldwide or includes the user (a remote hire needs no visa); a foreign right-to-work phrase still disqualifies first. (p) H2 — a body worldwide phrase plus "located/reside/based/live in <place elsewhere>" → UNKNOWN 0.5. (q) M2/L9 — exclusion wording in the location ("Global (excluding US)") labels only the part before it, or excludes when it names the user; a WORLD location next to an ELSEWHERE title marker is MIXED → UNKNOWN 0.5 (spec: "any WORLD" wins). (r) M4 — `role_family_ok` judges the title's role head (before ", " / " - " / "(") alone when it names a family; discipline vetoes (psychology, mechanical, technician, guard, participants, study, data entry, annotation, …) count anywhere; golden set still 1.0/1.0 (in-sample). (s) H3 — dedupe tier 3 never merges titles of different level (intern/entry/senior).
+  Final-review deviations: (o) M1 — step 2 (work authorization) is no longer "unchanged": a residency phrase naming the user's region/"anywhere" ("must be based in EMEA") is not foreign auth, and a visa-sponsorship line does not count when the location is decisively worldwide or includes the user (a remote hire needs no visa); a foreign right-to-work phrase still disqualifies first. (p) H2 — a body worldwide phrase plus "located/reside/based/live in <place elsewhere>" → UNKNOWN 0.5. (q) M2/L9 — exclusion wording in the location ("Global (excluding US)") labels only the part before it, or excludes when it names the user; a WORLD location next to an ELSEWHERE title marker is MIXED → UNKNOWN 0.5 (spec: "any WORLD" wins). (r) M4 — `role_family_ok` judges the title's role head (before ", " / " - " / "(") alone when it names a family; discipline vetoes (psychology, mechanical, technician, guard, participants, study, data entry, annotation, …) count anywhere; golden set still 1.0/1.0 (in-sample). (s) H3 — dedupe tier 3 never merges titles of different level (intern/entry/senior). (t) Follow-up — a WORLD/USER location plus a body sentence restricting applicants only to places elsewhere → UNKNOWN 0.5 (spec: the location decides first).
 Unverified facts still in code: all 2027 round dates are `expected` extrapolations (Outreachy ~Feb 5–12, GSoC Mar 24–Apr 7 kept from the old table, LFX mid-Jan/Apr/Jul + 4 weeks); Himalayas freshness per listing (E1 used pubDate).
 
 ### Final review findings (CLOSED `96c10db` — outcomes in the pass log entry "Final review CLOSED")
@@ -275,6 +280,21 @@ Unverified facts still in code: all 2027 round dates are `expected` extrapolatio
   (in-sample); (5) S6 acceptance A/B/C ✓, today's shipped table → 0 program notifications with a
   reason per round ✓; (6) 14-day observation — starts after merge; (7) pre-existing tests pass or carry
   a one-line justification ✓. Nothing pushed; `main` untouched.
+- 2026-10-04 — **Dagi's follow-ups.** (1) Body restriction vs WORLD/USER location (`5819288`): tests first in
+  `tests/test_final_review.py` — the 3 reported cases FAILED (all positive), 5 guards passed. Rule: when the
+  location is WORLD or USER, a description sentence "must be based/located/reside/live in …", "candidates /
+  applicants in …", "residents of …" whose every part names a place outside the user's scope → UNKNOWN 0.5
+  ("Check eligibility"), evidence quotes the clause. Results: "Worldwide" + "open to candidates in the US and
+  Canada only" → UNKNOWN 0.5; "Worldwide" + "must reside in Europe or North America" → UNKNOWN 0.5; "Remote,
+  EMEA" + "Must be based in the United Kingdom." → REQUIRES_WORK_AUTH 0.85 (excluded) — its root cause was the
+  step-2 residency window running past the sentence end into the appended location text ("…kingdom. remote,
+  emea"); the window now stops at `.;:` / newline. M1 visa-sponsorship behaviour kept (guard test). Live run
+  `3bb7a4f9766a`: rule fired on 0 of 628 records; the same 9 selected; re-classification of stored rows 0 bad
+  (7 Sourcegraph positives unchanged). **309 passed.** (2) `origin/main` a39feaa (bot run) merged into the branch
+  (`b911406`, clean; `data/scout.db` identical to origin/main); suite 309 passed and re-classification 0 bad on
+  the merged DB; branch pushed. (3) Pending check (3) rewritten to merge by PR. FACT: local `main` is 4 ahead /
+  1 behind `origin/main`; the 4 (80ae5b6, b9e0e96, a6d4fae, 7ec0b85) are ancestors of next-iteration, so the PR
+  carries them; local `main` was not touched.
 
 ---
 
