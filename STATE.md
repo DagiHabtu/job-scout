@@ -3,7 +3,7 @@
 ## RESUME — next-iteration
 Branch: next-iteration      Last commit: d1f055e S8: add the canonical Greenhouse board (verified live: 310 jobs)
 Step in progress: final whole-branch review
-  Sub-progress: [ ] reviewer spawned on 7ec0b85..HEAD (fresh context, read-only)  [ ] findings → tests → fixes  [ ] end-of-pass STATE (pending human checks + exact commands)
+  Sub-progress: [x] reviewer spawned on 7ec0b85..HEAD at 48745df (fresh context, read-only; if the context is cleared before its report is recorded here, re-run it)  [ ] findings → tests → fixes  [ ] end-of-pass STATE (pending human checks + exact commands)
 Steps done and verified: S0 (6bcbce7, e4535c9), S1 (49aa593, dfd37ec — unit level; device confirmation pending), S2 (613e2a1, ed728ba — review closed), S3 (ab43dd8; acceptance seen in the S7 live run: new_grad 60), S4 (b34b338), S5 (452e3ed, 5ecb953 — review closed), S6 (5cd289f, 3e7d379 — review closed), S7 (ab4e919, 0ef22b7), S8 (d1f055e)
 Reviews: S2 closed, S5 closed, S6 closed, final open
 Next action: run the final whole-branch review (spec §11: general-purpose, same model, read-only; give it §5, §8, §9, §11 review brief, the diff 7ec0b85..HEAD and the tests), action findings test-first, then write the end-of-pass STATE.
