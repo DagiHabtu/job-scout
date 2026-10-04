@@ -864,6 +864,184 @@ of it.
 do them, and the exact commands for each (dispatch the workflow on the branch, confirm the issue
 arrived, merge). Nothing is merged to `main` and nothing is reported as pushed unless it was.
 
+## 12. Iteration 2 — delivery fix, stage fit, interest (added 2026-10-04 after the first delivered run)
+
+### What the first run showed
+
+Run `37200027560` on `next-iteration` delivered 9 items. Dagi read each posting. His labels, and what
+the stored text of each item contains (FACT, read from the branch's `data/scout.db`):
+
+| Item | Dagi's verdict | Evidence in the stored description | Score |
+|---|---|---|--:|
+| Junior Ubuntu Software Engineer — Canonical | relevant (reasonable stretch) | "Our junior career path caters for both new graduates and early careers engineers" | 1.00 |
+| Software Engineer Intern — Ritual | interesting | none (description 1,577 chars) | 1.00 |
+| Research Intern — Ritual | interesting | none (2,000 chars) | 0.95 |
+| Junior DevOps / Cloud Engineer — CloudCops | interesting | none (1,599 chars) | 0.87 |
+| Research Engineer Intern — Tether | interesting, too advanced | "MSc/PhD Internships at Tether…", "PhD internships at Tether…" | 0.84 |
+| Junior Linux Kernel Engineer — Canonical | apply — genuinely interesting, a stretch | "recent university graduates or early career professionals"; "prospective or recently graduated students" | 0.82 |
+| QA/QC Intern — Flowmingo | accessible, not interested in the work | none | 0.72 |
+| Graduate Software Engineer — Canonical | ineligible (graduate requirement) | "We are hiring 2025 and 2026 Graduate Software Engineers"; "Undergraduate degree in Computer Science…" | 0.68 |
+| CRM Developer — NightOwl Consulting | outside his interests (no CRM/Salesforce work) | "1+ years of hands-on Salesforce development" | 0.62 |
+
+Findings:
+
+- **Discovery works; selection lacks two dimensions.** Location eligibility was right on all 9. What
+  is missing is (a) whether the role's *candidate stage* fits an undergraduate, and (b) whether the
+  *work* is something Dagi wants.
+- **Three of the four misses are fact extraction, not taste.** Graduate-only, MSc/PhD, and a
+  years-of-experience requirement are stated in text the system already holds. That is the same kind
+  of problem as location eligibility and gets the same kind of solution: rules with quoted evidence.
+- **One miss is taste (QA).** The spec's `role_family_ok` listed `qa` as a technical family. Taste
+  belongs in the profile, not in code.
+- **`NEW_GRAD` conflated two things.** S3 mapped both "junior / early-career" and "graduate / new
+  grad" titles to it. For a current student they are different: the first is open, the second
+  requires a completed degree.
+- **The existing score already orders these well** (the three lowest scores are three of the four
+  misses). Nine points cannot set a threshold, so the score stays an ordering signal only.
+- **Limit:** several Himalayas descriptions are 1,500–2,000 characters and contain no requirements
+  text. Whether the API returns a truncated description is unverified. Where the text has no stage
+  evidence the system must say so, not assume a fit.
+- **Delivery failed.** The issue was created; no email reached Dagi. H4 (§1) is refuted for the
+  current account settings.
+
+### S9 — Delivery that does not depend on watch settings
+
+- **File:** `.github/workflows/scout.yml`.
+- **Logic:** in both `gh issue create` calls add `--assignee "${{ github.repository_owner }}"`, and
+  have `render_issue_md` / the heartbeat renderer end the body with
+  `cc @<owner>` (owner passed by env `GITHUB_REPOSITORY_OWNER`; omitted when unset, e.g. locally).
+  Assignment and mention are "participating" notifications, which GitHub sends regardless of
+  whether the owner watches the repository.
+- **Human check (Dagi), before and after:** open `https://github.com/notifications`. If the 2026-10-04
+  issue is listed there, GitHub did notify and only the email channel is off or misaddressed: in
+  Settings → Notifications enable Email for "Participating, @mentions and custom" and for
+  "Watching", confirm the default notification email is the one being checked and is verified, and
+  search the mailbox (including spam) for `notifications@github.com`. If the issue is not listed,
+  the repository was not being watched.
+- **Acceptance:** one dispatched run with `seed=true` → an email from GitHub arrives. If it still does
+  not after the settings above are confirmed, implement the Telegram fallback (bot token and chat id
+  as Actions secrets, `sendMessage` with the same Markdown, $0) and make it the primary channel.
+- **Depends on:** nothing. Do this first.
+
+### S10 — Stage fit (candidate-stage eligibility)
+
+- **Files:** `normalize.py`, `score.py`, `notify.py`, `config.py`, `config/profile.yaml`.
+- **No spine change:** results are carried in `Relevance.matched_signals` / `Relevance.concerns`
+  (existing string lists) with the prefix `stage:`, and in gate reason codes.
+- **Profile:** add
+  ```yaml
+  education:
+    status: "undergraduate"        # undergraduate | graduate
+    accept_graduate_programs: false
+    max_required_years: 2          # roles demanding more are not surfaced
+  ```
+- **`normalize.py`:** split `_ENTRY_TITLE`. Junior / jr / entry-level / early-career / associate-engineer
+  stay `NEW_GRAD`. Remove `graduate` and `new grad(uate)` from it; add
+  `_GRAD_PROGRAM_TITLE = r"\b(graduate|new[- ]grad(uate)?|recent graduate)\b(?!\s+(student|degree))"`,
+  not matching "undergraduate". A title matching it is still typed `NEW_GRAD` (it is an entry-level
+  full-time role) and is marked by `stage_fit` below.
+- **`score.py`:** `stage_fit(opp, profile) -> tuple[str, list[str]]` returning a verdict and the
+  quoted evidence sentences. Evaluate in this order, first match wins:
+  1. `advanced_degree` — the body states an MSc/PhD requirement:
+     `r"\b(ph\.?d|doctoral|m\.?sc|master'?s)\b"` within the same sentence as
+     `internship|intern|student|candidate|degree|enrolled|pursuing|required|must`, and that sentence
+     does **not** also contain `undergraduate|bachelor|high school|all backgrounds|or equivalent|preferred|a plus|nice to have`.
+     (Ritual's "people of all backgrounds … undergraduate and postgraduate degree" must not match.)
+  2. `graduate_only` — `_GRAD_PROGRAM_TITLE` matches the title, or the body matches
+     `r"\b(hiring|for)\s+(20\d\d\b[\s,and/&-]*)+\s*graduates?\b"`,
+     `r"\b(must|will)\s+have\s+(graduated|completed\s+(a|your)\s+(bachelor|undergraduate|degree))"`,
+     or `r"\bgraduat(ed|ing)\s+(by|in|before|between)\s+\w+\s+20\d\d"`; unless the same sentence or
+     the title also names early-career candidates without a degree condition
+     (`early[- ]career|junior|students?`). A bare "degree in Computer Science" requirement is **not**
+     `graduate_only` — most junior postings carry it and Dagi treats those as a reasonable stretch.
+  3. `experience_required` — the largest N in
+     `r"(\d+)\s*\+?\s*(?:[-–]\s*\d+\s*)?years?\b[^.]{0,60}\b(experience|hands-on|working|professional)"`
+     exceeds `profile.education.max_required_years`.
+  4. `stretch` — an N of 1..`max_required_years` was found. Kept; the sentence is shown.
+  5. `fits` — the body or title explicitly names students, interns, juniors or early-career
+     candidates.
+  6. `no_evidence` — none of the above. Kept; the notification says "requirements not present in
+     the feed text — check the posting".
+- **Gate (`notify.gate_reason`), inserted after `role_family` and before the eligibility branch:**
+  `graduate_only` and `accept_graduate_programs` false → reason `stage:graduate_only` (not
+  selected). `experience_required` → `stage:experience` (not selected). `advanced_degree` → selected
+  into the section "Aspirational", at most 2 per run (overflow reason `stage:advanced_cap`).
+  Stipend programs skip this check. Everything else proceeds to the eligibility branch unchanged.
+- **Rendering:** each item shows its stage verdict and the quoted evidence sentence under the
+  eligibility evidence.
+- **Why gate and not penalty:** a completed-degree requirement and a 3+ year requirement are stated
+  conditions Dagi cannot meet now, like a location that excludes him. An MSc/PhD internship is kept
+  visible but separate because he finds the work interesting and it shows where the field is.
+- **Tests:** table tests for each verdict including the four real sentences above; negatives:
+  "Bachelor's degree in CS or equivalent experience" → not `graduate_only`; "PhD preferred" → not
+  `advanced_degree`; "undergraduate" in a title → not a graduate program; "5 years in business"
+  (company age) → not `experience_required`.
+
+### S11 — Interest: taste in the profile, sections in the issue
+
+- **Files:** `config/profile.yaml`, `config.py`, `score.py`, `notify.py`, `tests/fixtures/golden_titles.csv`.
+- **Profile:** replace `target_roles` with what Dagi stated, and add an explicit not-interested list
+  (defaults below; Dagi edits them — this is config):
+  ```yaml
+  interests:
+    - "software engineering intern"
+    - "systems, infrastructure, cloud or DevOps engineering"
+    - "Linux, kernel or open source engineering"
+    - "machine learning or AI engineering"
+    - "technical research engineering"
+    - "frontend, backend or full-stack software engineering"
+  not_interested: ["qa", "qc", "quality assurance", "manual testing", "crm", "salesforce"]
+  strong_interest_terms: ["linux", "kernel", "systems", "infrastructure", "compiler", "embedded",
+                          "distributed", "machine learning", "ml", "ai", "research", "open source"]
+  ```
+  Confirmed by Dagi 2026-10-04: the not-interested list is his current preference, not an absolute
+  exclusion; frontend and backend roles are not to be eliminated (they are not his long-term target
+  but he will apply to strong ones); aspirational roles stay visible, capped at 2, clearly separated
+  from actionable ones.
+  `target_roles` remains accepted as an alias of `interests` so existing configs load.
+- **`score.py`:** `embed_similarity` compares the title against `profile.interests` (unchanged
+  mechanism). Remove `qa` from the `role_family_ok` family regex; taste is no longer encoded there.
+  Add `interest_veto(opp, profile) -> str | None`: the first `not_interested` term matching the
+  **title** on a word boundary — unless the title also matches a `strong_interest_terms` entry, in
+  which case there is no veto and the item carries the note "matches '<term>' but also '<strong
+  term>'" (e.g. "QA Automation Engineer, Linux Kernel" stays in "Apply"). This is how "not an
+  absolute exclusion when the role has unusual technical substance" is made deterministic; it reads
+  the title only, so it is a coarse proxy and the last section remains the safety net.
+- **Gate:** an item with an `interest_veto` is still selected, into the section "Eligible, outside
+  your stated interests", rendered as title-and-link lines only, at most 5 per run (overflow reason
+  `interest:cap`). It is not dropped: Dagi wants to keep seeing technical directions he has not
+  considered, and a one-line listing costs him nothing.
+- **Issue sections, in this order:** "Apply" (eligible, stage `fits`/`stretch`/`no_evidence`, no
+  veto; ordered by relevance score) · "Check eligibility" (unchanged) · "Aspirational" ·
+  "Eligible, outside your stated interests". Empty sections are omitted.
+- **Not built now, on purpose:** a model that learns from ticks. Nine labels cannot train anything;
+  the ticks persist in the issues and can be harvested once there are a few dozen. No score
+  threshold is introduced for the same reason.
+
+### Acceptance for iteration 2
+
+- **Regression fixture:** `tests/fixtures/first_run_2026-10-04.json` — the 9 stored records, copied
+  from the branch database, with Dagi's labels. Test asserts the section of each:
+  Junior Ubuntu, both Ritual roles, CloudCops, Junior Linux Kernel → "Apply";
+  Tether → "Aspirational"; QA/QC Intern and CRM Developer → "outside your stated interests";
+  Graduate Software Engineer → not selected, reason `stage:graduate_only`.
+  (All nine placements confirmed by Dagi on 2026-10-04.) Add two synthetic cases: "Junior Backend
+  Engineer" and "Frontend Engineer Intern", worldwide, no stage evidence → "Apply"; and "QA
+  Automation Engineer, Linux Kernel" intern → "Apply" with the note.
+- This fixture is fitted to the nine items it tests. It guards against regressions; it does not
+  measure generalisation. §8 criterion 6 (14 days, ≥60% ticked in "Apply") remains the real check,
+  now counted over the "Apply" section only.
+- The funnel shows the new reasons; `internship_funnel.rejected_samples` includes stage rejections
+  with their quoted sentence, so a wrong stage rejection is visible in the weekly heartbeat.
+- All existing tests pass or carry a one-line justification. `golden_titles.csv` is updated for the
+  `qa` change and its precision/recall re-reported.
+
+### Order
+
+S9 first (delivery is still unproven), then S10, then S11, on a new branch `iteration-2` cut from
+`main` after `next-iteration` is merged. Same execution mode as §11: one session, resume block,
+fresh-context review after S10 and at the end.
+
 ---
 
 ## Sources
