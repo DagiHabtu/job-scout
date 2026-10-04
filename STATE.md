@@ -1,5 +1,26 @@
 # STATE
 
+## RESUME — next-iteration
+Branch: next-iteration      Last commit: 1c086a1 docs(spec): §11 execution mode — one session, one pass, resumable
+Step in progress: S0
+  Sub-progress: [ ] filter_reason + hard_filter via it  [ ] gate_reason (interim)  [ ] RunSummary rejects/gate/by_type/by_eligibility/near_misses/internship_funnel/source report  [ ] data/funnel.md + workflow step summary  [ ] tests (invariants)  [ ] E1 probe script + run  [ ] local funnel run on a COPY of data/scout.db → table here
+Steps done and verified: none
+Reviews: S2 open, S5 open, S6 open, final open
+Next action: implement S0 in score.py / notify.py / pipeline.py (no behaviour change).
+Pending human checks: none yet
+Deviations from spec: none
+Unverified facts still in code: none yet
+
+### Pass log (next-iteration, single pass per spec §11)
+- 2026-10-04 — Pass started. Partial work found from earlier session: `.claude/settings.json`
+  has an uncommitted edit adding `claude-opus-5-5` to `availableModels` (harness config, not
+  spec work) — left uncommitted, untouched. No partial S0 code. Updated spec (§11 rewritten:
+  single session, single branch) moved from repo root into `docs/` and committed (`1c086a1`).
+  Branch `next-iteration` created from `main` @ `7ec0b85`. Baseline: **89 passed**.
+  §11 supersedes the per-step branches (`s0-funnel`, …) described in §Next iteration below.
+
+---
+
 Live cursor. Update at **every task boundary** — this is a deliverable of every dispatched agent,
 not an afterthought. This file, `PLAN.md`, `CLAUDE.md`, and the code are the source of truth —
 never the conversation.
