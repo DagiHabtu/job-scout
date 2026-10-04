@@ -7,8 +7,9 @@ Audience: Claude Code (implementer) and Dagi (owner). Investigated against repo 
 supply claim in §1 is rescoped to what the inspected sources show, and the MLH entry and its
 acceptance criterion in S6 are replaced (the live application form is for a batch whose deadline
 passed on 2026-08-31, so revision 1 would have notified a closed round). Consequent edits are in
-§3, S0, S2, S5, S6, E1, §7, §8 and §10. §11 (delegation: model per step, parallelism, review, gates)
-was added afterwards. Diagnosis C1–C8, architecture and step order are otherwise
+§3, S0, S2, S5, S6, E1, §7, §8 and §10. §11 (execution mode) was added afterwards; its current form is
+one session, one pass, resumable from `STATE.md`. Where §5's per-step gates say to wait for Dagi,
+§11 overrides them. Diagnosis C1–C8, architecture and step order are otherwise
 unchanged.
 
 Labels used throughout: **FACT** = observed directly (code, DB, live fetch, reproduced locally).
@@ -741,64 +742,127 @@ judged by a pipeline that can be trusted.
 
 ---
 
-## 11. Delegation
+## 11. Execution mode: one session, one pass, resumable
 
-The main Claude Code session is the orchestrator. It creates the subagents below in
-`.claude/agents/` with the pinned model and effort. If the harness cannot pin a model version or an
-effort level, the orchestrator reports which one and what it would substitute, and waits. It does
-not substitute silently.
+Revised 2026-10-04 (third version; supersedes the subagent roster and the four-session handoff).
+One Claude Code session, one model (the one Dagi launches — Opus 5.5), started from the `job-scout`
+folder. It implements every step in §10 order without waiting for Dagi, and keeps `STATE.md`
+current so the context can be cleared at any time and the work resumed from the files alone.
 
-| Role | Model, effort | Owns |
-|---|---|---|
-| orchestrator (main session) | Opus 5.5, medium | Sequencing, gates, live-fact verification, diff review, merges, the funnel-invariant check, the final end-to-end run |
-| hard-logic | Opus 4.8, high | S2, S5, S6 |
-| builder | Opus 4.6, high | S0, S1, S4, S7 |
-| mechanic | Sonnet 5.5, medium | S3, `_geo.py` data, fixtures, `golden_titles.csv`, `scripts/probe_himalayas.py`, S8, doc write-backs |
+Why this replaced the earlier versions:
 
-Why each step sits where it does:
+- Subagents under an orchestrator pay a cold start and a review per step. The plan is mostly serial
+  (steps share `score.py`, `notify.py`, `eligibility.py`), so that overhead buys almost no
+  parallelism, and model pinning failed in practice.
+- Four model-specific sessions removed the orchestrator but required three manual restarts with
+  model switches and three stops for Dagi. The only saving was running a cheaper model on the
+  mechanical steps (S3, data files, fixtures), which are a small share of the work.
+- A single session has no handoff loss and no pinning problem, and the strongest available model
+  writes every step, including the hard ones. Tiering exists to save cost; it does not raise
+  quality, and Dagi has said cost is not the constraint.
+- What a single session lacks is independent review. That is added back below as fresh-context
+  reviewers, which is the one place extra tokens buy quality.
 
-| Step | Owner | Reason |
-|---|---|---|
-| Gates, fact checks, review | orchestrator | Errors here are judgement errors that tests do not catch: accepting weak evidence, or missing a conflict between the spec and the repo. |
-| S2 eligibility by location | hard-logic | Rule ordering and gazetteer edge cases. A wrong rule silently hides real opportunities or passes ineligible ones. |
-| S5 scoring and notify gate | hard-logic | The gate is the precision core, and its reason codes must stay mutually exclusive for the funnel invariant to hold. |
-| S6 programs calendar | hard-logic | State, timing, staleness and identity-per-state interact. Revision 1 got this step wrong. |
-| S0 funnel | builder | Bounded and fully specified, but it touches three modules and must not change behaviour. |
-| S1 issue delivery and workflow | builder | Integration work. The step ordering that makes a failed delivery replay needs care, not invention. |
-| S4 seniority filter, dedupe by location | builder | Small, test-driven changes with reproductions already written. |
-| S7 Himalayas adapter | builder | Follows the existing adapter pattern; mapping and rate-limit handling are specified. |
-| S3 title regexes and profile | mechanic | Exact regexes are given; table-driven tests catch mistakes. |
-| `_geo.py` data, fixtures, golden set, probe script, S8, doc write-backs | mechanic | Mechanical and easy to verify. |
+No implementer subagents and no model switching: the main session writes all code. Run at the
+highest reasoning effort the session offers.
 
-Rules:
+### Independent review
 
-- **S0 is serial and first.** Nothing fans out before it merges (freeze before fan-out).
-- **Allowed parallel set, after S0:** S1 (`notify.py` renderer, workflow), S2 (`_geo.py`,
-  `eligibility.py`), S3 (`normalize.py`, profile), E1 probe (`scripts/`). Their files do not overlap.
-- **Serial, in this order:** S4 → S5 → S6 → S7. They share `score.py`, `notify.py` and
-  `eligibility.py`.
-- **`_geo.py` is split:** mechanic writes the country, region and city data; hard-logic writes
-  `_classify_location` and owns its tests, so a missing entry surfaces as a test failure there.
-- **Briefing:** each subagent receives its spec section verbatim, the files it may touch, the files
-  it may not touch, and its acceptance criteria. Every subagent's acceptance criteria include its
-  `STATE.md` write-back.
-- **Review:** the orchestrator reviews every diff against the spec before merging. Authors do not
-  approve their own work. For S2 and S6 the orchestrator also re-runs the acceptance checks itself:
-  the stored-row re-classification for S2, and Case A/B/C for S6.
-- **Escalation:** if builder fails a step's acceptance criteria twice, the step moves to hard-logic.
-  If hard-logic fails twice, the orchestrator stops and reports to Dagi with the failing evidence.
+After the acceptance criteria pass for **S2, S5 and S6** (the steps where a wrong rule looks like a
+pass), and once more for the whole branch at the end, spawn one reviewer subagent: the built-in
+general-purpose agent on the same model as the main session (no pinned agent definitions needed),
+read-only.
 
-Gates where the orchestrator stops and waits for Dagi:
+- Give it only: the spec section for the step, §9 (boundaries), the diff (`git diff <base>..HEAD`
+  for that step), and the test files. Do not give it your reasoning or your summary of the change.
+- Ask it for: places the code departs from the spec; inputs that would be classified wrongly, with
+  a concrete example each; reason codes that can overlap or be skipped; tests that pass without
+  testing the stated behaviour. Findings ranked by severity, each with a failing input.
+- For every finding: turn it into a test first. If the test fails, fix the code. If it passes,
+  record the finding as refuted with the test name.
+- Record in `STATE.md`: findings, which were confirmed, which were refuted, the commits that fixed
+  them. A step is "done and verified" only after its review is closed.
+- The final whole-branch review also checks the funnel invariant end to end and that §8 criteria
+  1, 2, 4, 5 and 7 hold.
 
-1. After S0: the funnel table from one manual workflow run, and the E1 probe output. S2 does not
-   start before Dagi has seen the reason split.
-2. After S1: Dagi confirms the test issue reached a real device. Otherwise the Telegram fallback is
-   built before continuing.
-3. S3: `target_roles` confirmed before `profile.yaml` is committed.
-4. E1 fails, or E2 passes (which needs a spine decision): stop and report.
+### Branch and commits
 
-The tiering is a judgement call, not a measurement: these models were not compared on this
-codebase. The escalation rule is the correction mechanism if an assignment turns out wrong.
+- All work on one branch, `next-iteration`. `main` is not touched in this pass, so the daily
+  scheduled run keeps its current behaviour until Dagi merges.
+- One or more commits per step, each message prefixed with the step id (`S0: ...`). Commit before
+  every `STATE.md` update so that `git log` and `STATE.md` never disagree.
+
+### The resume block
+
+`STATE.md` starts with a block in exactly this shape, rewritten (not appended) at every checkpoint:
+
+```
+## RESUME — next-iteration
+Branch: next-iteration      Last commit: <hash> <subject>
+Step in progress: <S-id or "none">
+  Sub-progress: [x] done item  [ ] remaining item ...
+Steps done and verified: S0 (<hash>), S1 (<hash>), ...
+Reviews: S2 <open|closed>, S5 <open|closed>, S6 <open|closed>, final <open|closed>
+Next action: <one sentence>
+Pending human checks: <list, see below>
+Deviations from spec: <list or "none">
+Unverified facts still in code: <list or "none">
+```
+
+Checkpoints, all mandatory:
+
+1. When a step starts: set "Step in progress" and write its sub-progress checklist.
+2. After each commit inside a step: tick the checklist.
+3. When a step's acceptance criteria pass: move it to "done and verified" with the commit hash and
+   the evidence (numbers) in the step log below the block; set the next action.
+
+### Resuming after a cleared context
+
+Read CLAUDE.md, PLAN.md, STATE.md and this spec. Run `git status`, `git log -8` and the tests. If
+the resume block and `git log` disagree, git is the truth: fix the block first. Re-run the
+acceptance check of the last step marked done; if it fails, that step is reopened. Then continue
+from "Next action". Uncommitted changes found on resume belong to the step in progress: inspect
+them, then either finish and commit them or discard them, and say which in the step log.
+
+### What does not stop the pass
+
+These were gates in earlier versions. They are now recorded under "Pending human checks" and the
+pass continues:
+
+- **Funnel reason split (S0).** Produce it with a local run against a copy of `data/scout.db`
+  (never the committed file), record the table in `STATE.md`, continue. S2 does not depend on it:
+  S2 rests on C4, which was reproduced directly.
+- **Delivery confirmation (S1).** Implement and unit-test S1. Dagi confirms on a real device after
+  the pass, by dispatching the workflow on the branch. If it fails, the Telegram fallback is the
+  first follow-up.
+- **`target_roles` (S3).** Ship the default list in S3; Dagi may edit it later. It is config.
+- **E1 probe.** Run it at the start. Pass → build S7. Fail, or the network is unavailable → skip
+  S7, record why, continue.
+- **Live facts** (OFAC list, programs table, `canonical` token). Verify if the session has network
+  access. Anything it could not verify stays in the conservative state the spec already defines
+  (`UNKNOWN`, round not added, board not added) and is listed under "Unverified facts".
+- **E2** is not part of this pass.
+
+### What does stop the pass
+
+- A step appears to need a frozen-spine change.
+- The repo contradicts the spec in a way that changes a decision (not merely a fact).
+- Anything that would cost money.
+- A step fails its acceptance criteria after two honest attempts: stop, leave the evidence in
+  `STATE.md`.
+
+### When to clear the context
+
+Safe at any checkpoint. Recommended at step boundaries, after a step is marked done and verified:
+in particular after S1, after S4 (before the gate work in S5), and after S6. A fresh context that
+re-reads the spec section for the next step works from the source text, not from a compacted memory
+of it.
+
+### End of the pass
+
+`STATE.md` lists every step with its evidence, the pending human checks in the order Dagi should
+do them, and the exact commands for each (dispatch the workflow on the branch, confirm the issue
+arrived, merge). Nothing is merged to `main` and nothing is reported as pushed unless it was.
 
 ---
 
