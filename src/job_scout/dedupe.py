@@ -11,6 +11,7 @@ choice is rapidfuzz (C-backed token_set_ratio) — a drop-in swap flagged in STA
 
 from __future__ import annotations
 
+import re
 from dataclasses import fields as dataclass_fields
 from difflib import SequenceMatcher
 
@@ -21,6 +22,15 @@ _FUZZY_THRESHOLD = 0.90  # conservative: only near-identical titles within one c
 
 def _canon_company(c: str) -> str:
     return content_fingerprint(c, "", None)  # reuse the canonicaliser for a stable company key
+
+
+def _level(title: str) -> tuple[str, ...]:
+    """The title's level tokens (intern / entry / senior). "Junior X" and "Senior X" are ~0.9 similar
+    but are different roles — tier 3 never merges across levels (final review H3)."""
+    from .normalize import _ENTRY_TITLE, _INTERN_TITLE, _SENIOR_TITLE
+
+    levels = {"intern": _INTERN_TITLE, "entry": _ENTRY_TITLE, "senior": _SENIOR_TITLE}
+    return tuple(name for name, rx in levels.items() if rx.search(title))
 
 
 def _merge(into: Opportunity, other: Opportunity) -> Opportunity:
@@ -90,7 +100,8 @@ def dedupe(opps: list[Opportunity]) -> list[Opportunity]:
         bucket = per_company.setdefault(ckey, [])
         dup_of = None
         for existing in bucket:
-            if SequenceMatcher(None, existing.title.lower(), opp.title.lower()).ratio() >= _FUZZY_THRESHOLD:
+            if (_level(existing.title) == _level(opp.title)
+                    and SequenceMatcher(None, existing.title.lower(), opp.title.lower()).ratio() >= _FUZZY_THRESHOLD):
                 dup_of = existing
                 break
         if dup_of is not None:

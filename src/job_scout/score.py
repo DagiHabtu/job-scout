@@ -172,14 +172,33 @@ _ROLE_VETO = re.compile(
     r"(engineering|product|program|project|account|office) managers?|participants?|stud(y|ies)|"
     r"annotat(or|ion)|data entry|keyer|service desk|help ?desk|business development|social (growth|media)|"
     r"customer (research|service|experience)|opportunities|ad quality|professional services|needed|"
-    r"financial|business analyst|operations analyst|mechanical|civil|chemical|policy|psychology|technician)\b",
+    r"financial|business analyst|operations analyst|mechanical|civil|chemical|policy|psychology|technician|guard)\b",
     re.IGNORECASE,
 )
 
 
+# Veto words that are never a team name, so they count anywhere in the title ("Research Assistant
+# (Psychology)", "Mac Users Needed").
+_DISCIPLINE_VETO = re.compile(
+    r"\b(psychology|mechanical|civil|chemical|technician|guard|participants?|stud(y|ies)|needed|"
+    r"data entry|keyer|annotat(or|ion))\b",
+    re.IGNORECASE,
+)
+_TITLE_QUALIFIER = re.compile(r",\s|\s[-–—|]\s|\(|:\s")
+
+
 def role_family_ok(title: str) -> bool:
-    """True when the title names a technical role family and no non-technical veto word."""
-    return bool(_ROLE_FAMILY.search(title or "")) and not _ROLE_VETO.search(title or "")
+    """True when the title names a technical role family and no non-technical veto word.
+
+    The role head (text before the first ", " / " - " / "(") is judged on its own when it names a
+    family, so a team-name suffix cannot veto it ("Backend Engineer Intern, People Platform" — final
+    review M4). A head with no family word ("Intern, Software Engineering") falls back to the whole title.
+    """
+    title = title or ""
+    head = _TITLE_QUALIFIER.split(title, maxsplit=1)[0]
+    text = head if _ROLE_FAMILY.search(head) else title
+    return (bool(_ROLE_FAMILY.search(text)) and not _ROLE_VETO.search(text)
+            and not _DISCIPLINE_VETO.search(title))
 
 
 # --------------------------------------------------------------------------------------------- #

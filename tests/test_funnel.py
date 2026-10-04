@@ -78,7 +78,8 @@ def test_source_report_is_copied_into_the_run_record(tmp_path):
     src = FakeSource("reporting", [])
     src.report = {"round-x": "deadline_passed"}
     s = run_once(_cfg(tmp_path), [src])
-    assert s.sources["reporting"] == {"ok": True, "count": 0, "report": {"round-x": "deadline_passed"}}
+    # skipped_records added by the final review (M5, spec §6)
+    assert s.sources["reporting"] == {"ok": True, "count": 0, "skipped_records": 0, "report": {"round-x": "deadline_passed"}}
 
 
 def test_filter_reason_codes():

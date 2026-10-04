@@ -70,6 +70,18 @@ US_STATES: frozenset[str] = frozenset({
     "wyoming",
 })
 
+# Provinces/states/areas outside the US that appear in location fields (final review M3: an
+# unrecognised place falls through to body text, which must not decide it).
+SUBNATIONAL: frozenset[str] = frozenset({
+    "ontario", "quebec", "québec", "british columbia", "alberta", "manitoba", "saskatchewan",
+    "nova scotia", "new brunswick", "newfoundland", "prince edward island",
+    "new south wales", "queensland", "victoria, australia", "western australia", "south australia", "tasmania",
+    "karnataka", "maharashtra", "telangana", "tamil nadu", "andhra pradesh", "kerala", "gujarat",
+    "haryana", "uttar pradesh", "west bengal",
+    "bavaria", "catalonia", "scotland", "england", "wales", "northern ireland",
+    "bay area", "silicon valley", "greater toronto area",
+})
+
 WORLDWIDE_TOKENS: frozenset[str] = frozenset({"worldwide", "global", "anywhere", "international"})
 
 # Cities seen in practice → country. Extend from the funnel's rejected samples.

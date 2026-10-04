@@ -1,7 +1,7 @@
 """S2 acceptance — re-classify every stored row with the current eligibility rules (read-only).
 
 A row FAILS when it gets a positive category although its location names only places outside the
-user's scope. The oracle is deliberately independent of the classifier: a location fails it when it
+user's scope, or its body requires residence in a named non-user country. The oracle is deliberately independent of the classifier: a location fails it when it
 contains none of the user/region/worldwide words and is not a plain "Remote".
 
 Usage:  PYTHONPATH=src python scripts/reclassify_stored.py [path/to/scout.db]
@@ -10,6 +10,7 @@ Usage:  PYTHONPATH=src python scripts/reclassify_stored.py [path/to/scout.db]
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import sys
 from collections import Counter
@@ -36,6 +37,15 @@ def names_only_elsewhere(location: str | None) -> bool:
     return not any(w in loc for w in _OPEN_WORDS)
 
 
+_BODY_ELSEWHERE = re.compile(
+    r"\b(?:located|reside|residing|based|live)\s+in\s+(?:the\s+)?(?:united states|us|u\.s\.|canada|united kingdom|uk)\b")
+
+
+def body_requires_elsewhere(description: str | None) -> bool:
+    """Independent check (final review L7): the body requires residence in a named non-user country."""
+    return _BODY_ELSEWHERE.search((description or "").lower()) is not None
+
+
 def reclassify(db_path: str) -> tuple[list[dict], Counter]:
     profile = AppConfig.load("config/profile.yaml").profile
     rows = sqlite3.connect(db_path).execute("SELECT raw FROM opportunities").fetchall()
@@ -50,7 +60,7 @@ def reclassify(db_path: str) -> tuple[list[dict], Counter]:
         )
         e = classify_eligibility(o, profile)
         before = (d.get("eligibility") or {}).get("category")
-        bad = e.category in POSITIVE and names_only_elsewhere(o.location_raw)
+        bad = e.category in POSITIVE and (names_only_elsewhere(o.location_raw) or body_requires_elsewhere(o.description))
         counts[(before, e.category.value)] += 1
         results.append({"title": o.title, "company": o.company, "location": o.location_raw, "before": before,
                         "after": e.category.value, "confidence": e.confidence, "bad": bad})
@@ -66,7 +76,7 @@ def main() -> int:
     for r in positives:
         print(f"  + {r['title']} @ {r['company']} | {r['location']} → {r['after']} {r['confidence']}")
     bad = [r for r in results if r["bad"]]
-    print(f"positive rows whose location names only non-user places: {len(bad)}")
+    print(f"positive rows whose location or body names only non-user places: {len(bad)}")
     for r in bad:
         print(f"  ! {r['title']} | {r['location']} → {r['after']}")
     return 1 if bad else 0

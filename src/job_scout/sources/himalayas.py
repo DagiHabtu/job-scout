@@ -109,6 +109,7 @@ class HimalayasSource:
         return jobs
 
     def fetch(self, cfg: SourceConfig) -> list[Opportunity]:
+        self.skipped_records = 0                       # malformed records skipped (§6)
         queries = self._queries if self._queries is not None else list(cfg.himalayas_queries)
         self.report = {}
         if not queries:
@@ -130,6 +131,7 @@ class HimalayasSource:
                     opp = _to_opportunity(job)
                 except Exception as exc:
                     log.warning("himalayas: skipping malformed listing: %r", exc)
+                    self.skipped_records += 1
                     continue
                 if opp.ats_job_id in seen:              # the four queries overlap
                     continue

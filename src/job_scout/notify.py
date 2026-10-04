@@ -257,8 +257,9 @@ def render_funnel_md(rec: dict) -> str:
     for name, s in rec.get("sources", {}).items():
         status = "ok" if s.get("ok") else f"FAILED: {s.get('error', '')}"
         report = "; ".join(f"{k}: {v}" for k, v in (s.get("report") or {}).items())
-        src_rows += f"| {_md(name)} | {_md(status)} | {s.get('count', '—')} | {_md(report)} |\n"
-    out.append("| source | status | fetched | report |\n|---|---|--:|---|\n" + src_rows)
+        src_rows += (f"| {_md(name)} | {_md(status)} | {s.get('count', '—')} | {s.get('skipped_records', 0)} "
+                     f"| {_md(report)} |\n")
+    out.append("| source | status | fetched | skipped | report |\n|---|---|--:|--:|---|\n" + src_rows)
 
     merged = rec["discovered"] - rec["after_dedupe"]
     out.append(

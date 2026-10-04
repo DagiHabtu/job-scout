@@ -113,6 +113,9 @@ def _brief(opp: Opportunity) -> dict:
     }
 
 
+_KNOWN = {"not_new", "already_notified"}   # already-seen records are not "rejected"
+
+
 def _internship_funnel(target_raw: list[Opportunity], kept_ids: set[int], reason_of: dict[int, str | None]) -> dict:
     """Outcome of every fetched internship/stipend record: `merged` (folded into another record by
     dedupe), its filter or gate reason, or `notified`. Few fetched → coverage problem; many fetched
@@ -125,7 +128,7 @@ def _internship_funnel(target_raw: list[Opportunity], kept_ids: set[int], reason
             continue
         reason = reason_of.get(id(o))
         outcomes[reason or "notified"] += 1
-        if reason and len(samples) < _MAX_SAMPLES:
+        if reason and reason not in _KNOWN and len(samples) < _MAX_SAMPLES:   # real rejections only (L4)
             b = _brief(o)
             samples.append({
                 "title": b["title"], "company": b["company"], "location": b["location"], "reason": reason,
@@ -155,7 +158,9 @@ def _discover(sources: list[Source], cfg: AppConfig) -> tuple[list[Opportunity],
             if not opp.provenance:
                 opp.provenance = [Provenance(source=src.name, url=opp.apply_url, first_seen=now)]
             raw.append(opp)
-        results[src.name] = {"ok": True, "count": len(opps)}
+        results[src.name] = {"ok": True, "count": len(opps),
+                             # malformed records the source skipped (§6) — so "0" is never ambiguous
+                             "skipped_records": int(getattr(src, "skipped_records", 0) or 0)}
         # Optional, protocol-free: a source may explain records it deliberately did not emit.
         report = getattr(src, "report", None)
         if isinstance(report, dict) and report:

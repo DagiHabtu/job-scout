@@ -94,10 +94,12 @@ class AshbySource:
                 opps.append(_to_opportunity(job, company))
             except Exception as exc:  # one malformed job never aborts the org
                 log.warning("ashby: skipping malformed job in org %s: %r", org, exc)
+                self.skipped_records += 1
         log.info("ashby: org %s → %d jobs", org, len(opps))
         return opps
 
     def fetch(self, cfg: SourceConfig) -> list[Opportunity]:
+        self.skipped_records = 0                       # malformed records skipped (§6)
         orgs = self._orgs if self._orgs is not None else list(cfg.ashby_orgs)
         if not orgs:
             log.info("ashby: no orgs configured")

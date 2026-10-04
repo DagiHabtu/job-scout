@@ -24,3 +24,10 @@ def test_no_stored_row_is_positive_on_an_elsewhere_location(monkeypatch):
     assert names_only_elsewhere("Bangalore, India") and names_only_elsewhere("Remote, France")
     assert not names_only_elsewhere("Remote") and not names_only_elsewhere("Remote, EMEA")
     assert names_only_elsewhere("Remote, South Africa") and names_only_elsewhere("Remote - Anywhere in the US")
+
+
+def test_body_residency_oracle():
+    from reclassify_stored import body_requires_elsewhere
+
+    assert body_requires_elsewhere("we do require successful candidates to be located in the United States")
+    assert not body_requires_elsewhere("Come build with us. Teammates are located in Africa.")

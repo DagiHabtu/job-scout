@@ -3,6 +3,18 @@
 Rewritten for S6 (the round/program data model changed: state, dated evidence, per-state identity,
 no fixed LEAD_DAYS). The pipeline-level Case A/B/C acceptance lives in
 tests/test_known_programs_acceptance.py.
+
+The seven pre-S6 tests, one line each (spec §8 criterion 7):
+- test_round_is_surfaced_only_within_its_window → fixed LEAD_DAYS gone; now per-state leads in
+  test_lead_windows_by_state.
+- test_expired_round_is_skipped_for_the_next_one → now test_deadline_boundaries (+ report reason).
+- test_outreachy_open_window_surfaces_as_stipend_program → Case A in the acceptance file (synthetic
+  program; the shipped Outreachy round is `expected`, not open).
+- test_opening_soon_phrasing_before_open_date → titles are per state now: test_titles_per_state.
+- test_quiet_period_surfaces_nothing_today_dates → test_shipped_table_is_valid_and_quiet_on_2026_10_04.
+- test_best_fit_stipend_surfaces_below_threshold_but_unknown_does_not → threshold no longer gates
+  programs (S5); UNKNOWN programs are now surfaced as "Check eligibility" — Case C in the acceptance file.
+- test_program_ranks_top_tier_and_notifies_through_the_pipeline → Case A in the acceptance file.
 """
 
 from __future__ import annotations
