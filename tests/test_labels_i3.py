@@ -92,9 +92,10 @@ def test_workflow_never_interpolates_comment_or_issue_text():
     assert "github.event.comment.body" not in wf and "github.event.issue.body" not in wf
     assert "$GITHUB_EVENT_PATH" in wf
     assert "issue_comment" in wf and "github.repository_owner" in wf and "'scout'" in wf
-    assert "group: scout-state" in wf and "pull --rebase" in wf
+    # branch review M4: a shared concurrency group cancels pending runs → labels has none and retries its push
+    assert "concurrency:" not in wf and "pull --rebase" in wf and "for attempt in" in wf
     scout = (ROOT / ".github" / "workflows" / "scout.yml").read_text(encoding="utf-8")
-    assert "group: scout-state" in scout and "pull --rebase" in scout
+    assert "group: scout-state" in scout and "pull --rebase" in scout and "for attempt in" in scout
 
 
 def test_seed_file_matches_appendix_a():

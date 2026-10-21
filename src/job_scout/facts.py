@@ -74,6 +74,19 @@ def _section(text: str, headings: tuple[str, ...], n: int) -> str | None:
     return _cut(body, n) or None
 
 
+def _around(sentence: str) -> str:
+    """A long (flattened) sentence cut to `_LOCATION_MAX` chars around its location statement, which can
+    sit far past the start (EWOR: offset 685 of 953 — branch review M3)."""
+    if len(sentence) <= _LOCATION_MAX:
+        return sentence
+    m = _LOCATION.search(sentence) or next((p for p in _PLACE_BASED.finditer(sentence)
+                                            if p.group(1).lower() in _PLACES), None)
+    start = max(0, m.start() - 40) if m else 0
+    if start:
+        start = sentence.find(" ", start) + 1 or start   # begin on a word
+    return ("…" if start else "") + _cut(sentence[start:], _LOCATION_MAX)
+
+
 def _is_location(sentence: str) -> bool:
     return bool(_LOCATION.search(sentence)
                 or any(m.group(1).lower() in _PLACES for m in _PLACE_BASED.finditer(sentence)))
@@ -92,7 +105,7 @@ def key_facts(opp: Opportunity) -> dict[str, str]:
         facts["pay"] = snippet if verdict == "stated" else f"{verdict}" + (f" — {snippet}" if snippet else "")
     if m := _HOURS.search(text):
         facts["hours"] = m.group(0)
-    sentences = [_cut(s.strip(), _LOCATION_MAX) for s in _SENTENCE.findall(text) if _is_location(s)]
+    sentences = [_around(s.strip()) for s in _SENTENCE.findall(text) if _is_location(s)]
     if sentences:
         facts["location"] = " ".join(sentences[:2])
     return facts

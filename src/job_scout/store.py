@@ -15,10 +15,10 @@ import hashlib
 import json
 import sqlite3
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from enum import Enum
 
-from .models import Lifecycle, Opportunity
+from .models import EmploymentType, Lifecycle, Opportunity, Provenance, RemoteStatus
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS opportunities (
@@ -111,6 +111,40 @@ def first_seen_of(conn: sqlite3.Connection, opps: list[Opportunity]) -> list[dat
     for opp in opps:
         row = conn.execute("SELECT first_seen FROM opportunities WHERE key = ?", (_identity_key(opp),)).fetchone()
         out.append(datetime.fromisoformat(row["first_seen"]) if row else None)
+    return out
+
+
+def _deserialize(raw: str) -> Opportunity:
+    """A stored record's source fields (eligibility/relevance are re-derived by the pipeline)."""
+    d = json.loads(raw)
+    day = lambda v: date.fromisoformat(v[:10]) if v else None  # noqa: E731
+    return Opportunity(
+        title=d["title"], company=d["company"], apply_url=d["apply_url"], canonical_url=d["canonical_url"],
+        ats_provider=d.get("ats_provider"), ats_job_id=d.get("ats_job_id"),
+        content_fingerprint=d.get("content_fingerprint") or "", location_raw=d.get("location_raw"),
+        remote_status=RemoteStatus(d.get("remote_status") or "unknown"),
+        employment_type=EmploymentType(d.get("employment_type") or "unknown"),
+        description=d.get("description") or "", technologies=d.get("technologies") or [],
+        posting_date=day(d.get("posting_date")), deadline=day(d.get("deadline")), salary_raw=d.get("salary_raw"),
+        salary_is_estimated=bool(d.get("salary_is_estimated")),
+        provenance=[Provenance(p["source"], p["url"], datetime.fromisoformat(p["first_seen"]) if p.get("first_seen") else None)
+                    for p in d.get("provenance") or []],
+        history=d.get("history") or [],
+    )
+
+
+def pending_stored(conn: sqlite3.Connection, since: date, fetched: list[Opportunity]) -> list[Opportunity]:
+    """Never-notified records first seen on or after `since` that this run did not fetch (status ACTIVE):
+    a weekday deferral must still reach Monday's digest when Monday's fetch no longer returns it
+    (spec 2026-10-21 §4.6 pending pool; branch review H1)."""
+    seen = {_identity_key(o) for o in fetched}
+    out = []
+    for row in conn.execute("SELECT key, first_seen, raw FROM opportunities WHERE notified_at IS NULL"):
+        if row["key"] in seen or datetime.fromisoformat(row["first_seen"]).date() < since:
+            continue
+        opp = _deserialize(row["raw"])
+        opp.status = Lifecycle.ACTIVE
+        out.append(opp)
     return out
 
 

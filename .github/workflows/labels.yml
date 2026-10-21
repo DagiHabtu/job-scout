@@ -10,10 +10,9 @@ on:
   issue_comment:
     types: [created]
 
-# Shares the state group with the scout run: both commit to the repo, so they never overlap.
-concurrency:
-  group: scout-state
-  cancel-in-progress: false
+# No concurrency group: GitHub keeps only ONE pending run per group and cancels the older one, so a
+# shared group would silently drop a reply (or the daily scout run) — branch review M4. Instead the commit
+# step retries: on a push race it resets to the remote and re-appends this comment's lines.
 
 permissions:
   contents: write  # commit data/labels.jsonl
@@ -50,10 +49,16 @@ jobs:
         run: |
           git config user.name "job-scout[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- data/labels.jsonl
-          git commit -m "labels: reply on issue #$ISSUE"
-          git pull --rebase
-          git push
+          for attempt in 1 2 3 4 5; do
+            git add -- data/labels.jsonl
+            git commit -m "labels: reply on issue #$ISSUE"
+            if git pull --rebase && git push; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            git fetch origin && git reset --hard "origin/${GITHUB_REF_NAME}"
+            sleep $((attempt * 5))
+            PYTHONPATH=src python -m job_scout.labels --event "$GITHUB_EVENT_PATH" --out data/labels.jsonl               --error-file "$RUNNER_TEMP/label_error.md"
+          done
+          exit 1
 
       # A reaction, not a reply: no email for a successful label.
       - name: React to the comment

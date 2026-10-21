@@ -432,6 +432,7 @@ def render_funnel_md(rec: dict) -> str:
         "| stage | count |\n|---|--:|\n"
         f"| discovered | {rec['discovered']} |\n"
         f"| merged by dedupe | {merged} |\n"
+        f"| pending from earlier runs, not fetched now | {rec.get('carried', 0)} |\n"
         f"| rejected by hard filter | {sum(rec.get('rejects', {}).values())} |\n"
         f"| survived | {rec['after_filter']} |\n"
         f"| not selected at notify gate | {sum(rec.get('gate', {}).values())} |\n"

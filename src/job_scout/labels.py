@@ -22,7 +22,10 @@ DECISIONS = ("apply", "maybe", "skip")
 _SEPARATORS = re.compile(r"[·;,\s]+")
 _RANGE = re.compile(r"(\d+)-(\d+)")
 _MAP = re.compile(r"<!-- scout-items (\{.*?\}) -->")
-_ITEM = re.compile(r"^(\d+)\. \[(.+?)\]\(.*?\)(?: — ([^·\n]+))?", re.MULTILINE)
+# The company is the text up to " · " or the next " — " (an outside-interest line may end with
+# " — eligibility not confirmed — …", which is not a company: branch review L1).
+_ITEM = re.compile(r"^(\d+)\. \[(.+?)\]\(.*?\)(?: — ((?:(?! — )[^·\n])+))?", re.MULTILINE)
+_NOTE = "eligibility not confirmed"
 
 
 class LabelParseError(ValueError):
@@ -34,22 +37,30 @@ def item_map_of(issue_body: str) -> dict[str, str]:
     m = _MAP.search(issue_body or "")
     if not m:
         raise LabelParseError("this issue has no item map (`<!-- scout-items … -->`), so its numbers cannot be read")
-    return json.loads(m.group(1))
+    try:
+        return json.loads(m.group(1))
+    except json.JSONDecodeError as exc:
+        raise LabelParseError(f"this issue's item map could not be read ({exc})") from None
 
 
-def parse_label_comment(comment: str, item_map: dict[str, str]) -> list[tuple[str, str]]:
+def parse_label_comment(comment: str, item_map: dict[str, str], named: frozenset[str] = frozenset()
+                        ) -> list[tuple[str, str]]:
     """[(record key, decision)] in item order. Grammar (case-insensitive; separators `·` `;` `,` and
     whitespace): a verb (apply|maybe|skip) followed by item numbers, ranges `2-4`, `all`, or `rest` —
-    the items this comment does not name otherwise. A later mention of an item wins."""
+    the items neither this comment nor an earlier one (`named` keys) names. A later mention wins."""
     chosen: dict[int, str] = {}
     rest: str | None = None
     verb: str | None = None
     bad: list[str] = []
     numbers = sorted(int(n) for n in item_map)
+    used = True   # did the current verb get any items? ("apply 1 maybe" is an error: branch review L2)
     for tok in (t for t in _SEPARATORS.split((comment or "").lower()) if t):
         if tok in DECISIONS:
-            verb = tok
+            if not used:
+                bad.append(f"{verb} (no items after it)")
+            verb, used = tok, False
             continue
+        used = True
         if verb is None:
             bad.append(tok)
             continue
@@ -66,8 +77,10 @@ def parse_label_comment(comment: str, item_map: dict[str, str]) -> list[tuple[st
             chosen.update((n, verb) for n in wanted)
         else:
             bad.append(tok)
+    if not used and (chosen or rest is not None or bad):
+        bad.append(f"{verb} (no items after it)")
     if rest is not None:
-        chosen.update((n, rest) for n in numbers if n not in chosen)
+        chosen.update((n, rest) for n in numbers if n not in chosen and item_map[str(n)] not in named)
     if bad:
         raise LabelParseError("Not understood: " + ", ".join(f"`{b}`" for b in bad))
     if not chosen:
@@ -76,14 +89,17 @@ def parse_label_comment(comment: str, item_map: dict[str, str]) -> list[tuple[st
 
 
 def label_lines(issue_body: str, comment: str, *, issue: int | None = None, comment_id: int | None = None,
-                now: datetime | None = None) -> list[dict]:
-    """The `labels.jsonl` lines for one comment on one delivery issue."""
+                now: datetime | None = None, earlier: list[dict] = ()) -> list[dict]:
+    """The `labels.jsonl` lines for one comment on one delivery issue. `earlier`: lines already stored;
+    those from the same issue are "named", so this comment's `rest` leaves them alone (branch review M1)."""
     item_map = item_map_of(issue_body)
-    shown = {n: (t, (c or "").strip() or None) for n, t, c in _ITEM.findall(issue_body)}
+    shown = {n: (t, None if (c or "").strip().startswith(_NOTE) else (c or "").strip() or None)
+             for n, t, c in _ITEM.findall(issue_body)}
     when = (now or datetime.now(timezone.utc)).date().isoformat()
     number_of = {k: n for n, k in item_map.items()}
     out = []
-    for key, decision in parse_label_comment(comment, item_map):
+    named = frozenset(ln["key"] for ln in earlier if issue is not None and ln.get("issue") == issue)
+    for key, decision in parse_label_comment(comment, item_map, named):
         title, company = shown.get(number_of[key], (None, None))
         out.append({"key": key, "title": title, "company": company, "decision": decision, "labelled_at": when,
                     "source": "issue-comment", "issue": issue, "comment_id": comment_id})
@@ -114,7 +130,7 @@ def main(argv: list[str] | None = None) -> int:
     issue, comment = event.get("issue") or {}, event.get("comment") or {}
     try:
         lines = label_lines(issue.get("body") or "", comment.get("body") or "", issue=issue.get("number"),
-                            comment_id=comment.get("id"))
+                            comment_id=comment.get("id"), earlier=read_labels(args.out))
     except LabelParseError as exc:
         Path(args.error_file).write_text(f"Job Scout could not read this reply. {exc}\n", encoding="utf-8")
         return 2

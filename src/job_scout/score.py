@@ -354,7 +354,7 @@ _ROLE_FAMILY = re.compile(
     # bare data/analyst/analytics removed (spec 2026-10-21 §4.3): "Video Data Collector", "Antifraud Analyst"
     r"\b(engineer(ing)?|developer|programmer|software|data (engineer(ing)?|scien(ce|tist)s?|platform|infrastructure)|"
     r"machine learning|ml|ai|devops|sre|site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|"
-    r"scientist|security|research|"            # `qa` removed (§12 S11): taste lives in the profile
+    r"scientist|(cyber)?security|research|"            # `qa` removed (§12 S11): taste lives in the profile
     r"embedded|computer vision|database|"
     r"linux|kernel|compiler)\b",               # "QA Intern, Linux Kernel" is technical (final review M1)
     re.IGNORECASE,
@@ -454,14 +454,17 @@ _UNPAID_TITLE = re.compile(r"\b(unpaid|volunteer)\b", re.IGNORECASE)
 _UNPAID_BODY = re.compile(
     r"\b(this|it)\s+(is|will be)\s+an?\s+(unpaid|volunteer)\b|\bunpaid\s+(internship|role|position)\b|"
     r"\bvolunteer\s+(role|position)\b", re.IGNORECASE)
-_CONTINGENT = re.compile(r"\b(goal|performance)[- ]based\b", re.IGNORECASE)
-_CONTINGENT_NEAR = re.compile(r"compensation|paid", re.IGNORECASE)
+# "not an unpaid internship", "Unlike an unpaid internship" (branch review M1).
+_NEGATED = re.compile(r"\b(not|no|never|unlike|instead of)\W+(\w+\W+){0,2}$", re.IGNORECASE)
+# A performance-based *bonus* is extra pay, and "paid time off" is not pay (branch review M2).
+_CONTINGENT = re.compile(r"\b(goal|performance)[- ]based\b(?!\s+bonus)", re.IGNORECASE)
+_CONTINGENT_NEAR = re.compile(r"\b(compensation|paid)\b(?!\s+(time off|leave|holidays?|vacation))", re.IGNORECASE)
 _STIPEND = re.compile(r"\bstipend\b", re.IGNORECASE)
 _CURRENCY = r"(?:US\$|\$|USD\s?|€|EUR\s?|£)"
 _AMOUNT = rf"{_CURRENCY}\s?\d[\d,.]*k?"
 _STATED = re.compile(
     rf"{_AMOUNT}(?:\s?(?:-|–|to)\s?{_CURRENCY}?\s?\d[\d,.]*k?)?(?:\s?(?:USD|EUR|GBP))?"
-    r"\s?(?:/|per|a)\s?(?:hour|hr|week|month|mo|year|yr)\b"
+    r"\s?(?:/|per|an?)\s?(?:hour|hr|week|month|mo|year|yr)\b"
     r"|\d[\d,.]*\s?\$\s?/\s?(?:hr|hour)\b", re.IGNORECASE)
 # Not pay: a budget or allowance amount ("learning and development budget of USD 2,000 per year", Canonical).
 _NOT_PAY = re.compile(r"\b(budget|allowance|reimburse\w*)\b[^.]{0,20}$", re.IGNORECASE)
@@ -471,7 +474,8 @@ def pay_of(opp: Opportunity) -> tuple[str, str | None]:
     """(verdict, quoted snippet) from the title and description: unpaid | contingent | stipend | stated |
     unstated."""
     title, body = opp.title or "", opp.description or ""
-    m = _UNPAID_TITLE.search(title) or _UNPAID_BODY.search(body)
+    m = _UNPAID_TITLE.search(title) or next(
+        (b for b in _UNPAID_BODY.finditer(body) if not _NEGATED.search(body[max(0, b.start() - 40): b.start()])), None)
     if m:
         return "unpaid", m.group(0)
     for m in _CONTINGENT.finditer(body):
@@ -479,7 +483,7 @@ def pay_of(opp: Opportunity) -> tuple[str, str | None]:
             return "contingent", body[max(0, m.start() - 40): m.end() + 40].strip()
     stated = next((m for m in _STATED.finditer(body) if not _NOT_PAY.search(body[max(0, m.start() - 60): m.start()])),
                   None)
-    if _STIPEND.search(body):
+    if any(not _NEGATED.search(body[max(0, s.start() - 40): s.start()]) for s in _STIPEND.finditer(body)):
         return "stipend", stated.group(0) if stated else "stipend"
     if stated:
         return "stated", stated.group(0)
