@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: acceptance 5.1 (tests/test_labels_2026_10_21.py) → 5.2–5.4 → whole-branch review.
+Step in progress: whole-branch review (fresh-context, read-only) running. Then: pending human checks (below).
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`) · review 4.6 CLOSED (`65f21ad`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`) · review 4.6 CLOSED (`65f21ad`) · 5.1 (`f13c664`) · 5.2 · 5.3.
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -189,6 +189,16 @@ Deviations from spec (iteration 3):
   **Finding for the human checks (not in the spec):** GitHub runs `issue_comment` workflows from the *default branch*
   only, so `labels.yml` cannot react to a reply before it is on `main`; the "reply on the test issue" check (§5.4) has
   to happen after merge.
+- 2026-10-21 — **Acceptance 5.1–5.3.** 5.1 `tests/test_labels_2026_10_21.py` (`f13c664`, 38 tests): 36 records from
+  the fixture, current-adapter type (`_employment` for internship-typed Himalayas) and marker (`Worldwide` →
+  `NO_RESTRICTION_LISTED`) reconstructed, NEW, today 2026-10-21, real profile, lexical scoring, uncapped. Result =
+  §2 exactly: Apply 4 records (Canonical ×2, CloudCops ×2) · Check eligibility 9 (Ritual ×2, Emetlab, Avary, GitLab
+  ×2, Affidea Innovation, Affidea DevOps, ArchWell) · Aspirational 1 (Tether) · Outside 5 (Vantum, Makerble Tester,
+  NightOwl CRM, Affidea QA, Resilio) · not selected 17 with the Appendix A reasons (EWOR: `seniority_title:head`,
+  `not_target_class`; micro1: `eligibility:remote_excludes_user`). All 11 picked items selected; no deviation.
+  5.2 all pre-existing tests pass; the changed ones carry a one-line justification (listed per step above).
+  **639 passed.** 5.3 see the 4.5 entry (role 71%, asks 89%, picked facts printed).
+  5.4 **not run** — it needs the branch pushed and a real issue posted: a human check (below).
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
