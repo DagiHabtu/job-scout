@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: 4.3.
+Step in progress: 4.4.
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -70,6 +70,13 @@ Deviations from spec (iteration 3):
   "must be based in <place>" is caught earlier as REQUIRES_WORK_AUTH 0.85 (pre-existing, still disqualifying).
   Gate (4.2): no hole found; side effect for Dagi — unverified new-grads share the 5-per-run "Check eligibility"
   cap with UNKNOWN internships, so they can push internships out (`unknown_cap`). Spine: no drift. **521 passed.**
+- 2026-10-21 — **4.3 done** (`c40b9bd`). Tests first (`tests/test_role_family_i3.py`: the 4 skipped titles failed).
+  `_ROLE_FAMILY` drops bare data/analyst/analytics, adds `data (engineer(ing)?|scien(ce|tist)s?|platform|
+  infrastructure)`. Calibrate on golden_titles.csv (in-sample): before P 1.000 / R 1.000 → after R 0.964, one
+  positive missed: "Staff Data Analyst" — relabelled 0 (contradicts Appendix A xp-da "Data Analyst" → skip,
+  role_family; cited in the commit) → P 1.000 / R 1.000. Stored rows (380): role_family_ok drops 6 titles, adds
+  none — Antifraud Analyst Junior, Global Treasury Analyst, Staff Data Analyst, Teaching Assistant: Supply Chain
+  Analyst, Video Data Collector (Smartphone), Data Analyst - Remote, Contact. **531 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
