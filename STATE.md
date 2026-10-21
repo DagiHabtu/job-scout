@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: 4.7.
+Step in progress: 4.5.
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -91,6 +91,11 @@ Deviations from spec (iteration 3):
   based Incentives", a non-target role; contingent does not gate), 355 unstated. Pre-existing test changed:
   `test_interest_s11::test_outside_interests_rendered_as_title_and_link_only` (the line now ends "— <company>").
   Deviation i3-f. **549 passed.**
+- 2026-10-21 — **4.7 done** (`b6dc285`). Tests first (`tests/test_small_fixes_i3.py`, 3 failed). Himalayas
+  `_employment`: "Intern" → INTERNSHIP only when the title matches neither `co-?founder` nor
+  `normalize._SENIOR_TITLE` (both EWOR titles now fall through; Flowai "Senior … Intern" too — normalize re-types
+  it INTERNSHIP, so it still reaches `pay:unpaid`). `_NOT_REQUIREMENT` += operational|operating|established.
+  Stored rows (380), stage verdict old vs new: 1 change — Mimidentalclinic experience_required → fits. **553 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
