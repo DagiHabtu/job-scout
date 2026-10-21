@@ -1,6 +1,15 @@
 # STATE
 
-## RESUME — closed out (2026-10-04)
+## RESUME — iteration 3 (started 2026-10-21)
+Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iteration-3`, cut from `main` @ `06dc4c6`
+(scheduled run 2026-10-21; local `main` fast-forwarded to `origin/main` first). Baseline: **439 passed**
+(`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
+Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
+Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
+Step in progress: first writes.
+Do not merge to or push `main`; Dagi merges.
+
+## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
 Status: **both iterations merged to main** — next-iteration (PR #2 → bc4154c) and iteration-2 (PR #4 → 40c3559). **Nothing is in flight.** The daily scheduled run on main now runs the iteration-2 code.
 Delivery: **CONFIRMED** — Dagi received the GitHub email for the seeded run on 2026-10-04 (S9 acceptance met; the Telegram fallback is not needed).
@@ -570,6 +579,17 @@ calibration pass — do not act on them unilaterally.
     location-reject vs type/experience-reject counts (currently only one post-filter "survived" count
     is logged); (b) the digest overwrite-on-quiet-run (already logged §Known defects); (c) revisit
     whether entry/intern coverage should widen — but that is a coverage decision, not a bug.
+- 2026-10-21 — **Observation-period review (due 2026-10-18), with Dagi's labels for all 35 delivered
+  items.** Apply 6 · maybe 5 · skip 24 (docs/SPEC-2026-10-21-iteration-3.md Appendix A;
+  data/labels.jsonl). Zero issue checkboxes ticked in 17 days: the checkbox label channel produced no data;
+  the review happened through a triage page with per-item summaries. Ongoing feed: 2 of 23 "Apply" items
+  picked as apply (6 of 23 apply or maybe); Oct 4 backlog run: 5 of 9. Causes of skipped "Apply" items:
+  Himalayas adapter writes "Worldwide" for an empty locationRestrictions (Still open (2)); bare
+  data/analyst role words; unpaid roles (Dagi: pay matters; his one off-interest pick was chosen for pay);
+  EWOR co-founder roles typed Intern. Recall checked against heartbeats #6/#11/#19: rejected samples all
+  correct; near-misses all already delivered; one wrong stage:experience ("20+ years operational").
+  Supply after precision fixes ≈ 1 strong item/week (inference, 14 days). Cadence decided: weekly Monday
+  digest + urgent-only daily. Next: iteration 3 (docs/SPEC-2026-10-21-iteration-3.md).
 
 ---
 
