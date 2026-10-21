@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: 4.5 — WIP `2706f56`: src/job_scout/facts.py written (not yet tested). TODO: tests/test_facts_i3.py (unit cases + coverage acceptance asks ≥80%, role ≥70% on the Appendix A bodies), print the 11 picked items' facts into the pass log, then commit. Interpretation to record: role also stops at the next known heading; curly ’ normalised.
+Step in progress: 4.6 (not started) — weekly digest, urgent-only daily, numbered items; then the 4.6 review.
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -96,6 +96,47 @@ Deviations from spec (iteration 3):
   `normalize._SENIOR_TITLE` (both EWOR titles now fall through; Flowai "Senior … Intern" too — normalize re-types
   it INTERNSHIP, so it still reaches `pay:unpaid`). `_NOT_REQUIREMENT` += operational|operating|established.
   Stored rows (380), stage verdict old vs new: 1 change — Mimidentalclinic experience_required → fits. **553 passed.**
+- 2026-10-21 — **4.5 done** (`2706f56` + `9eb2a35`). `src/job_scout/facts.py` `key_facts(opp)`; tests
+  `tests/test_facts_i3.py` (12). Interpretations: `role` also stops at the next known heading (spec says so only
+  for `asks`); curly ’ normalised to ' before matching; a heading tail "in you" / "to Succeed" is dropped (Canonical
+  "What we are looking for in you", Emetlab "What You'll Need to Succeed"); "<word>-based" counts as a location
+  only when the word is in the `_geo` gazetteer (stored bodies: Performance-based ×15, Linux-based ×7, LLM-based …
+  vs US ×14, UK, India, EU, Barcelona). `pay` text = the §4.4 snippet for `stated`, else "<verdict> — <snippet>".
+  Coverage on the 35 stored Appendix A bodies (one per label): **role 25/35 (71%) · asks 31/35 (89%)** · pay 8 ·
+  hours 3 · location 10. No role: avary, affidea-devops, affidea-innov, gitlab-eoi, gitlab-sec, ewor-dev, banco,
+  ewor-cmo, vantum, affidea-qa. No asks: gitlab-eoi, gitlab-sec, banco, c1-ta (the GitLab EOI bodies have none
+  of the headings). Facts for the 11 picked items, for Dagi to judge:
+  - `canon-kernel` Junior Linux Kernel Engineer - Ubuntu — Canonical
+    - role: Collaborate regularly and proactively with a globally distributed team Learn from senior mentors to demystify the inner workings of the Linux kernel and how it is distributed Work closely with external silicon, cloud, or hardware manufacturer…
+    - asks: Well-organized and motivated self-starter able to thrive in a remote work environment Professional manner with colleagues, business partners, and the open-source community Ability to communicate effectively in English, both written and verbal Programming experience in C and/or Rust Familiarity with version control practices, ideally with git…
+    - location: Location: We have home-based Kernel Teams in every timezone.
+  - `canon-ubuntu` Junior Ubuntu Software Engineer — Canonical
+    - role: Based on the first round of interviews, we identify specific teams where you might be an excellent fit and conduct second-round interviews with those teams. Our engineers are: Designing, building and shipping software in Rust, Go, Python and C/C++…
+    - asks: An exceptional academic track record from both high school and university Undergraduate degree in Computer Science or STEM, or a compelling narrative about your alternative path Drive and a track record of going above and beyond expectations A passion for open source software Experience with Rust, Go, Python, Flutter or C/C++ Professional written…
+    - location: Location : We have remote roles open in every time zone.
+  - `ritual-research` Research Intern — Ritual
+    - role: Prototype new mechanisms, then work to productionize your research Work at the frontier of modern cryptographic schemes and open-source AI Collaborate closely with our engineering and product team to ensure your research has real-world impact…
+    - asks: Intellectually curious about the latest advancements in machine learning, cryptography, and how they intersect Desire to see your research go beyond academic papers and have a tangible impact Experience with taking research projects or experiments from ideation to prototype code, or implementation either on your own or coordinating with…
+  - `emetlab` Junior Software Engineer — Emetlab
+    - role: Write clean, well-tested code that contributes to Emetlab 's core platform, data pipelines, and internal tooling. Collaborate with senior engineers on the design and implementation of new features across our contributor platform, quality assurance…
+    - asks: A degree in Computer Science, Software Engineering, or a related discipline, or equivalent practical experience through bootcamps, self-directed learning, or personal projects. Foundational knowledge of at least one programming language such as Python, C#, TypeScript, or JavaScript. Familiarity with web development fundamentals including APIs…
+  - `avary` Data Scientist Intern — Avary.ai
+    - asks: Currently pursuing or recently completed a degree in Computer Science, Data Science, Statistics, Mathematics, Artificial Intelligence, Machine Learning , or a related technical field. Strong analytical and problem-solving skills. Experience with Python and common data analysis libraries such as Pandas and NumPy. Working knowledge of SQL and…
+  - `vantum` QA Tester — Vantum
+    - asks: You notice when software is wrong, and you can describe it without a developer sitting next to you. You should be able to: Follow a flow from start to finish. Include empty states, errors, and the second time through. Write a bug report a stranger can follow. Steps, expected result, actual result. Tell a display problem from a data problem. The…
+    - pay: $500 to $1,000 USD per month
+    - location: At least three hours of weekday overlap with Bangkok (GMT+7), so we can review bugs the same day. Tell us your timezone, your weekday overlap with Bangkok, when you can start, how many hours a week you can give, and your expected monthly pay.
+  - `ritual-swe` Software Engineer Intern — Ritual
+    - role: Prototype rapidly, iterate and execute quickly based on technical guidance Work at the frontier of modern cryptographic schemes and open-source AI Release your work into the open-source world and build alongside the Ritual community
+    - asks: Intellectually curious around intersections of interdisciplinary fields ranging from game theory to cryptography to machine learning Quick iteration and development cycles on writing and/or proof-of-concept
+  - `gitlab-eoi` Backend, Frontend, and Fullstack Engineering Expression of Interest Form — GitLab: (nothing found)
+  - `gitlab-sec` Security Engineer Expression of Interest Form — GitLab: (nothing found)
+  - `cloudcops` Junior DevOps / Cloud Engineer — CloudCops
+    - role: Bau und Pflege von CI/CD-Pipelines in GitHub Actions und / oder GitLab CI Infrastructure-as-Code mit Terraform / Terragrunt – von Green-field bis Brown-field Betrieb & Tuning von Kubernetes-Clustern (AWS EKS, GKE, AKS oder on-prem) Einführung von…
+    - asks: Leidenschaft für Cloud-Technologien & Automatisierung; du verstehst unseren Ethos "Everything-as-Code". Erste Hands-on-Erfahrung mit einer großen Cloud (AWS, GCP, Azure o. Ä.) Solides Git-, Linux- und Shell-Know-how Lernhunger & Neugier: Du probierst gern neue Tools aus und teilst dein Wissen offen Teamspirit, Kommunikationsfreude (Deutsch oder…
+  - `affidea-innov` Junior Digital Innovation Engineer — Affidea BV
+    - asks: Bachelor's degree or diploma in Computer Science, Software Engineering, Information Technology, or a related field, OR a completed coding bootcamp / equivalent self-taught portfolio demonstrating comparable practical ability. 0-3 years' professional software development or technical research experience; recent graduates and career-changers with a…
+  **565 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
