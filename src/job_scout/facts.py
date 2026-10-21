@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import re
 
+from . import _geo
 from .models import Opportunity
 from .score import pay_of
 
@@ -27,10 +28,16 @@ _STOP_HEADINGS = ROLE_HEADINGS + ASKS_HEADINGS + _OTHER_HEADINGS
 ROLE_MAX, ASKS_MAX = 250, 350
 
 _HOURS = re.compile(r"\d+\s*(?:[-–]|to)?\s*\d*\s*\+?\s*(hours|hrs)\s*(/|per|a)\s*week", re.IGNORECASE)
-# The §4.1 location shapes (a capitalised place: "based in Europe", "US-based", "Remote (EMEA)") or a
-# working-hours/timezone statement.
+# The §4.1 location shapes (a capitalised place: "based in Europe", "Remote (EMEA)") or a
+# working-hours/timezone statement; "<place>-based" separately, since most "-based" words in the stored
+# bodies are not places ("Performance-based", "Linux-based", "LLM-based").
 _LOCATION = re.compile(r"\b(?:based|located|resid(?:e|ing|ent)|living)\s+in\s+(?:the\s+)?[A-Z]|"
-                       r"\b[A-Z][A-Za-z.]*-based\b|\bRemote\s*\(|\btime ?zones?\b|\boverlap\b|\b(?:GMT|UTC|CET)\b")
+                       r"\bRemote\s*\(|\btime ?zones?\b|\boverlap\b|\b(?:GMT|UTC|CET)\b")
+_PLACE_BASED = re.compile(r"\b([A-Z][A-Za-z.]*)-based\b")
+_PLACES = (_geo.COUNTRIES | _geo.REGIONS_EXCLUDING_AFRICA | _geo.REGIONS_INCLUDING_AFRICA | _geo.US_STATES
+           | set(_geo.CITIES))
+# A heading's tail ("What we are looking for in you", "What You'll Need to Succeed") is not content.
+_HEADING_TAIL = re.compile(r"^(?:in you|to succeed)\b", re.IGNORECASE)
 _SENTENCE = re.compile(r"[^.!?\n]+[.!?]?")
 _LOCATION_MAX = 200
 
@@ -62,8 +69,14 @@ def _section(text: str, headings: tuple[str, ...], n: int) -> str | None:
         return None
     begin = hit[0] + len(hit[1])
     nxt = _earliest(text, _STOP_HEADINGS, begin)
-    body = text[begin: nxt[0] if nxt else len(text)].lstrip(" :–—-\n").strip()
+    body = _HEADING_TAIL.sub("", text[begin: nxt[0] if nxt else len(text)].lstrip())
+    body = body.lstrip(" :–—-\n").strip()
     return _cut(body, n) or None
+
+
+def _is_location(sentence: str) -> bool:
+    return bool(_LOCATION.search(sentence)
+                or any(m.group(1).lower() in _PLACES for m in _PLACE_BASED.finditer(sentence)))
 
 
 def key_facts(opp: Opportunity) -> dict[str, str]:
@@ -79,7 +92,7 @@ def key_facts(opp: Opportunity) -> dict[str, str]:
         facts["pay"] = snippet if verdict == "stated" else f"{verdict}" + (f" — {snippet}" if snippet else "")
     if m := _HOURS.search(text):
         facts["hours"] = m.group(0)
-    sentences = [_cut(s.strip(), _LOCATION_MAX) for s in _SENTENCE.findall(text) if _LOCATION.search(s)]
+    sentences = [_cut(s.strip(), _LOCATION_MAX) for s in _SENTENCE.findall(text) if _is_location(s)]
     if sentences:
         facts["location"] = " ".join(sentences[:2])
     return facts
