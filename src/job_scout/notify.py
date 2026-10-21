@@ -19,6 +19,7 @@ from html import escape
 from pathlib import Path
 
 from .config import AppConfig
+from .eligibility import UNSTATED_EVIDENCE
 from .models import EligibilityCategory, EmploymentType, Lifecycle, Opportunity
 from .score import interest_of, role_family_ok, stage_of
 
@@ -30,6 +31,7 @@ UNKNOWN_INTERN_CAP = 5     # "Check eligibility" internships per run (stipend pr
 ASPIRATIONAL_CAP = 2       # advanced-degree (MSc/PhD) roles per run (§12 S10)
 OUTSIDE_INTERESTS_CAP = 5  # title-and-link lines for eligible roles outside the stated interests (§12 S11)
 _TARGET_CLASS = frozenset({EmploymentType.INTERNSHIP, EmploymentType.NEW_GRAD})
+UNVERIFIED_CONFIDENCE = 0.6  # UNKNOWN at/above this = "unverified" (spec 2026-10-21 §4.2)
 
 
 def gate_reason(opp: Opportunity, threshold: float) -> str | None:
@@ -38,8 +40,10 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
 
     already_notified → not_new → stipend program (positive or UNKNOWN eligibility → selected; never
     dropped for uncertainty) → not_target_class (not INTERNSHIP/NEW_GRAD) → role_family (title is not
-    a technical role) → eligibility: positive → selected; UNKNOWN internship → selected under "Check
-    eligibility" (capped per run by `gate_reasons`); UNKNOWN new-grad → eligibility_unknown.
+    a technical role) → eligibility: positive → selected; unverified (UNKNOWN ≥ 0.6, spec 2026-10-21 §4.2)
+    → selected under "Check eligibility" for internships and new-grad roles; other UNKNOWN internship →
+    selected under "Check eligibility"; other UNKNOWN new-grad → eligibility_unknown. "Check eligibility"
+    is capped per run by `gate_reasons`.
 
     `threshold` stays in the signature (frozen) but is no longer consulted: relevance orders items,
     it does not gate them (C3).
@@ -69,6 +73,8 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
     if cat in _POSITIVE:
         return None
     if cat == EligibilityCategory.UNKNOWN:
+        if opp.eligibility is not None and opp.eligibility.confidence >= UNVERIFIED_CONFIDENCE:
+            return None   # unverified: aggregator-only evidence, surfaced as uncertain (never as eligible)
         return None if opp.employment_type == EmploymentType.INTERNSHIP else "eligibility_unknown"
     return "eligibility_negative"   # a low-confidence disqualifier that survived the hard filter
 
@@ -78,9 +84,10 @@ def gate_reasons(opps: list[Opportunity], threshold: float) -> list[str | None]:
     internships in "Check eligibility" (`unknown_cap`), "Aspirational" (`stage:advanced_cap`), "Eligible,
     outside your stated interests" (`interest:cap`). The best title matches are kept."""
     out = [gate_reason(o, threshold) for o in opps]
+    # unverified new-grad roles share the "Check eligibility" cap with UNKNOWN internships (§4.2)
     capped = [
         i for i, (o, r) in enumerate(zip(opps, out))
-        if r is None and o.employment_type == EmploymentType.INTERNSHIP and section_of(o) == CHECK_ELIGIBILITY
+        if r is None and o.employment_type in _TARGET_CLASS and section_of(o) == CHECK_ELIGIBILITY
     ]
     for i in sorted(capped, key=lambda i: -_title_fit(opps[i]))[UNKNOWN_INTERN_CAP:]:
         out[i] = "unknown_cap"
@@ -213,6 +220,13 @@ _POSITIVE = frozenset({
 
 
 _UNCONFIRMED = "eligibility not confirmed — check it before applying"
+UNSTATED_LINE = "No location restriction listed on Himalayas or in the posting. Confirm before applying."
+
+
+def _unstated(opp: Opportunity) -> bool:
+    """The aggregator marker with a silent body (spec 2026-10-21 §4.2)."""
+    e = opp.eligibility
+    return bool(e and e.category == EligibilityCategory.UNKNOWN and UNSTATED_EVIDENCE in e.evidence)
 
 
 def _positive(opp: Opportunity) -> bool:
@@ -239,7 +253,9 @@ def _issue_item(opp: Opportunity) -> str:
     if opp.deadline:
         lines.append(f"  - deadline: {opp.deadline.isoformat()}")
     e = opp.eligibility
-    if e is not None:
+    if e is not None and _unstated(opp):
+        lines.append(f"  - eligibility: {UNSTATED_LINE}")
+    elif e is not None:
         lines.append(f"  - eligibility: **{e.category.value}** (confidence {e.confidence:.2f})")
         lines += [f"    - {x}" for x in e.evidence]
     if not _positive(opp) and section_of(opp) != CHECK_ELIGIBILITY:

@@ -96,6 +96,7 @@ _WORLDWIDE = (
 USER, WORLD, BARE, ELSEWHERE, OTHER = "USER", "WORLD", "BARE", "ELSEWHERE", "OTHER"
 # The aggregator's "no restriction listed" marker (spec 2026-10-21 §4.1): like BARE, the body decides.
 UNSTATED = "UNSTATED"
+UNSTATED_EVIDENCE = "Himalayas lists no location restriction; the posting states none"
 
 _SEGMENT_SPLIT = re.compile(r";|\||/| or | and ")
 _EDGE_CHARS = " \t-–—,:()[]."
@@ -593,7 +594,7 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
     # 5) No decisive signal — honestly unknown. Surfaced, never dropped. (d) of spec 2026-10-21 §4.1: 0.6
     #    for the aggregator marker, 0.5 for a bare "Remote", 0.3 for no location.
     if loc is not None and loc[0] == UNSTATED:
-        ev.append("Himalayas lists no location restriction; the posting states none")
+        ev.append(UNSTATED_EVIDENCE)
         return Eligibility(EligibilityCategory.UNKNOWN, 0.6, ev)
     if loc is not None and loc[0] == BARE:
         ev.append(f"{where} is plain 'Remote' with no stated scope — eligibility unknown")
