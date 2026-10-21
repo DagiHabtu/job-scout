@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: review of 4.6 (fresh-context, read-only) → then 4.8.
+Step in progress: review of 4.6 running (fresh-context, read-only); 4.8 done meanwhile → acceptance 5.1 next.
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -158,7 +158,22 @@ Deviations from spec (iteration 3):
   near misses skip already_notified / not_new / deferred:weekly. Pre-existing tests changed (one-line justification
   inline): test_delivery ×3 (numbered format; near misses now exclude seen records), test_final_review_i2 d3 + test_gate_review_s5
   l3 (cap 10), test_interest_s11 ×2 + test_pay_i3 + test_stage_s10 (numbered / `**Stage:**` format; first-run
-  regression pins `every_run` — it loads the weekly profile). **576 passed.**
+  regression pins `every_run` — it loads the weekly profile). **576 passed.** Follow-up `f5ac17d`:
+  test_delivery_s9 expects one `gh issue create` step now (heartbeat step removed).
+- 2026-10-21 — **4.8 done** (`057750b`). `src/job_scout/labels.py` (stdlib only): `parse_label_comment(comment,
+  item_map)`; tokens split on `·` `;` `,` and whitespace; a verb sets the decision for the following numbers /
+  ranges / `all` / `rest`; `rest` = items this comment does not name otherwise (resolved at the end, so `skip rest,
+  apply 1` works); a later mention wins; a token before any verb, an unknown number or range, or no decision →
+  `LabelParseError` listing the tokens. "A later comment replaces earlier decisions" = `labels.jsonl` is append-only
+  and `latest()` takes the last line per key. Comment lines also carry `issue`, `comment_id`, and the title/company
+  read from the numbered item line. `python -m job_scout.labels --event $GITHUB_EVENT_PATH --out … --error-file …`
+  (exit 2 + message on a parse error). `.github/workflows/labels.yml` per §4.8 (owner + `scout` label; event file only;
+  commit → pull --rebase → push; `+1` reaction via `gh api`, or the error posted with `--body-file`); scout.yml now
+  `concurrency: scout-state` and pulls with rebase before pushing. `data/labels.jsonl` seeded: 36 lines (35 labels,
+  CloudCops ×2 maybe). `scripts/label_report.py [--since D]`: latest label per key × section from the stored record;
+  on the seed it reads the stored rows' pre-iteration-3 classification, so it is not a measurement — use `--since`
+  the first weekly digest for criterion 5. Tests `tests/test_labels_i3.py` (21: grammar table, errors, injection-shaped
+  comments stored nowhere and executed never, workflow never interpolates comment/issue text, seed file). **597 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
