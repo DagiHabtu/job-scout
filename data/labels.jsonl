@@ -34,3 +34,4 @@
 {"key": "himalayas:https://himalayas.app/companies/vantum/jobs/qa-tester", "title": "QA Tester", "company": "Vantum", "decision": "apply", "labelled_at": "2026-10-21", "source": "triage-page"}
 {"key": "himalayas:https://himalayas.app/companies/affidea-bv/jobs/qa-and-uat-tester", "title": "QA and UAT Tester", "company": "Affidea BV", "decision": "skip", "labelled_at": "2026-10-21", "source": "triage-page"}
 {"key": "himalayas:https://himalayas.app/companies/resilio-partners/jobs/remote-ui-ux-reviewer-quality-assurance-qa", "title": "UI/UX Reviewer & QA", "company": "Resilio Partners", "decision": "skip", "labelled_at": "2026-10-21", "source": "triage-page"}
+{"key": "himalayas:https://himalayas.app/companies/mimidentalclinic/jobs/junior-software-engineer", "title": "Junior Software Engineer", "company": "Mimidentalclinic", "decision": "skip", "labelled_at": "2026-10-21", "source": "issue-comment", "issue": 20, "comment_id": 6326642130}
