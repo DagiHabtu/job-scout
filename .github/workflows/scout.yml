@@ -26,9 +26,9 @@ on:
         type: string
         default: ""
 
-# Only one scout run at a time — it commits state back, so overlapping runs would race on push.
+# Only one state-committing run at a time (this and labels.yml) — overlapping runs would race on push.
 concurrency:
-  group: scout
+  group: scout-state
   cancel-in-progress: false
 
 permissions:
@@ -127,6 +127,7 @@ jobs:
             echo "no state changes to commit"
           else
             git commit -m "scout: run $(date -u +%Y-%m-%dT%H:%MZ)"
+            git pull --rebase
             git push
           fi
 
