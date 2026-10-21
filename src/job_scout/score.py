@@ -347,8 +347,9 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
 # "AI study" posts, data entry/annotation, service desk, managers); the extra family terms from
 # missed technical titles. See STATE.md "Deviations from spec".
 _ROLE_FAMILY = re.compile(
-    r"\b(engineer(ing)?|developer|programmer|software|data|machine learning|ml|ai|devops|sre|"
-    r"site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|analyst|analytics|"
+    # bare data/analyst/analytics removed (spec 2026-10-21 §4.3): "Video Data Collector", "Antifraud Analyst"
+    r"\b(engineer(ing)?|developer|programmer|software|data (engineer(ing)?|scien(ce|tist)s?|platform|infrastructure)|"
+    r"machine learning|ml|ai|devops|sre|site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|"
     r"scientist|security|research|"            # `qa` removed (§12 S11): taste lives in the profile
     r"embedded|computer vision|database|"
     r"linux|kernel|compiler)\b",               # "QA Intern, Linux Kernel" is technical (final review M1)
