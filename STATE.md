@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: whole-branch review (fresh-context, read-only) running. Then: pending human checks (below).
-Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`) · review 4.6 CLOSED (`65f21ad`) · 5.1 (`f13c664`) · 5.2 · 5.3.
+Step in progress: none — build COMPLETE. Then: the end-of-pass checks ("Pending checks" below).
+Dagi (2026-10-21) asked Claude to run the git/GitHub commands (push, dispatch, PR, merge, test reply) itself.
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`) · review 4.6 CLOSED (`65f21ad`) · 5.1 (`f13c664`) · 5.2 · 5.3 · whole-branch review CLOSED (`e9ca7ef`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -39,6 +39,31 @@ Deviations from spec (iteration 3):
   (Canonical "learning and development budget of USD 2,000 per year" would read `stated`). The stipend snippet
   is the stated amount when there is one, else "stipend". "unstated" carries no `pay:` entry. `tester` is
   also in the `UserProfile` default `not_interested` (as i2-m) and in profile.example.yaml.
+  (i3-g) Branch review: §4.8 says both workflows share `concurrency: scout-state`; GitHub keeps only ONE
+  pending run per group and cancels the older pending one (even with cancel-in-progress: false), so a reply
+  or a scheduled scout run could be dropped silently. `labels.yml` has no group; its commit step retries 5×
+  (reset to remote, re-append this comment's lines). `scout.yml` keeps its group and retries its push 5×.
+  The two touch different files (labels.jsonl / scout.db), so a rebase never conflicts between them.
+  (i3-h) Branch review H1: the §4.6 pending pool also reads the STORE — never-notified records first seen
+  within 14 days that this run did not fetch are re-judged (eligibility, filter, score with today's rules,
+  status ACTIVE) and gated with the fetched ones (`store.pending_stored`). Funnel invariant becomes
+  `discovered + carried − merged − Σrejects − Σgate = notified`; funnel table row "pending from earlier runs".
+  (i3-i) `rest` in a later comment on the same issue skips items an earlier comment on it named.
+Pending checks (in order; Claude runs the commands, Dagi confirms only (c) of step 2):
+  1. `git push -u origin iteration-3`
+  2. `gh workflow run scout --ref iteration-3 -f seed=true -f today=2026-10-19` (this week's Monday — never a
+     future date: the stored `digest_date` would suppress that week's real digest), `gh run watch`. Check
+     (a) a "Job Scout weekly — N new — 2026-10-19" issue, (b) numbered items + a parseable hidden map
+     (`gh issue view <n> --json body`), (c) **Dagi: it reached a device (email / GitHub mobile).**
+     The run commits `data/scout.db` to `iteration-3` (its items are then marked notified there).
+  3. Merge by PR: `gh pr create --base main --head iteration-3 …`, `gh pr merge --merge`. On a
+     `data/scout.db` conflict keep the branch's copy (`git merge origin/main` on the branch,
+     `git checkout --ours data/scout.db`). Then realign local main: `git checkout main && git reset --hard origin/main`.
+  4. After merge (issue_comment workflows run from the default branch only): comment `apply 1 · skip rest` on
+     the step-2 issue as Dagi (`gh issue comment`), confirm the 👍 reaction (`gh api …/comments/<id>/reactions`)
+     and that `data/labels.jsonl` on main gained the lines.
+  5. Real test (§5.5): four Monday digests; Dagi replies to each; then `scripts/label_report.py` (≥ 60% of
+     Apply + Check eligibility labelled apply/maybe is the review threshold).
 
 ### Iteration-3 pass log
 - 2026-10-21 — **4.1 done** (`1f59601`). Tests first (`tests/test_eligibility_i3.py`; collection failed before the
@@ -199,6 +224,26 @@ Deviations from spec (iteration 3):
   5.2 all pre-existing tests pass; the changed ones carry a one-line justification (listed per step above).
   **639 passed.** 5.3 see the 4.5 entry (role 71%, asks 89%, picked facts printed).
   5.4 **not run** — it needs the branch pushed and a real issue posted: a human check (below).
+- 2026-10-21 — **Whole-branch review CLOSED** (fixes `e9ca7ef`). Two fresh-context read-only reviewers (one
+  started before a /clear, one re-run) on 06dc4c6..HEAD. Every finding → `tests/test_branch_review_i3.py` first:
+  **16 failed → confirmed → fixed.** H1 a weekday-deferred item not re-fetched on Monday was never delivered
+  (20 of 200 stored Himalayas records rolled off the feed within a week; GitLab Security EOI, labelled maybe, would
+  have been lost) → (i3-h). Pay: "not an unpaid internship" / "Unlike an unpaid internship" / "no stipend" were
+  unpaid/stipend → negation within 3 words before blocks it; "performance-based bonus" and "paid time off" made
+  salaried posts `contingent` → a bonus is not contingent, paid time off/leave is not pay; "$20 an hour" now
+  stated. Facts: a long flattened sentence's location fact now shows ±200 chars around the match (EWOR "based in
+  Europe…"). Labels: company stops before " — eligibility not confirmed"; "apply 1 maybe" is an error; a malformed
+  map is a parse error (reply), not a crash; `rest` across comments (i3-i). Role family: "Cybersecurity" counts.
+  Funnel: `deferred:weekly` is not a rejected sample. Workflows: (i3-g). Stored rows old→new: 31 of 380 change
+  — 30 location facts now centred on the match, 1 pay (NightOwl "Paid leave … Performance based Incentives"
+  contingent → unstated). Dry Monday run on a DB copy with no sources: 49 stored pending carried, 48 `role_family`,
+  1 delivered (Mimidentalclinic Junior SWE, fetched today anyway), invariant holds.
+  Recorded, not fixed: an Apply section has no cap, so a >65,536-char weekly body would fail `gh issue create`
+  every day (≈1–1.5 KB/item; today ~1 item/week); `label_report.py` measures a record's current section, not the
+  one it was delivered in, and its denominator is labelled items only (unlabelled items don't count against);
+  the injection unit test can't fail (the guard is the workflow grep test); "<place>-based <noun>" without an
+  article (e.g. "with US-based startups" is guarded, other nouns may not be) still excludes at 0.75; a title
+  "… Volunteer Platform" would read unpaid. **659 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
