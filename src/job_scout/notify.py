@@ -14,41 +14,54 @@ dependency; the file digest is the always-available default.
 
 from __future__ import annotations
 
+import json
 import os
+from datetime import date, datetime
 from html import escape
 from pathlib import Path
 
 from .config import AppConfig
+from .eligibility import UNSTATED_EVIDENCE
 from .models import EligibilityCategory, EmploymentType, Lifecycle, Opportunity
-from .score import interest_of, role_family_ok, stage_of
+from .facts import key_facts
+from .score import interest_of, pay_verdict, role_family_ok, stage_of
+from .store import _identity_key
 
 # Statuses that are worth telling the user about. ACTIVE (seen again, unchanged) is deliberately
 # excluded — re-announcing an unchanged posting is exactly the noise we are avoiding.
 _NOTIFIABLE = frozenset({Lifecycle.NEW, Lifecycle.UPDATED})
 
-UNKNOWN_INTERN_CAP = 5     # "Check eligibility" internships per run (stipend programs are outside it)
-ASPIRATIONAL_CAP = 2       # advanced-degree (MSc/PhD) roles per run (§12 S10)
+# Per-digest caps (spec 2026-10-21 §4.6: the weekly pool is larger than a day's)
+UNKNOWN_INTERN_CAP = 10    # "Check eligibility" items per digest (stipend programs are outside it)
+ASPIRATIONAL_CAP = 2       # advanced-degree (MSc/PhD) roles per digest (§12 S10)
 OUTSIDE_INTERESTS_CAP = 5  # title-and-link lines for eligible roles outside the stated interests (§12 S11)
+PENDING_DAYS = 14          # a never-notified record first seen this recently is still deliverable (§4.6)
+URGENT_DAYS = 14           # a deadline this close makes an item urgent: delivered on any day (§4.6)
+DEFERRED = "deferred:weekly"
 _TARGET_CLASS = frozenset({EmploymentType.INTERNSHIP, EmploymentType.NEW_GRAD})
+UNVERIFIED_CONFIDENCE = 0.6  # UNKNOWN at/above this = "unverified" (spec 2026-10-21 §4.2)
 
 
-def gate_reason(opp: Opportunity, threshold: float) -> str | None:
+def gate_reason(opp: Opportunity, threshold: float, *, pending: bool = False) -> str | None:
     """Why `opp` is NOT notified, or None if it is selected. Deterministic rules, first match wins,
     so every unselected record carries exactly one reason (spec S5):
 
     already_notified → not_new → stipend program (positive or UNKNOWN eligibility → selected; never
     dropped for uncertainty) → not_target_class (not INTERNSHIP/NEW_GRAD) → role_family (title is not
-    a technical role) → eligibility: positive → selected; UNKNOWN internship → selected under "Check
-    eligibility" (capped per run by `gate_reasons`); UNKNOWN new-grad → eligibility_unknown.
+    a technical role) → eligibility: positive → selected; unverified (UNKNOWN ≥ 0.6, spec 2026-10-21 §4.2)
+    → selected under "Check eligibility" for internships and new-grad roles; other UNKNOWN internship →
+    selected under "Check eligibility"; other UNKNOWN new-grad → eligibility_unknown. "Check eligibility"
+    is capped per run by `gate_reasons`.
 
     `threshold` stays in the signature (frozen) but is no longer consulted: relevance orders items,
-    it does not gate them (C3).
+    it does not gate them (C3). `pending` (spec 2026-10-21 §4.6): the record is in the pending pool
+    (`in_pending_pool`), so an ACTIVE one is not `not_new`.
     """
     # already_notified is checked first (spec lists not_new first): the reason label only — selection is
     # identical — but a record seen again after delivery reads as delivered, which S6's Case A asserts.
     if opp.notified_at is not None:
         return "already_notified"
-    if opp.status not in _NOTIFIABLE:
+    if opp.status not in _NOTIFIABLE and not pending:
         return "not_new"
     cat = opp.eligibility.category if opp.eligibility else EligibilityCategory.UNKNOWN
     if opp.employment_type == EmploymentType.STIPEND_PROGRAM:
@@ -59,6 +72,10 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
     # ("CRM Assistant" → role_family); a technical not-interested one goes to its own section (§12 S11).
     if not role_family_ok(opp.title, opp.description):
         return "role_family"
+    # Pay (spec 2026-10-21 §4.4): unpaid roles are not wanted unless the profile accepts them (recorded
+    # at score time as "unpaid_accepted"). Stipend programs returned above, so they are exempt.
+    if pay_verdict(opp)[0] == "unpaid":
+        return "pay:unpaid"
     # Stage fit (§12 S10): stated conditions a current student cannot meet now. An advanced-degree
     # role with positive eligibility is selected into "Aspirational" (capped in `gate_reasons`).
     stage, _ = stage_of(opp)
@@ -69,18 +86,45 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
     if cat in _POSITIVE:
         return None
     if cat == EligibilityCategory.UNKNOWN:
+        if opp.eligibility is not None and opp.eligibility.confidence >= UNVERIFIED_CONFIDENCE:
+            return None   # unverified: aggregator-only evidence, surfaced as uncertain (never as eligible)
         return None if opp.employment_type == EmploymentType.INTERNSHIP else "eligibility_unknown"
     return "eligibility_negative"   # a low-confidence disqualifier that survived the hard filter
 
 
-def gate_reasons(opps: list[Opportunity], threshold: float) -> list[str | None]:
-    """`gate_reason` for each record in order, plus the per-run caps, one per section: UNKNOWN-eligibility
+def in_pending_pool(opp: Opportunity, first_seen: datetime | None, today: date) -> bool:
+    """Deliverable if selected (spec 2026-10-21 §4.6): never notified, and NEW/UPDATED or first seen
+    (the store's `first_seen`) within `PENDING_DAYS` of `today`."""
+    if opp.notified_at is not None:
+        return False
+    if opp.status in _NOTIFIABLE:
+        return True
+    return first_seen is not None and (today - first_seen.date()).days <= PENDING_DAYS
+
+
+def is_urgent(opp: Opportunity, today: date) -> bool:
+    """A stipend program, or a deadline within `URGENT_DAYS` of `today` — delivered on any day (§4.6)."""
+    if opp.employment_type == EmploymentType.STIPEND_PROGRAM:
+        return True
+    return opp.deadline is not None and (opp.deadline - today).days <= URGENT_DAYS
+
+
+def gate_reasons(opps: list[Opportunity], threshold: float, *, pending: list[bool] | None = None,
+                 urgent_only: date | None = None) -> list[str | None]:
+    """`gate_reason` for each record in order, plus the per-digest caps, one per section: UNKNOWN-eligibility
     internships in "Check eligibility" (`unknown_cap`), "Aspirational" (`stage:advanced_cap`), "Eligible,
-    outside your stated interests" (`interest:cap`). The best title matches are kept."""
-    out = [gate_reason(o, threshold) for o in opps]
+    outside your stated interests" (`interest:cap`). The best title matches are kept.
+
+    `pending`: per record, whether it is in the pending pool (§4.6). `urgent_only` (a weekday that is not
+    the weekly digest's, as `today`): only urgent records stay selected, the rest are `deferred:weekly`
+    — before the caps, so a deferred record never reads as capped."""
+    out = [gate_reason(o, threshold, pending=p) for o, p in zip(opps, pending or [False] * len(opps))]
+    if urgent_only is not None:
+        out = [DEFERRED if r is None and not is_urgent(o, urgent_only) else r for o, r in zip(opps, out)]
+    # unverified new-grad roles share the "Check eligibility" cap with UNKNOWN internships (§4.2)
     capped = [
         i for i, (o, r) in enumerate(zip(opps, out))
-        if r is None and o.employment_type == EmploymentType.INTERNSHIP and section_of(o) == CHECK_ELIGIBILITY
+        if r is None and o.employment_type in _TARGET_CLASS and section_of(o) == CHECK_ELIGIBILITY
     ]
     for i in sorted(capped, key=lambda i: -_title_fit(opps[i]))[UNKNOWN_INTERN_CAP:]:
         out[i] = "unknown_cap"
@@ -93,9 +137,9 @@ def gate_reasons(opps: list[Opportunity], threshold: float) -> list[str | None]:
     return out
 
 
-def select_for_notification(opps: list[Opportunity], threshold: float) -> list[Opportunity]:
-    """The records `gate_reasons` selects. Order preserved."""
-    return [o for o, r in zip(opps, gate_reasons(opps, threshold)) if r is None]
+def select_for_notification(opps: list[Opportunity], threshold: float, **kw) -> list[Opportunity]:
+    """The records `gate_reasons` selects (same keywords). Order preserved."""
+    return [o for o, r in zip(opps, gate_reasons(opps, threshold, **kw)) if r is None]
 
 
 # --------------------------------------------------------------------------------------------- #
@@ -213,6 +257,13 @@ _POSITIVE = frozenset({
 
 
 _UNCONFIRMED = "eligibility not confirmed — check it before applying"
+UNSTATED_LINE = "No location restriction listed on Himalayas or in the posting. Confirm before applying."
+
+
+def _unstated(opp: Opportunity) -> bool:
+    """The aggregator marker with a silent body (spec 2026-10-21 §4.2)."""
+    e = opp.eligibility
+    return bool(e and e.category == EligibilityCategory.UNKNOWN and UNSTATED_EVIDENCE in e.evidence)
 
 
 def _positive(opp: Opportunity) -> bool:
@@ -232,35 +283,61 @@ def section_of(opp: Opportunity) -> str:
     return ACTIONABLE if _positive(opp) else CHECK_ELIGIBILITY
 
 
-def _issue_item(opp: Opportunity) -> str:
+_CONDITION = "condition (not checked): "   # known_programs evidence prefix
+
+
+def _issue_item(opp: Opportunity, n: int) -> str:
+    """One numbered item (spec 2026-10-21 §4.6): the decision facts, eligibility, stage and the notes."""
     url = opp.canonical_url or opp.apply_url
     meta = " · ".join(x for x in (opp.company, opp.employment_type.value, opp.location_raw) if x)
-    lines = [f"- [ ] [{opp.title}]({url}) — {meta}"]
+    lines = []
+    facts = key_facts(opp)
+    if "role" in facts:
+        lines.append(f"- **Role:** {facts['role']}")
+    if "asks" in facts:
+        lines.append(f"- **Asks:** {facts['asks']}")
+    pay_hours = [f"**{k.title()}:** {facts[k]}" for k in ("pay", "hours") if k in facts]
+    if pay_hours:
+        lines.append("- " + " · ".join(pay_hours))
+    if "location" in facts:
+        lines.append(f"- **Location:** {facts['location']}")
     if opp.deadline:
-        lines.append(f"  - deadline: {opp.deadline.isoformat()}")
+        lines.append(f"- **Deadline:** {opp.deadline.isoformat()}")
     e = opp.eligibility
-    if e is not None:
-        lines.append(f"  - eligibility: **{e.category.value}** (confidence {e.confidence:.2f})")
-        lines += [f"    - {x}" for x in e.evidence]
+    if e is not None and _unstated(opp):
+        lines.append(f"- **Eligibility:** {UNSTATED_LINE}")
+    elif e is not None:
+        lines.append(f"- **Eligibility:** {e.category.value} ({e.confidence:.2f})"
+                     + (f" — {e.evidence[0]}" if e.evidence else ""))
+    # a known program's personal conditions are not eligibility reasoning: only the user can check them
+    conditions = [x.split(": ", 1)[1] for x in (e.evidence if e else []) if x.startswith(_CONDITION)]
+    if conditions:
+        lines.append(f"- **Check yourself:** {'; '.join(conditions)}")
     if not _positive(opp) and section_of(opp) != CHECK_ELIGIBILITY:
-        lines.append(f"  - {_UNCONFIRMED}")
+        lines.append(f"- {_UNCONFIRMED}")
     stage, stage_ev = stage_of(opp)
     if stage and opp.employment_type != EmploymentType.STIPEND_PROGRAM:
-        lines.append(f"  - stage: **{stage}**")
-        lines += [f"    - {x}" for x in stage_ev]
+        lines.append(f"- **Stage:** {stage}" + (f" — {'; '.join(stage_ev)}" if stage_ev else ""))
     veto, note = interest_of(opp)
     if veto:
-        lines.append(f"  - outside your stated interests ('{veto}')")
+        lines.append(f"- outside your stated interests ('{veto}')")
     if note:
-        lines.append(f"  - interest: {note}")
-    matched = [x for x in (opp.relevance.matched_signals if opp.relevance else [])
-               if not x.startswith(("stage:", "interest:"))]
-    if matched:
-        lines.append(f"  - matched: {', '.join(matched)}")
+        lines.append(f"- interest: {note}")
     if opp.ats_provider == "himalayas":
         listing = opp.ats_job_id if (opp.ats_job_id or "").startswith("http") else url
-        lines.append(f"  - via [Himalayas]({listing})")
-    return "\n".join(lines)
+        lines.append(f"- via [Himalayas]({listing})")
+    return "\n".join([f"{n}. [{opp.title}]({url}) — {meta}"] + [f"    {x}" for x in lines])
+
+
+_PAID = frozenset({"stated", "stipend"})
+
+
+def _outside_line(opp: Opportunity, n: int) -> str:
+    """'<n>. [Title](url) — Company · pay: <snippet>' (+ the unconfirmed-eligibility note)."""
+    snippet = pay_verdict(opp)[1] if pay_verdict(opp)[0] in _PAID else None
+    meta = " · ".join(x for x in (opp.company, f"pay: {snippet}" if snippet else None) if x)
+    line = f"{n}. [{opp.title}]({opp.canonical_url or opp.apply_url})" + (f" — {meta}" if meta else "")
+    return line + ("" if _positive(opp) else f" — {_UNCONFIRMED}")
 
 
 def _title_fit(opp: Opportunity) -> float:
@@ -271,25 +348,45 @@ def _title_fit(opp: Opportunity) -> float:
     return r.semantic_similarity if r.semantic_similarity is not None else r.score
 
 
-def render_issue_md(opps: list[Opportunity], cfg: AppConfig) -> str:
-    """One task-list line per item (tick the ones worth applying to), in the sections "Apply" (ordered
-    by relevance score) · "Check eligibility" · "Aspirational" · "Eligible, outside your stated
-    interests" (title-and-link lines only), each detailed item with its eligibility and stage
-    evidence. Empty sections are omitted."""
-    out = [f"Job Scout — {len(opps)} new for {cfg.profile.location.country_name}. "
-           "Tick the items worth applying to.\n"]
+REPLY_HINT = "Reply with a comment such as: `apply 1,4 · maybe 2 · skip rest`"
+
+
+def render_issue_md(opps: list[Opportunity], cfg: AppConfig, *, funnel: str | None = None) -> str:
+    """The issue body (spec 2026-10-21 §4.6): items numbered continuously across the sections "Apply"
+    (ordered by relevance score) · "Check eligibility" · "Aspirational" · "Eligible, outside your
+    stated interests" (one line per item); each detailed item with its decision facts, eligibility and
+    stage evidence. Empty sections are omitted. Then the weekly `funnel` (folded), the reply hint, and
+    a hidden map from item number to record key for the labels channel (§4.8)."""
+    out = [f"Job Scout — {len(opps)} new for {cfg.profile.location.country_name}.\n"]
+    keys: dict[str, str] = {}
     for section in SECTIONS:
         key = (lambda o: o.relevance.score if o.relevance else 0.0) if section == ACTIONABLE else _title_fit
+        if section == OUTSIDE_INTERESTS:      # paid roles first (spec 2026-10-21 §4.4), then title fit
+            key = lambda o: (pay_verdict(o)[0] in _PAID, _title_fit(o))  # noqa: E731
         items = sorted((o for o in opps if section_of(o) == section), key=key, reverse=True)
         if not items:
             continue
         out.append(f"## {section}\n")
-        if section == OUTSIDE_INTERESTS:      # title-and-link lines only (§12 S11)
-            out.append("\n".join(f"- [ ] [{o.title}]({o.canonical_url or o.apply_url})"
-                                 + ("" if _positive(o) else f" — {_UNCONFIRMED}") for o in items) + "\n")
-        else:
-            out.append("\n".join(_issue_item(o) for o in items) + "\n")
+        render = _outside_line if section == OUTSIDE_INTERESTS else _issue_item
+        lines = []
+        for o in items:
+            keys[str(len(keys) + 1)] = _identity_key(o)
+            lines.append(render(o, len(keys)))
+        out.append("\n".join(lines) + "\n")
+    if funnel:
+        out.append(f"<details><summary>Weekly funnel</summary>\n\n{funnel.rstrip()}\n\n</details>\n")
+    if keys:
+        out.append(REPLY_HINT + "\n")
+    # ">" escaped (still the same JSON) so a key containing "-->" cannot end the comment (4.6 review L2)
+    out.append(f"<!-- scout-items {json.dumps(keys).replace('>', chr(92) + 'u003e')} -->")
     return _with_cc("\n".join(out))
+
+
+def issue_title(n: int, today: date, *, weekly: bool, urgent: bool) -> str:
+    """The issue title the workflow posts (§4.6)."""
+    if weekly:
+        return f"Job Scout weekly — {n} new — {today.isoformat()}"
+    return f"Job Scout: {n} {'urgent' if urgent else 'new'} — {today.isoformat()}"
 
 
 def _with_cc(body: str) -> str:
@@ -335,6 +432,7 @@ def render_funnel_md(rec: dict) -> str:
         "| stage | count |\n|---|--:|\n"
         f"| discovered | {rec['discovered']} |\n"
         f"| merged by dedupe | {merged} |\n"
+        f"| pending from earlier runs, not fetched now | {rec.get('carried', 0)} |\n"
         f"| rejected by hard filter | {sum(rec.get('rejects', {}).values())} |\n"
         f"| survived | {rec['after_filter']} |\n"
         f"| not selected at notify gate | {sum(rec.get('gate', {}).values())} |\n"
@@ -396,9 +494,17 @@ def _sum_counts(dicts) -> dict[str, int]:
     return total
 
 
+NOT_NEAR_MISS = frozenset({"already_notified", "not_new", DEFERRED})   # seen or waiting, not "missed"
+
+
 def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> str:
     """Weekly heartbeat: the funnel summed over the given run records (newest first) plus their
     near misses, so silence is distinguishable from failure. `extra` lines are appended verbatim."""
+    return _with_cc(heartbeat_body(records, extra))
+
+
+def heartbeat_body(records: list[dict], extra: list[str] | None = None) -> str:
+    """`render_heartbeat_md` without the `cc` line — also the weekly digest's folded funnel (§4.6)."""
     out = [f"## Job Scout weekly funnel — {len(records)} run(s)\n"]
     if not records:
         out.append("No run records found — the scout has not run. Check the Actions tab.\n")
@@ -424,6 +530,8 @@ def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> 
         best: dict[tuple, dict] = {}
         for r in records:
             for n in r.get("near_misses", []):
+                if n.get("gate_reason") in NOT_NEAR_MISS:
+                    continue
                 k = (n["title"], n["company"])
                 if k not in best or n["score"] > best[k]["score"]:
                     best[k] = n
@@ -440,4 +548,4 @@ def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> 
             )
     if extra:
         out.append("\n".join(extra) + "\n")
-    return _with_cc("\n".join(out))
+    return "\n".join(out)

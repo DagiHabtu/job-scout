@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -35,17 +35,23 @@ from .eligibility import classify_eligibility
 from .models import EmploymentType, Opportunity, Provenance
 from .normalize import normalize
 from .notify import (
+    NOT_NEAR_MISS,
+    PENDING_DAYS,
     gate_reasons,
+    heartbeat_body,
+    in_pending_pool,
+    issue_title,
     pick_samples,
     render_digest,
     render_funnel_md,
     render_issue_md,
-    select_for_notification,
     write_digest,
 )
 from .score import filter_reason, hard_filter, rank, score_opportunity, stage_of
 from .sources.base import Source
-from .store import connect, mark_notified, record_run, upsert_and_reconcile
+from .sources.known_programs import maintenance_notes
+from .store import (connect, first_seen_of, mark_notified, pending_stored, recent_runs, record_run,
+                    upsert_and_reconcile)
 
 log = logging.getLogger("job_scout.pipeline")
 
@@ -61,7 +67,7 @@ class RunSummary:
 
     Every record that does not reach the user carries exactly one reason: `rejects` (hard filter)
     and `gate` (notify gate) are reason → count, so
-    `discovered − merged − Σrejects − Σgate = notified` holds for every run.
+    `discovered + carried − merged − Σrejects − Σgate = notified` holds for every run.
     """
 
     run_id: str
@@ -69,11 +75,13 @@ class RunSummary:
     finished: str
     sources: dict[str, dict] = field(default_factory=dict)   # name -> {ok, count|error, report?}
     discovered: int = 0
+    carried: int = 0     # stored pending records re-judged this run though not fetched (§4.6, review H1)
     after_dedupe: int = 0
     after_filter: int = 0
     lifecycle: dict[str, int] = field(default_factory=dict)  # new/updated/active
     notified: int = 0
     digest_path: str | None = None
+    digest_date: str | None = None   # set when this run wrote the weekly digest (spec 2026-10-21 §4.6)
     rejects: dict[str, int] = field(default_factory=dict)          # hard-filter reason -> count
     gate: dict[str, int] = field(default_factory=dict)             # notify-gate reason -> count
     by_type: dict[str, int] = field(default_factory=dict)          # employment type after normalize
@@ -90,6 +98,7 @@ class RunSummary:
             "finished": self.finished,
             "sources": self.sources,
             "discovered": self.discovered,
+            "carried": self.carried,
             "after_dedupe": self.after_dedupe,
             "after_filter": self.after_filter,
             "lifecycle": self.lifecycle,
@@ -101,6 +110,7 @@ class RunSummary:
             "by_eligibility": self.by_eligibility,
             "near_misses": self.near_misses,
             "internship_funnel": self.internship_funnel,
+            "digest_date": self.digest_date,
         }
 
 
@@ -115,9 +125,6 @@ def _brief(opp: Opportunity) -> dict:
     }
 
 
-_KNOWN = {"not_new", "already_notified"}   # already-seen records are not "rejected"
-
-
 def _internship_funnel(target_raw: list[Opportunity], kept_ids: set[int], reason_of: dict[int, str | None]) -> dict:
     """Outcome of every fetched internship/stipend record: `merged` (folded into another record by
     dedupe), its filter or gate reason, or `notified`. Few fetched → coverage problem; many fetched
@@ -130,7 +137,7 @@ def _internship_funnel(target_raw: list[Opportunity], kept_ids: set[int], reason
             continue
         reason = reason_of.get(id(o))
         outcomes[reason or "notified"] += 1
-        if reason and reason not in _KNOWN:                    # real rejections only (L4)
+        if reason and reason not in NOT_NEAR_MISS:             # real rejections only (L4; deferrals: branch review L1)
             b = _brief(o)
             samples.append({
                 "title": b["title"], "company": b["company"], "location": b["location"], "reason": reason,
@@ -172,6 +179,24 @@ def _discover(sources: list[Source], cfg: AppConfig) -> tuple[list[Opportunity],
     return raw, results
 
 
+def _local_today(cfg: AppConfig) -> date:
+    """Today in the user's timezone (the weekly digest is a Monday there). Falls back to UTC where the
+    tz database is missing (Windows without `tzdata`); the scheduled run at 04:00 UTC is the same date."""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo(cfg.profile.location.timezone)).date()
+    except Exception:  # ZoneInfoNotFoundError, or an invalid name in the profile
+        return datetime.now(timezone.utc).date()
+
+
+def _digest_due(conn, today: date) -> bool:
+    """The weekly digest is due unless a stored run already wrote one this week (Monday to `today`). So a
+    Monday digest whose issue step failed — its state never committed — is written by the next run, and a
+    second Monday run writes none (4.6 review M1, L1). The first run after setup writes one on any day."""
+    monday = (today - timedelta(days=today.weekday())).isoformat()
+    return not any(monday <= (r.get("digest_date") or "") <= today.isoformat() for r in recent_runs(conn, 30))
+
+
 def run_once(
     cfg: AppConfig,
     sources: list[Source],
@@ -207,7 +232,7 @@ def run_once(
     by_eligibility = Counter(o.eligibility.category.value for o in deduped)
 
     # 5. hard filter (confident disqualifiers, passed deadlines, unwanted employment types)
-    today = today or date.today()
+    today = today or _local_today(cfg)
     survivors = hard_filter(deduped, cfg.profile, cfg.scoring, today=today)
     reason_of: dict[int, str | None] = {id(o): filter_reason(o, cfg.profile, cfg.scoring, today) for o in deduped}
     rejects = Counter(r for r in reason_of.values() if r is not None)
@@ -226,27 +251,40 @@ def run_once(
     try:
         lifecycle = upsert_and_reconcile(conn, ranked, run_id)
 
-        # 9. notify (deterministic gate: new/updated, not notified, class ∧ role family ∧ eligibility) → deliver
+        # 9. notify (deterministic gate: new/updated, not notified, class ∧ role family ∧ eligibility) → deliver.
+        # Weekly cadence (spec 2026-10-21 §4.6): the gate reads the pending pool (never notified, first seen
+        # within 14 days); Monday delivers it all, other days only urgent items (the rest `deferred:weekly`).
         threshold = cfg.scoring.relevance_threshold
-        to_notify = select_for_notification(ranked, threshold)
-        for o, r in zip(ranked, gate_reasons(ranked, threshold)):
+        weekly = cfg.notify.cadence == "weekly"
+        digest_day = weekly and _digest_due(conn, today)
+        # Stored pending records this run did not fetch (Himalayas pages roll over, a source fails) are
+        # re-judged with today's rules and gated with the rest (branch review H1).
+        carried = pending_stored(conn, today - timedelta(days=PENDING_DAYS), ranked) if weekly else []
+        for o in carried:
+            o.eligibility = classify_eligibility(o, cfg.profile)
+            reason_of[id(o)] = filter_reason(o, cfg.profile, cfg.scoring, today)
+            if reason_of[id(o)]:
+                rejects[reason_of[id(o)]] += 1
+            else:
+                o.relevance = score_opportunity(o, cfg.profile, cfg.scoring, model=model)
+        ranked = rank(ranked + [o for o in carried if reason_of[id(o)] is None])
+        pending = [in_pending_pool(o, f, today) for o, f in zip(ranked, first_seen_of(conn, ranked))] if weekly else None
+        reasons = gate_reasons(ranked, threshold, pending=pending,
+                               urgent_only=today if weekly and not digest_day else None)
+        to_notify = [o for o, r in zip(ranked, reasons) if r is None]
+        for o, r in zip(ranked, reasons):
             reason_of[id(o)] = r
         gate = Counter(reason_of[id(o)] for o in ranked if reason_of[id(o)] is not None)
-        unselected = [o for o in ranked if reason_of[id(o)] is not None]
+        # seen or waiting records are not misses — kept out before the top-N, or deferrals fill it (4.6 review M2)
+        unselected = [o for o in ranked if reason_of[id(o)] is not None and reason_of[id(o)] not in NOT_NEAR_MISS]
         near_misses = [
             {**_brief(o), "score": o.relevance.score if o.relevance else 0.0, "gate_reason": reason_of[id(o)]}
             for o in sorted(unselected, key=lambda o: -(o.relevance.score if o.relevance else 0.0))[:_MAX_SAMPLES]
         ]
         digest = render_digest(to_notify, cfg)
         digest_path = write_digest(digest, cfg)
-        # The issue body exists only when there is something to deliver; a stale one is removed so
-        # the workflow never re-posts a previous run's selection.
-        notify_path = Path(digest_path).parent / "notify.md"
         if to_notify:
-            notify_path.write_text(render_issue_md(to_notify, cfg), encoding="utf-8")
             mark_notified(conn, to_notify)
-        else:
-            notify_path.unlink(missing_ok=True)
 
         finished = datetime.now(timezone.utc).isoformat()
         summary = RunSummary(
@@ -255,6 +293,7 @@ def run_once(
             finished=finished,
             sources=source_results,
             discovered=len(raw),
+            carried=len(carried),
             after_dedupe=len(deduped),
             after_filter=len(survivors),
             lifecycle=lifecycle,
@@ -265,6 +304,7 @@ def run_once(
             by_type=dict(by_type),
             by_eligibility=dict(by_eligibility),
             near_misses=near_misses,
+            digest_date=today.isoformat() if digest_day else None,
             internship_funnel=_internship_funnel(target_raw, {id(o) for o in deduped}, reason_of),
             ranked=ranked,
         )
@@ -273,6 +313,19 @@ def run_once(
         record_run(conn, run_id, started, record)
         funnel_path = Path(cfg.notify.digest_path).parent / "funnel.md"
         funnel_path.write_text(render_funnel_md(record), encoding="utf-8")
+        # The issue body exists only when there is something to deliver — always on the weekly digest
+        # day, which carries the funnel (it replaces the heartbeat issue); a stale one is removed so the
+        # workflow never re-posts a previous run's selection.
+        notify_path = Path(digest_path).parent / "notify.md"
+        title_path = notify_path.with_name("notify_title.txt")
+        if to_notify or digest_day:
+            funnel = heartbeat_body(recent_runs(conn), maintenance_notes(today)) if digest_day else None
+            notify_path.write_text(render_issue_md(to_notify, cfg, funnel=funnel), encoding="utf-8")
+            title_path.write_text(issue_title(len(to_notify), today, weekly=digest_day, urgent=weekly),
+                                  encoding="utf-8")
+        else:
+            notify_path.unlink(missing_ok=True)
+            title_path.unlink(missing_ok=True)
     finally:
         if owns_conn:
             conn.close()
@@ -281,12 +334,12 @@ def run_once(
 
 
 def _check_invariant(s: RunSummary) -> bool:
-    """`discovered − merged − Σrejects − Σgate = notified`: every lost record has one reason."""
+    """`discovered + carried − merged − Σrejects − Σgate = notified`: every lost record has one reason."""
     merged = s.discovered - s.after_dedupe
-    ok = s.discovered - merged - sum(s.rejects.values()) - sum(s.gate.values()) == s.notified
+    ok = s.discovered + s.carried - merged - sum(s.rejects.values()) - sum(s.gate.values()) == s.notified
     if not ok:
         log.warning(
-            "funnel invariant violated: discovered=%d merged=%d rejects=%d gate=%d notified=%d",
-            s.discovered, merged, sum(s.rejects.values()), sum(s.gate.values()), s.notified,
+            "funnel invariant violated: discovered=%d carried=%d merged=%d rejects=%d gate=%d notified=%d",
+            s.discovered, s.carried, merged, sum(s.rejects.values()), sum(s.gate.values()), s.notified,
         )
     return ok

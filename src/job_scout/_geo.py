@@ -50,6 +50,8 @@ REGIONS_EXCLUDING_AFRICA: frozenset[str] = frozenset({
     "americas", "amer", "north america", "latam", "latin america", "south america", "central america",
     "apac", "asia pacific", "asia", "oceania", "europe", "eu", "european union", "eea", "dach",
     "nordics", "benelux", "anz", "middle east",
+    # spec 2026-10-21 §4.1 (Xperteez: "Based in an English-speaking country")
+    "english-speaking country", "english speaking country",
     # African sub-regions that do not contain Ethiopia (they contain the word "africa")
     "north africa", "northern africa", "west africa", "western africa", "southern africa", "central africa",
 })
@@ -83,6 +85,10 @@ SUBNATIONAL: frozenset[str] = frozenset({
 })
 
 WORLDWIDE_TOKENS: frozenset[str] = frozenset({"worldwide", "global", "anywhere", "international"})
+
+# What an aggregator adapter writes when its listing carries no location restriction (spec 2026-10-21
+# §4.1): the aggregator lists none — not a statement by the employer that it hires worldwide.
+NO_RESTRICTION_LISTED = "Remote (no location restriction listed)"
 
 # Cities seen in practice → country. Extend from the funnel's rejected samples.
 CITIES: dict[str, str] = {

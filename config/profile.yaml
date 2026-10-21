@@ -10,7 +10,7 @@ profile:
     - "frontend, backend or full-stack software engineering"
   # Current preference, not an absolute exclusion: matching titles are still listed, in
   # "Eligible, outside your stated interests" — unless the title also names a strong-interest term.
-  not_interested: ["qa", "qc", "quality assurance", "manual testing", "crm", "salesforce"]
+  not_interested: ["qa", "qc", "quality assurance", "manual testing", "crm", "salesforce", "tester"]
   strong_interest_terms: ["linux", "kernel", "systems", "infrastructure", "compiler", "embedded",
                           "distributed", "machine learning", "ml", "ai", "research", "open source"]
   target_technologies: ["python", "sql", "docker", "postgres", "kubernetes", "go"]
@@ -20,6 +20,9 @@ profile:
     status: "undergraduate"           # undergraduate | graduate
     accept_graduate_programs: false   # graduate-only roles (completed degree required)
     max_required_years: 2             # roles demanding more years of experience are not surfaced
+  pay:                                # spec 2026-10-21 §4.4
+    # Dagi 2026-10-21: unpaid not wanted; paid part-time work is wanted even outside stated interests
+    accept_unpaid: false
   location:
     country_code: "ET"
     country_name: "Ethiopia"
@@ -74,3 +77,4 @@ scoring:
 notify:
   mode: "file"                        # "file" (zero-dep) | "email" (Gmail SMTP app password)
   digest_path: "data/digest.html"
+  cadence: "weekly"                   # Mondays: the whole pending pool + funnel; other days: urgent only

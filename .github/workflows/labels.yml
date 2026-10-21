@@ -1,0 +1,76 @@
+name: labels
+
+# Labels channel (spec 2026-10-21 §4.8): the owner replies to a delivery issue with e.g.
+# `apply 1,4 · maybe 2 · skip rest`; the decisions are appended to data/labels.jsonl and committed.
+#
+# The comment and issue text are untrusted input: they are read only from the event JSON file
+# ($GITHUB_EVENT_PATH) by `python -m job_scout.labels`, never interpolated into a shell command.
+
+on:
+  issue_comment:
+    types: [created]
+
+# No concurrency group: GitHub keeps only ONE pending run per group and cancels the older one, so a
+# shared group would silently drop a reply (or the daily scout run) — branch review M4. Instead the commit
+# step retries: on a push race it resets to the remote and re-appends this comment's lines.
+
+permissions:
+  contents: write  # commit data/labels.jsonl
+  issues: write    # react to the comment, or reply with the parse error
+
+jobs:
+  label:
+    if: github.event.comment.user.login == github.repository_owner && contains(github.event.issue.labels.*.name, 'scout')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Stdlib only: no install needed.
+      - name: Parse the reply
+        id: parse
+        run: |
+          if PYTHONPATH=src python -m job_scout.labels --event "$GITHUB_EVENT_PATH" --out data/labels.jsonl \
+               --error-file "$RUNNER_TEMP/label_error.md"; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          elif [ -s "$RUNNER_TEMP/label_error.md" ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            exit 1   # a crash, not a parse error
+          fi
+
+      - name: Commit labels
+        if: steps.parse.outputs.ok == 'true'
+        env:
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          git config user.name "job-scout[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git add -- data/labels.jsonl
+            git commit -m "labels: reply on issue #$ISSUE"
+            if git pull --rebase && git push; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            git fetch origin && git reset --hard "origin/${GITHUB_REF_NAME}"
+            sleep $((attempt * 5))
+            PYTHONPATH=src python -m job_scout.labels --event "$GITHUB_EVENT_PATH" --out data/labels.jsonl               --error-file "$RUNNER_TEMP/label_error.md"
+          done
+          exit 1
+
+      # A reaction, not a reply: no email for a successful label.
+      - name: React to the comment
+        if: steps.parse.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: gh api --method POST "repos/$GITHUB_REPOSITORY/issues/comments/$COMMENT_ID/reactions" -f content=+1
+
+      - name: Reply with the parse error
+        if: steps.parse.outputs.ok == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/label_error.md"

@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from datetime import date
 
 from .config import AppConfig
 from .pipeline import RunSummary, run_once
@@ -110,6 +111,8 @@ def run(argv: list[str] | None = None) -> RunSummary | None:
     parser.add_argument("-c", "--config", default="config/profile.yaml", help="path to the YAML profile")
     parser.add_argument("--no-model", action="store_true", help="skip the embedding model; use lexical scoring only")
     parser.add_argument("--heartbeat", action="store_true", help="write the weekly funnel heartbeat and exit (no scout run)")
+    parser.add_argument("--today", type=date.fromisoformat, default=None,
+                        help="run as if today were YYYY-MM-DD (delivery tests: a Monday gives the weekly digest)")
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose logging")
     args = parser.parse_args(argv)
 
@@ -124,7 +127,7 @@ def run(argv: list[str] | None = None) -> RunSummary | None:
         log.warning("no sources resolved — running an empty pass (Phase 0 has no adapters yet)")
     model = None if args.no_model else _load_embedding_model(cfg)
 
-    summary = run_once(cfg, sources, model=model)
+    summary = run_once(cfg, sources, model=model, today=args.today)
     log.info(
         "run %s: discovered=%d deduped=%d survived=%d lifecycle=%s notified=%d digest=%s",
         summary.run_id, summary.discovered, summary.after_dedupe, summary.after_filter,

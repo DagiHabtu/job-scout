@@ -171,7 +171,8 @@ _YEARS = re.compile(
 _NOT_REQUIREMENT = re.compile(
     r"\b(combined|collective(ly)?|team of|founded|founders?|in business|ago|has been|have been|"
     r"our (team|company|engineers|clients|customers)|we(?:'ve| have| bring| were)|"
-    r"old|older|age|aged|vest(s|ed|ing)?|stock options|equity|contract|lasts?|duration)\b",
+    r"old|older|age|aged|vest(s|ed|ing)?|stock options|equity|contract|lasts?|duration|"
+    r"operational|operating|established)\b",   # company age: "Established, 20+ years operational" (§4.7)
     re.IGNORECASE)
 _SENTENCE_MAX = 200
 # A span, not a requirement: "within 3 years", "over 10 years", "in the last 2 years", "up to 2 years".
@@ -334,6 +335,9 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
     interest_matched, interest_concerns = interest_signals(opp, profile)
     matched += interest_matched
     concerns += interest_concerns
+    pay_matched, pay_concerns = pay_signals(opp, profile)
+    matched += pay_matched
+    concerns += pay_concerns
 
     return Relevance(score=round(final, 4), matched_signals=matched, concerns=concerns, semantic_similarity=sim)
 
@@ -347,9 +351,10 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
 # "AI study" posts, data entry/annotation, service desk, managers); the extra family terms from
 # missed technical titles. See STATE.md "Deviations from spec".
 _ROLE_FAMILY = re.compile(
-    r"\b(engineer(ing)?|developer|programmer|software|data|machine learning|ml|ai|devops|sre|"
-    r"site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|analyst|analytics|"
-    r"scientist|security|research|"            # `qa` removed (§12 S11): taste lives in the profile
+    # bare data/analyst/analytics removed (spec 2026-10-21 §4.3): "Video Data Collector", "Antifraud Analyst"
+    r"\b(engineer(ing)?|developer|programmer|software|data (engineer(ing)?|scien(ce|tist)s?|platform|infrastructure)|"
+    r"machine learning|ml|ai|devops|sre|site reliability|platform|infrastructure|cloud|backend|back-end|full[- ]?stack|"
+    r"scientist|(cyber)?security|research|"            # `qa` removed (§12 S11): taste lives in the profile
     r"embedded|computer vision|database|"
     r"linux|kernel|compiler)\b",               # "QA Intern, Linux Kernel" is technical (final review M1)
     re.IGNORECASE,
@@ -438,6 +443,72 @@ def interest_of(opp: Opportunity) -> tuple[str | None, str | None]:
     veto = next((x[len("interest:veto: "):] for x in r.concerns if x.startswith("interest:veto: ")), None)
     note = next((x[len("interest:note: "):] for x in r.matched_signals if x.startswith("interest:note: ")), None)
     return veto, note
+
+
+# --------------------------------------------------------------------------------------------- #
+# Pay (spec 2026-10-21 §4.4) — read from the title and body, first match wins: unpaid → contingent →
+# stipend → stated → unstated. Carried in Relevance as "pay:" strings (no spine change).
+# --------------------------------------------------------------------------------------------- #
+
+_UNPAID_TITLE = re.compile(r"\b(unpaid|volunteer)\b", re.IGNORECASE)
+_UNPAID_BODY = re.compile(
+    r"\b(this|it)\s+(is|will be)\s+an?\s+(unpaid|volunteer)\b|\bunpaid\s+(internship|role|position)\b|"
+    r"\bvolunteer\s+(role|position)\b", re.IGNORECASE)
+# "not an unpaid internship", "Unlike an unpaid internship" (branch review M1).
+_NEGATED = re.compile(r"\b(not|no|never|unlike|instead of)\W+(\w+\W+){0,2}$", re.IGNORECASE)
+# A performance-based *bonus* is extra pay, and "paid time off" is not pay (branch review M2).
+_CONTINGENT = re.compile(r"\b(goal|performance)[- ]based\b(?!\s+bonus)", re.IGNORECASE)
+_CONTINGENT_NEAR = re.compile(r"\b(compensation|paid)\b(?!\s+(time off|leave|holidays?|vacation))", re.IGNORECASE)
+_STIPEND = re.compile(r"\bstipend\b", re.IGNORECASE)
+_CURRENCY = r"(?:US\$|\$|USD\s?|€|EUR\s?|£)"
+_AMOUNT = rf"{_CURRENCY}\s?\d[\d,.]*k?"
+_STATED = re.compile(
+    rf"{_AMOUNT}(?:\s?(?:-|–|to)\s?{_CURRENCY}?\s?\d[\d,.]*k?)?(?:\s?(?:USD|EUR|GBP))?"
+    r"\s?(?:/|per|an?)\s?(?:hour|hr|week|month|mo|year|yr)\b"
+    r"|\d[\d,.]*\s?\$\s?/\s?(?:hr|hour)\b", re.IGNORECASE)
+# Not pay: a budget or allowance amount ("learning and development budget of USD 2,000 per year", Canonical).
+_NOT_PAY = re.compile(r"\b(budget|allowance|reimburse\w*)\b[^.]{0,20}$", re.IGNORECASE)
+
+
+def pay_of(opp: Opportunity) -> tuple[str, str | None]:
+    """(verdict, quoted snippet) from the title and description: unpaid | contingent | stipend | stated |
+    unstated."""
+    title, body = opp.title or "", opp.description or ""
+    m = _UNPAID_TITLE.search(title) or next(
+        (b for b in _UNPAID_BODY.finditer(body) if not _NEGATED.search(body[max(0, b.start() - 40): b.start()])), None)
+    if m:
+        return "unpaid", m.group(0)
+    for m in _CONTINGENT.finditer(body):
+        if _CONTINGENT_NEAR.search(body[max(0, m.start() - 80): m.end() + 80]):
+            return "contingent", body[max(0, m.start() - 40): m.end() + 40].strip()
+    stated = next((m for m in _STATED.finditer(body) if not _NOT_PAY.search(body[max(0, m.start() - 60): m.start()])),
+                  None)
+    if any(not _NEGATED.search(body[max(0, s.start() - 40): s.start()]) for s in _STIPEND.finditer(body)):
+        return "stipend", stated.group(0) if stated else "stipend"
+    if stated:
+        return "stated", stated.group(0)
+    return "unstated", None
+
+
+def pay_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], list[str]]:
+    """(matched, concerns): "pay:<verdict>" plus 'pay:evidence: "<snippet>"'. An unpaid role the profile
+    accepts is recorded as "pay:unpaid_accepted" (the gate has no profile — as for graduate programs)."""
+    verdict, snippet = pay_of(opp)
+    if verdict == "unstated":
+        return [], []
+    if verdict == "unpaid" and profile.pay.accept_unpaid:
+        verdict = "unpaid_accepted"
+    entries = [f"pay:{verdict}", *([f'pay:evidence: "{snippet}"'] if snippet else [])]
+    return ([], entries) if verdict in ("unpaid", "contingent") else (entries, [])
+
+
+def pay_verdict(opp: Opportunity) -> tuple[str, str | None]:
+    """Read (verdict, snippet) back from `opp.relevance`; "unstated" when there is none."""
+    r = opp.relevance
+    entries = [x for x in (*r.matched_signals, *r.concerns) if x.startswith("pay:")] if r else []
+    verdict = next((x[len("pay:"):] for x in entries if not x.startswith("pay:evidence:")), "unstated")
+    snippet = next((x[len('pay:evidence: "'):-1] for x in entries if x.startswith("pay:evidence:")), None)
+    return verdict, snippet
 
 
 # --------------------------------------------------------------------------------------------- #

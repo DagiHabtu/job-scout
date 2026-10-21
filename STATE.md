@@ -1,6 +1,251 @@
 # STATE
 
-## RESUME — closed out (2026-10-04)
+## RESUME — iteration 3 (started 2026-10-21)
+Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iteration-3`, cut from `main` @ `06dc4c6`
+(scheduled run 2026-10-21; local `main` fast-forwarded to `origin/main` first). Baseline: **439 passed**
+(`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
+Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
+Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
+Step in progress: none — build COMPLETE. Then: the end-of-pass checks ("Pending checks" below).
+Dagi (2026-10-21) asked Claude to run the git/GitHub commands (push, dispatch, PR, merge, test reply) itself.
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`) · review 4.6 CLOSED (`65f21ad`) · 5.1 (`f13c664`) · 5.2 · 5.3 · whole-branch review CLOSED (`e9ca7ef`).
+Deviations from spec (iteration 3):
+  (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
+  a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
+  among the three words before it ("We are an innovative SaaS startup based in Portugal", "customers primarily
+  located in North America"). The place must start the clause; any other part naming the user/world cancels it.
+  (i3-b) §4.1(b) also counts "a preference" before the place and a predicate form after it in the same sentence
+  ("… is a plus / is preferred"); a flattened heading after it ("US-based Nice to Have …", micro1) does not count.
+  (i3-c) Not a requirement either (stored bodies): "<place>-based employers/companies/clients/…", "Based in
+  Melbourne, Australia, we …", "NOT based in …", and a sentence about salary/pay/compensation ("The base salary
+  range … is for residents of the United States only").
+  (i3-d) The old coarse body rule (any excluding-region word, no Africa/global word → excluded 0.8) is NOT applied
+  to the marker: on the stored rows it excluded Affidea DevOps ('apac' inside "capacity"; §2 expects Check
+  eligibility) and "roles outside the U.S.". For BARE/OTHER/no location it is unchanged.
+  Interpretations: a "sentence" for the relocation check ends at . ! ? : or a newline (TJ: "… North America)
+  Location: Remote (Relocation to Portugal Available)"); a `Remote (<list>)` item mentioning relocation is not a
+  place; a body `Remote (<list>)` naming the user's region → REMOTE_REGION_INCLUDES_USER **0.7** (spec table gives
+  no confidence; same as a body worldwide phrase), `Remote (Global)` → WORLDWIDE 0.7.
+  (i3-e) 4.1 review fixes (beyond the spec's shapes): "based/located/… in <place>" is no requirement when the five
+  words before it hold a negation or condition (not, don't, doesn't, no, without, if, whether, wherever) or a
+  descriptive subject (most, many, some, several, hq, headquarters, founded, cost, colleagues, employees, staff,
+  teammates, engineers, members — unless hiring/seeking/looking/recruiting is there too); "<place>-based" is no
+  requirement after "is/was" (unless you/candidate/applicant precede it) or before "(and|or <word>) customers…"
+  or "hours/time zone/schedule"; the spec's a/an/our/the guard does NOT apply when a person noun follows
+  ("a US-based engineer" → excluded 0.75); the preference window stops at . ! ? or a newline (not ':'); the
+  §4.1 body shapes run only for an absent, bare "Remote" or marker location (§3), not an unrecognised field.
+  (i3-f) §4.4: `accept_unpaid` is applied at score time (verdict `pay:unpaid_accepted`) because `gate_reason`
+  has no profile (as i2-c). A currency amount preceded within 60 chars by budget/allowance/reimburse… is not pay
+  (Canonical "learning and development budget of USD 2,000 per year" would read `stated`). The stipend snippet
+  is the stated amount when there is one, else "stipend". "unstated" carries no `pay:` entry. `tester` is
+  also in the `UserProfile` default `not_interested` (as i2-m) and in profile.example.yaml.
+  (i3-g) Branch review: §4.8 says both workflows share `concurrency: scout-state`; GitHub keeps only ONE
+  pending run per group and cancels the older pending one (even with cancel-in-progress: false), so a reply
+  or a scheduled scout run could be dropped silently. `labels.yml` has no group; its commit step retries 5×
+  (reset to remote, re-append this comment's lines). `scout.yml` keeps its group and retries its push 5×.
+  The two touch different files (labels.jsonl / scout.db), so a rebase never conflicts between them.
+  (i3-h) Branch review H1: the §4.6 pending pool also reads the STORE — never-notified records first seen
+  within 14 days that this run did not fetch are re-judged (eligibility, filter, score with today's rules,
+  status ACTIVE) and gated with the fetched ones (`store.pending_stored`). Funnel invariant becomes
+  `discovered + carried − merged − Σrejects − Σgate = notified`; funnel table row "pending from earlier runs".
+  (i3-i) `rest` in a later comment on the same issue skips items an earlier comment on it named.
+Pending checks (in order; Claude runs the commands, Dagi confirms only (c) of step 2):
+  1. `git push -u origin iteration-3`
+  2. `gh workflow run scout --ref iteration-3 -f seed=true -f today=2026-10-19` (this week's Monday — never a
+     future date: the stored `digest_date` would suppress that week's real digest), `gh run watch`. Check
+     (a) a "Job Scout weekly — N new — 2026-10-19" issue, (b) numbered items + a parseable hidden map
+     (`gh issue view <n> --json body`), (c) **Dagi: it reached a device (email / GitHub mobile).**
+     The run commits `data/scout.db` to `iteration-3` (its items are then marked notified there).
+  3. Merge by PR: `gh pr create --base main --head iteration-3 …`, `gh pr merge --merge`. On a
+     `data/scout.db` conflict keep the branch's copy (`git merge origin/main` on the branch,
+     `git checkout --ours data/scout.db`). Then realign local main: `git checkout main && git reset --hard origin/main`.
+  4. After merge (issue_comment workflows run from the default branch only): comment `apply 1 · skip rest` on
+     the step-2 issue as Dagi (`gh issue comment`), confirm the 👍 reaction (`gh api …/comments/<id>/reactions`)
+     and that `data/labels.jsonl` on main gained the lines.
+  5. Real test (§5.5): four Monday digests; Dagi replies to each; then `scripts/label_report.py` (≥ 60% of
+     Apply + Check eligibility labelled apply/maybe is the review threshold).
+
+### Iteration-3 pass log
+- 2026-10-21 — **4.1 done** (`1f59601`). Tests first (`tests/test_eligibility_i3.py`; collection failed before the
+  code). Spec table: all 12 rows as specified. Fixture `tests/fixtures/labels_2026-10-21_records.json` = the 36
+  records (raw, verbatim from data/scout.db @ 06dc4c6). Probes (scratch, read-only): **all 380 stored rows, old vs new
+  code as stored** → 1 change (Sourcegraph-type "a preference for someone to reside in the US": UNKNOWN 0.5 → 0.45);
+  four Greenhouse false exclusions found on the way and fixed (i3-a/b/c). **Stored Himalayas rows with the marker:**
+  166 → UNKNOWN 0.6, 10 WORLDWIDE 0.7 (work from anywhere / no geographical restrictions / Remote (Global)), 7
+  excluded 0.75 — all genuine (Talent Journey ×2, micro1 ×3 "US-based", "EU-based participants", "based in Latin
+  America"), 3 UNKNOWN 0.5 (EWOR relocation), 2 UNKNOWN 0.45 (Xperteez). Known gap: "Location: LATAM, 100% Remote"
+  (Abstra, Emptor) is no longer excluded for the marker (the coarse rule caught it; no §4.1 shape covers
+  "Location: <place>") → UNKNOWN 0.6; both are non-target titles. Pre-existing tests changed (one-line justification
+  inline): `test_final_review::test_h2…` (Sourcegraph "require … located in the United States" now excluded 0.75 —
+  §4.1(a) before (c)), `test_himalayas` marker + `…_are_unstated_through_s2`. **488 passed.**
+- 2026-10-21 — **4.2 done** (`7a5f58f`). Tests first (`tests/test_gate_i3.py`). Unverified = UNKNOWN with
+  confidence ≥ 0.6 → selected for INTERNSHIP and NEW_GRAD into "Check eligibility", never Apply; UNKNOWN < 0.6
+  unchanged (intern selected, new-grad `eligibility_unknown`). The "Check eligibility" cap (`unknown_cap`, 5/run)
+  now covers every target-class item in that section (unverified new-grads share it with UNKNOWN interns). The
+  marker case's eligibility line reads "No location restriction listed on Himalayas or in the posting. Confirm
+  before applying." Pre-existing test changed: `test_gate::_o` builds UNKNOWN at 0.5 instead of 0.8 (0.8 is now
+  the unverified tier; the tests mean a bare "Remote"). **498 passed.**
+- 2026-10-21 — **Review of 4.1+4.2 CLOSED** (fixes `b669124`). Reviewer: general-purpose, read-only, on
+  06dc4c6..7a5f58f. Findings → `tests/test_eligibility_i3_review.py` first: **19 failed → confirmed → fixed**
+  (deviation i3-e): H1 negated/conditional/descriptive "based/located/living in" ×11 (e.g. "You do not need to be
+  based in the US", "If you're based in Europe", "HQ located in Austin", "cost of living in London"); H2
+  "Acme is London-based but hires globally", "US-based and European customers", "US-based hours"; M1 "a US-based
+  engineer" / "an EU-based developer" now excluded 0.75 (were UNKNOWN 0.6 with a false "states none" line); M2
+  "Perks: performance bonus." no longer turns a later requirement into a preference; M3 the new shapes no longer
+  run for an unrecognised location field. Passed before (guards, kept): real requirements still exclude ×3;
+  "Remote (Middle East and Africa)" = INCLUDES 0.7 (now asserted). **Stored rows, old vs new: 0 of 380 change.**
+  Not fixed, recorded: "<country>-based" as a brand word (chad/jordan/turkey-based) — rare, and a real place;
+  "Candidates living in the EU will be invoiced in EUR" — reads like the standard requirement shape; L1 a pay
+  word within the quoted sentence cancels a requirement — errs toward surfacing (Check eligibility), not dropping;
+  "must be based in <place>" is caught earlier as REQUIRES_WORK_AUTH 0.85 (pre-existing, still disqualifying).
+  Gate (4.2): no hole found; side effect for Dagi — unverified new-grads share the 5-per-run "Check eligibility"
+  cap with UNKNOWN internships, so they can push internships out (`unknown_cap`). Spine: no drift. **521 passed.**
+- 2026-10-21 — **4.3 done** (`c40b9bd`). Tests first (`tests/test_role_family_i3.py`: the 4 skipped titles failed).
+  `_ROLE_FAMILY` drops bare data/analyst/analytics, adds `data (engineer(ing)?|scien(ce|tist)s?|platform|
+  infrastructure)`. Calibrate on golden_titles.csv (in-sample): before P 1.000 / R 1.000 → after R 0.964, one
+  positive missed: "Staff Data Analyst" — relabelled 0 (contradicts Appendix A xp-da "Data Analyst" → skip,
+  role_family; cited in the commit) → P 1.000 / R 1.000. Stored rows (380): role_family_ok drops 6 titles, adds
+  none — Antifraud Analyst Junior, Global Treasury Analyst, Staff Data Analyst, Teaching Assistant: Supply Chain
+  Analyst, Video Data Collector (Smartphone), Data Analyst - Remote, Contact. **531 passed.**
+- 2026-10-21 — **4.4 done** (`4fe21fd`). Tests first (`tests/test_pay_i3.py`; collection failed before the code).
+  `pay_of` → unpaid (Holiday World, Flowai, Makerble DevOps, Bridges) · contingent (Makerble Automated Tester) ·
+  stated (Vantum "$500 to $1,000 USD per month", Resilio "35$/hr") · stipend (Flowmingo) · unstated ("Our team
+  volunteers at local food banks"). Gate: after role_family, before stage → `pay:unpaid`; stipend programs
+  exempt. "Outside your stated interests": paid (stated/stipend) first, then title fit; each line shows company
+  and pay. Stored rows (380): 13 stated, 6 unpaid, 4 stipend, 2 contingent (one false: "Paid leave … Performance
+  based Incentives", a non-target role; contingent does not gate), 355 unstated. Pre-existing test changed:
+  `test_interest_s11::test_outside_interests_rendered_as_title_and_link_only` (the line now ends "— <company>").
+  Deviation i3-f. **549 passed.**
+- 2026-10-21 — **4.7 done** (`b6dc285`). Tests first (`tests/test_small_fixes_i3.py`, 3 failed). Himalayas
+  `_employment`: "Intern" → INTERNSHIP only when the title matches neither `co-?founder` nor
+  `normalize._SENIOR_TITLE` (both EWOR titles now fall through; Flowai "Senior … Intern" too — normalize re-types
+  it INTERNSHIP, so it still reaches `pay:unpaid`). `_NOT_REQUIREMENT` += operational|operating|established.
+  Stored rows (380), stage verdict old vs new: 1 change — Mimidentalclinic experience_required → fits. **553 passed.**
+- 2026-10-21 — **4.5 done** (`2706f56` + `9eb2a35`). `src/job_scout/facts.py` `key_facts(opp)`; tests
+  `tests/test_facts_i3.py` (12). Interpretations: `role` also stops at the next known heading (spec says so only
+  for `asks`); curly ’ normalised to ' before matching; a heading tail "in you" / "to Succeed" is dropped (Canonical
+  "What we are looking for in you", Emetlab "What You'll Need to Succeed"); "<word>-based" counts as a location
+  only when the word is in the `_geo` gazetteer (stored bodies: Performance-based ×15, Linux-based ×7, LLM-based …
+  vs US ×14, UK, India, EU, Barcelona). `pay` text = the §4.4 snippet for `stated`, else "<verdict> — <snippet>".
+  Coverage on the 35 stored Appendix A bodies (one per label): **role 25/35 (71%) · asks 31/35 (89%)** · pay 8 ·
+  hours 3 · location 10. No role: avary, affidea-devops, affidea-innov, gitlab-eoi, gitlab-sec, ewor-dev, banco,
+  ewor-cmo, vantum, affidea-qa. No asks: gitlab-eoi, gitlab-sec, banco, c1-ta (the GitLab EOI bodies have none
+  of the headings). Facts for the 11 picked items, for Dagi to judge:
+  - `canon-kernel` Junior Linux Kernel Engineer - Ubuntu — Canonical
+    - role: Collaborate regularly and proactively with a globally distributed team Learn from senior mentors to demystify the inner workings of the Linux kernel and how it is distributed Work closely with external silicon, cloud, or hardware manufacturer…
+    - asks: Well-organized and motivated self-starter able to thrive in a remote work environment Professional manner with colleagues, business partners, and the open-source community Ability to communicate effectively in English, both written and verbal Programming experience in C and/or Rust Familiarity with version control practices, ideally with git…
+    - location: Location: We have home-based Kernel Teams in every timezone.
+  - `canon-ubuntu` Junior Ubuntu Software Engineer — Canonical
+    - role: Based on the first round of interviews, we identify specific teams where you might be an excellent fit and conduct second-round interviews with those teams. Our engineers are: Designing, building and shipping software in Rust, Go, Python and C/C++…
+    - asks: An exceptional academic track record from both high school and university Undergraduate degree in Computer Science or STEM, or a compelling narrative about your alternative path Drive and a track record of going above and beyond expectations A passion for open source software Experience with Rust, Go, Python, Flutter or C/C++ Professional written…
+    - location: Location : We have remote roles open in every time zone.
+  - `ritual-research` Research Intern — Ritual
+    - role: Prototype new mechanisms, then work to productionize your research Work at the frontier of modern cryptographic schemes and open-source AI Collaborate closely with our engineering and product team to ensure your research has real-world impact…
+    - asks: Intellectually curious about the latest advancements in machine learning, cryptography, and how they intersect Desire to see your research go beyond academic papers and have a tangible impact Experience with taking research projects or experiments from ideation to prototype code, or implementation either on your own or coordinating with…
+  - `emetlab` Junior Software Engineer — Emetlab
+    - role: Write clean, well-tested code that contributes to Emetlab 's core platform, data pipelines, and internal tooling. Collaborate with senior engineers on the design and implementation of new features across our contributor platform, quality assurance…
+    - asks: A degree in Computer Science, Software Engineering, or a related discipline, or equivalent practical experience through bootcamps, self-directed learning, or personal projects. Foundational knowledge of at least one programming language such as Python, C#, TypeScript, or JavaScript. Familiarity with web development fundamentals including APIs…
+  - `avary` Data Scientist Intern — Avary.ai
+    - asks: Currently pursuing or recently completed a degree in Computer Science, Data Science, Statistics, Mathematics, Artificial Intelligence, Machine Learning , or a related technical field. Strong analytical and problem-solving skills. Experience with Python and common data analysis libraries such as Pandas and NumPy. Working knowledge of SQL and…
+  - `vantum` QA Tester — Vantum
+    - asks: You notice when software is wrong, and you can describe it without a developer sitting next to you. You should be able to: Follow a flow from start to finish. Include empty states, errors, and the second time through. Write a bug report a stranger can follow. Steps, expected result, actual result. Tell a display problem from a data problem. The…
+    - pay: $500 to $1,000 USD per month
+    - location: At least three hours of weekday overlap with Bangkok (GMT+7), so we can review bugs the same day. Tell us your timezone, your weekday overlap with Bangkok, when you can start, how many hours a week you can give, and your expected monthly pay.
+  - `ritual-swe` Software Engineer Intern — Ritual
+    - role: Prototype rapidly, iterate and execute quickly based on technical guidance Work at the frontier of modern cryptographic schemes and open-source AI Release your work into the open-source world and build alongside the Ritual community
+    - asks: Intellectually curious around intersections of interdisciplinary fields ranging from game theory to cryptography to machine learning Quick iteration and development cycles on writing and/or proof-of-concept
+  - `gitlab-eoi` Backend, Frontend, and Fullstack Engineering Expression of Interest Form — GitLab: (nothing found)
+  - `gitlab-sec` Security Engineer Expression of Interest Form — GitLab: (nothing found)
+  - `cloudcops` Junior DevOps / Cloud Engineer — CloudCops
+    - role: Bau und Pflege von CI/CD-Pipelines in GitHub Actions und / oder GitLab CI Infrastructure-as-Code mit Terraform / Terragrunt – von Green-field bis Brown-field Betrieb & Tuning von Kubernetes-Clustern (AWS EKS, GKE, AKS oder on-prem) Einführung von…
+    - asks: Leidenschaft für Cloud-Technologien & Automatisierung; du verstehst unseren Ethos "Everything-as-Code". Erste Hands-on-Erfahrung mit einer großen Cloud (AWS, GCP, Azure o. Ä.) Solides Git-, Linux- und Shell-Know-how Lernhunger & Neugier: Du probierst gern neue Tools aus und teilst dein Wissen offen Teamspirit, Kommunikationsfreude (Deutsch oder…
+  - `affidea-innov` Junior Digital Innovation Engineer — Affidea BV
+    - asks: Bachelor's degree or diploma in Computer Science, Software Engineering, Information Technology, or a related field, OR a completed coding bootcamp / equivalent self-taught portfolio demonstrating comparable practical ability. 0-3 years' professional software development or technical research experience; recent graduates and career-changers with a…
+  **565 passed.**
+- 2026-10-21 — **4.6 done** (`1584548`, profile `8161d0a`). Tests first (`tests/test_delivery_i3.py`, 11; collection
+  failed before the code). Mechanism: `NotifyConfig.cadence` = `weekly` (config/profile.yaml + example) | `every_run`
+  (code default — tests and local runs keep the old every-run delivery; the pending pool and deferral apply only to
+  `weekly`). Pending pool = never notified ∧ (NEW/UPDATED ∨ store `first_seen` ≤ 14 days) — `store.first_seen_of`
+  (`discovered_date` is re-stamped each run). `gate_reason(..., *, pending=False)` and `gate_reasons(..., *, pending,
+  urgent_only)` are keyword-only additions; no stage signature changed. Urgent = stipend program or deadline ≤ 14
+  days. Non-Monday: non-urgent selections → `deferred:weekly` **before** the caps (a deferred item never reads as
+  capped). Monday = `today.weekday() == 0` with `today` = the profile timezone's date (`zoneinfo`; UTC fallback where
+  the tz database is missing, e.g. this Windows venv — same date at the 04:00 UTC cron); `run_once(today=…)` and new
+  CLI `--today` / workflow_dispatch input `today` inject it. Monday always writes notify.md (even with 0 items: it
+  carries the folded funnel = `heartbeat_body` of the last 7 runs + maintenance notes, replacing the heartbeat issue —
+  workflow step removed; `--heartbeat` kept for manual use). Pipeline writes `data/notify_title.txt` (gitignored):
+  `Job Scout weekly — N new — <date>` / `Job Scout: N urgent — <date>` (`N new` under every_run). Caps per digest:
+  Check eligibility 10, Aspirational 2, Outside 5. Item format per §4.6; "matched:" dropped from the issue (kept in
+  the HTML). Interpretations: a deadline line `**Deadline:**` is kept; a known program's `condition (not checked)`
+  evidence lines are kept as one `**Check yourself:**` line (the one-evidence-line format would drop "18+", "20
+  hours/week" — things only Dagi can check); the hidden map is written even when empty (`{}`). Seed step rewritten:
+  numbered test item + reply hint + map `{"1": "seed:delivery-test"}`, keeping a funnel-only weekly body. Heartbeat
+  near misses skip already_notified / not_new / deferred:weekly. Pre-existing tests changed (one-line justification
+  inline): test_delivery ×3 (numbered format; near misses now exclude seen records), test_final_review_i2 d3 + test_gate_review_s5
+  l3 (cap 10), test_interest_s11 ×2 + test_pay_i3 + test_stage_s10 (numbered / `**Stage:**` format; first-run
+  regression pins `every_run` — it loads the weekly profile). **576 passed.** Follow-up `f5ac17d`:
+  test_delivery_s9 expects one `gh issue create` step now (heartbeat step removed).
+- 2026-10-21 — **4.8 done** (`057750b`). `src/job_scout/labels.py` (stdlib only): `parse_label_comment(comment,
+  item_map)`; tokens split on `·` `;` `,` and whitespace; a verb sets the decision for the following numbers /
+  ranges / `all` / `rest`; `rest` = items this comment does not name otherwise (resolved at the end, so `skip rest,
+  apply 1` works); a later mention wins; a token before any verb, an unknown number or range, or no decision →
+  `LabelParseError` listing the tokens. "A later comment replaces earlier decisions" = `labels.jsonl` is append-only
+  and `latest()` takes the last line per key. Comment lines also carry `issue`, `comment_id`, and the title/company
+  read from the numbered item line. `python -m job_scout.labels --event $GITHUB_EVENT_PATH --out … --error-file …`
+  (exit 2 + message on a parse error). `.github/workflows/labels.yml` per §4.8 (owner + `scout` label; event file only;
+  commit → pull --rebase → push; `+1` reaction via `gh api`, or the error posted with `--body-file`); scout.yml now
+  `concurrency: scout-state` and pulls with rebase before pushing. `data/labels.jsonl` seeded: 36 lines (35 labels,
+  CloudCops ×2 maybe). `scripts/label_report.py [--since D]`: latest label per key × section from the stored record;
+  on the seed it reads the stored rows' pre-iteration-3 classification, so it is not a measurement — use `--since`
+  the first weekly digest for criterion 5. Tests `tests/test_labels_i3.py` (21: grammar table, errors, injection-shaped
+  comments stored nowhere and executed never, workflow never interpolates comment/issue text, seed file). **597 passed.**
+- 2026-10-21 — **Review of 4.6 CLOSED** (`65f21ad`; general-purpose, read-only; no high findings). Each finding a test
+  first in `tests/test_delivery_i3.py` (all 4 failed before the fix):
+  M1 a failed Monday issue (state not committed) was not re-delivered until the next Monday → the digest is now *due*
+  unless a stored run already wrote one this week (Monday..today, run record `digest_date`; `pipeline._digest_due`).
+  Consequence: the first weekly-cadence run after setup writes a digest on any day. L1 a second Monday run posted a
+  second 0-item digest → fixed by the same rule. M2 weekday deferrals filled the 5 near-miss slots and were then
+  dropped by the heartbeat → `NOT_NEAR_MISS` reasons are excluded before the top 5 (test_funnel near-miss test
+  changed: it asserted near misses = seen records; now uses real role_family misses). L2 a key containing `-->` could
+  end the hidden map comment → `>` written as `>` (same JSON). Recorded, not fixed: L3 the seed step on a 0-item
+  weekly body puts the test item above the header line (cosmetic); L4 `--today` mixes the injected date with
+  wall-clock `first_seen`/`notified_at` (manual testing only — dispatch with `today` = the current week's Monday, not
+  a future one, or the stored `digest_date` suppresses that week's real digest). **601 passed.**
+  **Finding for the human checks (not in the spec):** GitHub runs `issue_comment` workflows from the *default branch*
+  only, so `labels.yml` cannot react to a reply before it is on `main`; the "reply on the test issue" check (§5.4) has
+  to happen after merge.
+- 2026-10-21 — **Acceptance 5.1–5.3.** 5.1 `tests/test_labels_2026_10_21.py` (`f13c664`, 38 tests): 36 records from
+  the fixture, current-adapter type (`_employment` for internship-typed Himalayas) and marker (`Worldwide` →
+  `NO_RESTRICTION_LISTED`) reconstructed, NEW, today 2026-10-21, real profile, lexical scoring, uncapped. Result =
+  §2 exactly: Apply 4 records (Canonical ×2, CloudCops ×2) · Check eligibility 9 (Ritual ×2, Emetlab, Avary, GitLab
+  ×2, Affidea Innovation, Affidea DevOps, ArchWell) · Aspirational 1 (Tether) · Outside 5 (Vantum, Makerble Tester,
+  NightOwl CRM, Affidea QA, Resilio) · not selected 17 with the Appendix A reasons (EWOR: `seniority_title:head`,
+  `not_target_class`; micro1: `eligibility:remote_excludes_user`). All 11 picked items selected; no deviation.
+  5.2 all pre-existing tests pass; the changed ones carry a one-line justification (listed per step above).
+  **639 passed.** 5.3 see the 4.5 entry (role 71%, asks 89%, picked facts printed).
+  5.4 **not run** — it needs the branch pushed and a real issue posted: a human check (below).
+- 2026-10-21 — **Whole-branch review CLOSED** (fixes `e9ca7ef`). Two fresh-context read-only reviewers (one
+  started before a /clear, one re-run) on 06dc4c6..HEAD. Every finding → `tests/test_branch_review_i3.py` first:
+  **16 failed → confirmed → fixed.** H1 a weekday-deferred item not re-fetched on Monday was never delivered
+  (20 of 200 stored Himalayas records rolled off the feed within a week; GitLab Security EOI, labelled maybe, would
+  have been lost) → (i3-h). Pay: "not an unpaid internship" / "Unlike an unpaid internship" / "no stipend" were
+  unpaid/stipend → negation within 3 words before blocks it; "performance-based bonus" and "paid time off" made
+  salaried posts `contingent` → a bonus is not contingent, paid time off/leave is not pay; "$20 an hour" now
+  stated. Facts: a long flattened sentence's location fact now shows ±200 chars around the match (EWOR "based in
+  Europe…"). Labels: company stops before " — eligibility not confirmed"; "apply 1 maybe" is an error; a malformed
+  map is a parse error (reply), not a crash; `rest` across comments (i3-i). Role family: "Cybersecurity" counts.
+  Funnel: `deferred:weekly` is not a rejected sample. Workflows: (i3-g). Stored rows old→new: 31 of 380 change
+  — 30 location facts now centred on the match, 1 pay (NightOwl "Paid leave … Performance based Incentives"
+  contingent → unstated). Dry Monday run on a DB copy with no sources: 49 stored pending carried, 48 `role_family`,
+  1 delivered (Mimidentalclinic Junior SWE, fetched today anyway), invariant holds.
+  Recorded, not fixed: an Apply section has no cap, so a >65,536-char weekly body would fail `gh issue create`
+  every day (≈1–1.5 KB/item; today ~1 item/week); `label_report.py` measures a record's current section, not the
+  one it was delivered in, and its denominator is labelled items only (unlabelled items don't count against);
+  the injection unit test can't fail (the guard is the workflow grep test); "<place>-based <noun>" without an
+  article (e.g. "with US-based startups" is guarded, other nouns may not be) still excludes at 0.75; a title
+  "… Volunteer Platform" would read unpaid. **659 passed.**
+
+## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
 Status: **both iterations merged to main** — next-iteration (PR #2 → bc4154c) and iteration-2 (PR #4 → 40c3559). **Nothing is in flight.** The daily scheduled run on main now runs the iteration-2 code.
 Delivery: **CONFIRMED** — Dagi received the GitHub email for the seeded run on 2026-10-04 (S9 acceptance met; the Telegram fallback is not needed).
@@ -8,7 +253,12 @@ Observation period: **2026-10-04 → 2026-10-18.** No changes to rules, profile 
 Single next action: **none until 2026-10-18.**
 Still open:
   (1) DECISION deferred: onsite/hybrid in Addis = UNKNOWN@0.4 (an Addis NEW_GRAD role is never notified; an intern lands in "Check eligibility") — deferred until a source actually delivers local roles.
-  (2) Eligibility wording gaps — NOT fixed by iteration 2 (iteration 2 did not touch these rules). Probed on main 40c3559 (Remote, intern, read-only): "You must be based in a timezone within 3 hours of CET." → `requires_work_auth` 0.85 — still **wrongly rejected** (EAT is within 3 h of CET). "We are hiring only US-based candidates …" → with location "Remote": `remote_excludes_user` 0.8 (correct); with location "Worldwide": `worldwide_remote` 0.85 — still **wrongly passed** in that case.
+  (2) [UPDATED 2026-10-21, iteration 3 §4.1] Himalayas no longer writes "Worldwide" (marker → body decides): the
+      "US-based candidates" case is fixed for every Himalayas listing. **Accepted, unchanged:** an employer-stated
+      worldwide location ("Home based - Worldwide") plus "We are hiring only US-based candidates" stays
+      `worldwide_remote` — the employer's location field is authoritative (Decision #6), pinned in
+      `test_eligibility_i3::test_spec_table`. The CET-timezone wording below is unchanged (spec §6).
+      Original note: Eligibility wording gaps — NOT fixed by iteration 2 (iteration 2 did not touch these rules). Probed on main 40c3559 (Remote, intern, read-only): "You must be based in a timezone within 3 hours of CET." → `requires_work_auth` 0.85 — still **wrongly rejected** (EAT is within 3 h of CET). "We are hiring only US-based candidates …" → with location "Remote": `remote_excludes_user` 0.8 (correct); with location "Worldwide": `worldwide_remote` 0.85 — still **wrongly passed** in that case.
   (3) Unverified: all 2027 program round dates are `expected` extrapolations (Outreachy, GSoC, LFX); whether the Himalayas API truncates descriptions (§12 "Limit").
   (4) Known limits below.
 Known limits (final review Lows not fixed, and test gaps): L2 `education.status` is recorded config only (no rule in the spec). L3 "Graduate Research Assistant" reads `not_target_class` (the `_GRAD_PROGRAM_TITLE` lookahead keeps it from NEW_GRAD), not `stage:graduate_only` — still unselected. L4 eligibility "position/role … based in" pattern (c54fe46) sits outside §12's file list — 6 probes, no false negative. L5 generic strong terms ("systems", "ai", "research") cancel most vetoes — spec-literal. L6 "2-4 years" → N=2 (stretch) — spec-literal, test-pinned. Test gaps: the first-run regression test does not check the order inside "Apply", runs in lexical mode (no model), and its synthetic cases preset `employment_type`.
@@ -570,6 +820,17 @@ calibration pass — do not act on them unilaterally.
     location-reject vs type/experience-reject counts (currently only one post-filter "survived" count
     is logged); (b) the digest overwrite-on-quiet-run (already logged §Known defects); (c) revisit
     whether entry/intern coverage should widen — but that is a coverage decision, not a bug.
+- 2026-10-21 — **Observation-period review (due 2026-10-18), with Dagi's labels for all 35 delivered
+  items.** Apply 6 · maybe 5 · skip 24 (docs/SPEC-2026-10-21-iteration-3.md Appendix A;
+  data/labels.jsonl). Zero issue checkboxes ticked in 17 days: the checkbox label channel produced no data;
+  the review happened through a triage page with per-item summaries. Ongoing feed: 2 of 23 "Apply" items
+  picked as apply (6 of 23 apply or maybe); Oct 4 backlog run: 5 of 9. Causes of skipped "Apply" items:
+  Himalayas adapter writes "Worldwide" for an empty locationRestrictions (Still open (2)); bare
+  data/analyst role words; unpaid roles (Dagi: pay matters; his one off-interest pick was chosen for pay);
+  EWOR co-founder roles typed Intern. Recall checked against heartbeats #6/#11/#19: rejected samples all
+  correct; near-misses all already delivered; one wrong stage:experience ("20+ years operational").
+  Supply after precision fixes ≈ 1 strong item/week (inference, 14 days). Cadence decided: weekly Monday
+  digest + urgent-only daily. Next: iteration 3 (docs/SPEC-2026-10-21-iteration-3.md).
 
 ---
 

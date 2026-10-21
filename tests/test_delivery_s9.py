@@ -36,6 +36,6 @@ def test_workflow_assigns_owner_on_every_issue_and_seed_mentions_owner():
     yaml.safe_load(text)
     steps = {s["name"]: s.get("run", "") for s in yaml.safe_load(text)["jobs"]["scout"]["steps"] if "name" in s}
     creates = [r for r in steps.values() if "gh issue create" in r]
-    assert len(creates) == 2
+    assert len(creates) == 1   # spec 2026-10-21 §4.6: no separate heartbeat issue — Monday's digest carries the funnel
     assert all('--assignee "${{ github.repository_owner }}"' in r for r in creates)
     assert "cc @%s" in steps["Seed delivery test item"]

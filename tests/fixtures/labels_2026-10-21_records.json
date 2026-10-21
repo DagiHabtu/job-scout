@@ -1,0 +1,1931 @@
+{
+ "_about": "The 36 records behind Dagi's 35 labels of 2026-10-21 (spec 2026-10-21 Appendix A), column `raw` copied verbatim from data/scout.db at origin/main 06dc4c6. Stored Himalayas `location_raw` is the old adapter's synthetic 'Worldwide' (empty locationRestrictions); the regression test maps it to the new marker. In-sample: the iteration-3 rules were written with these items in view.",
+ "records": [
+  {
+   "label_id": "canon-kernel",
+   "decision": "apply",
+   "key": "greenhouse:5370815",
+   "record": {
+    "title": "Junior Linux Kernel Engineer - Ubuntu",
+    "company": "Canonical",
+    "apply_url": "https://job-boards.greenhouse.io/canonical/jobs/5370815",
+    "canonical_url": "https://job-boards.greenhouse.io/canonical/jobs/5370815",
+    "ats_provider": "greenhouse",
+    "ats_job_id": "5370815",
+    "content_fingerprint": "6fee003c7b41de89",
+    "location_raw": "Home based - Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Canonical is a leading provider of open source software and operating systems to the global enterprise and technology markets. Our platform, Ubuntu, is very widely used in breakthrough enterprise initiatives such as public cloud, data science, AI, engineering innovation, and IoT. Our customers include the world's leading public cloud and silicon providers, and industry leaders in many sectors. The company is a pioneer of global distributed collaboration, with 1200+ colleagues in 75+ countries and very few office-based roles. Teams meet two to four times yearly in person, in interesting locations around the world, to align on strategy and execution. The company is founder-led, profitable, and growing. Every year we select new junior professionals into the Canonical Kernel Team, to work on the Linux kernel for Ubuntu. If you’ve enjoyed operating systems in your coursework or current role, you are confident in your ability to write high quality C and possibly Rust, and are ready to take the plunge and see how it all works, then this would be a great place to pursue your next career stage. We are a global team working to ship the world's most widely used Linux kernel, across the very latest silicon and cloud, where you can apply and grow your software engineering skills. The Canonical Kernel Team builds and maintains all supported Ubuntu Linux kernels for a variety of platforms and architectures from small embedded devices to standard desktop/server systems to large-scale cloud environments. In your first year you will tackle serious initiatives, which include but are not limited to: Optimized solutions for key Silicon and Cloud partner platforms Developer platforms such as Raspberry Pi and RISC-V Enabling Ubuntu on a wide range of embedded systems Security hardening and exploit mitigation Third-party driver integration and distribution, such as graphics Expanded driver support for bleeding-edge PC platforms We select candidates that are recent university graduates or early career professionals who are enthusiastic to develop kernel-level software in multiple areas including security updates, patching, and testing. The successful candidate will have a background in software engineering, be motivated to work in a distributed team and willing and able to travel globally twice a year for company engineering events. These are full-time positions available to prospective or recently graduated students. Location: We have home-based Kernel Teams in every timezone. The role entails Collaborate regularly and proactively with a globally distributed team Learn from senior mentors to demystify the inner workings of the Linux kernel and how it is distributed Work closely with external silicon, cloud, or hardware manufacturer delivery teams on bleeding-edge platforms Diagnose and resolve issues in the kernel reported by customers, the community, and discovered by your own rigorous testing Take personal responsibility for the delivery of various flavors of the Ubuntu Linux kernel Improve tooling and automation for delivery and test of Ubuntu Linux kernels Submit, review, and apply kernel patches, working with both internal and external upstream maintainers What we are looking for in you Well-organized and motivated self-starter able to thrive in a remote work environment Professional manner with colleagues, business partners, and the open-source community Ability to communicate effectively in English, both written and verbal Programming experience in C and/or Rust Familiarity with version control practices, ideally with git Understanding of operating system kernel fundamentals Ability to travel twice a year for company events of up to two weeks length Nice-to-have skills Interest and experience in Rust Python and Bash scripting ability Prior experience with Ubuntu/Debian/Snap packaging Demonstrated experience with kernel patching and debugging Strong grasp of device drivers, BSP’s, and other low level system engineering What we offer colleagues We consider geographical location, experience, and performance in shaping compensation worldwide. We revisit compensation annually (and more often for graduates and associates) to ensure we recognize outstanding performance. In addition to base pay, we offer a performance-driven annual bonus or commission. We provide all team members with additional benefits which reflect our values and ideals. We balance our programs to meet local needs and ensure fairness globally. Distributed work environment with twice-yearly team sprints in person Personal learning and development budget of USD 2,000 per year Annual compensation review Recognition rewards Annual holiday leave Maternity and paternity leave Team Member Assistance Program & Wellness Platform Opportunity to travel to new locations to meet colleagues Priority Pass and travel upgrades for long-haul company events About Canonical Canonical is a pioneering tech firm at the forefront of the global move to open source. As the company that publishes Ubuntu, one of the most important open-source projects and the platform for AI, IoT, and the cloud, we are changing the world of software. We recruit on a global basis and set a very high standard for people joining the company. We expect excellence; in order to succeed, we need to be the best at what we do. Most colleagues at Canonical have worked from home since our inception in 2004.​ Working here is a step into the future and will challenge you to think differently, work smarter, learn new skills, and raise your game. Canonical is an equal opportunity employer We are proud to foster a workplace free from discrimination. Diversity of experience, perspectives, and background create a better work environment and better products. Whatever your identity, we will give your application fair consideration. #LI-remote",
+    "technologies": [],
+    "posting_date": null,
+    "deadline": null,
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Home based - Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.9138,
+     "matched_signals": [
+      "tech: python",
+      "role match: Linux, kernel or open source engineering",
+      "keyword: open source",
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior Linux Kernel Engineer - Ubuntu\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.691346287727356
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/canonical/jobs/5370815",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.946195+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "canon-ubuntu",
+   "decision": "apply",
+   "key": "greenhouse:6707669",
+   "record": {
+    "title": "Junior Ubuntu Software Engineer",
+    "company": "Canonical",
+    "apply_url": "https://job-boards.greenhouse.io/canonical/jobs/6707669",
+    "canonical_url": "https://job-boards.greenhouse.io/canonical/jobs/6707669",
+    "ats_provider": "greenhouse",
+    "ats_job_id": "6707669",
+    "content_fingerprint": "6a6d3a1f4797d4ad",
+    "location_raw": "Home based - Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Canonical is a leading provider of open source software and operating systems to the global enterprise and technology markets. Our platform, Ubuntu, is very widely used in breakthrough enterprise initiatives such as public cloud, data science, AI, engineering innovation and IoT. Our customers include the world's leading public cloud and silicon providers, and industry leaders in many sectors. The company is a pioneer of global distributed collaboration, with 1200+ colleagues in 75+ countries and very few office based roles. Teams meet two to four times yearly in person, in interesting locations around the world, to align on strategy and execution. The company is founder led, profitable and growing. We are hiring junior engineers to work across the breadth of our Ubuntu Engineering organisation - engineers who care deeply for quality, performance and resilience in software, engineers who are just as comfortable designing and engineering new software as they are packaging, integrating, testing and shipping the incredible catalog of open source software provided by the Ubuntu repositories. Our engineers integrate the freshest open source software, provide robust upgrade paths and engineer the future of Ubuntu. Ubuntu is not just the world’s most deployed open source operating system, it's a platform that enables innovation for millions of users across the globe. Our community represents the full breadth of the developer experience; from students, hobbyists and freelancers to high performance engineering and creative teams in corporate and academic environments. The four key teams that ship Ubuntu are Foundations : maintaining foundational software: architectures, package managers, compilers, toolchains, bootloaders, filesystems and core utilities Server: leading the design, evolution and future of our Ubuntu Server distribution Desktop: driving Ubuntu Desktop, our future immutable desktop: Ubuntu Core Desktop, WSL, gaming technology, and a suite of modern applications for the desktop crafted with Flutter Debcrafters: a new team responsible for the forward movement, maintenance and overall health of the Ubuntu archive: one of the most abundant repositories of open source software available today Bring your existing expertise and learn new skills by working on one of the most prolific pieces of open source software. As an engineer working on Ubuntu you could work on any or all of the following categories: Development : design, build and ship new foundational systems software and applications in Rust, Go, Flutter, and Python Architecture : engineer the integration of open source from boot firmware to cloud applications deployment Packaging : a combination of Debian and Snap packaging to ship software in the distribution Automation : build and maintain the machinery responsible for building, testing and shipping Ubuntu Distro Engineering : the maintenance and evolution of a Linux distribution and its repositories If you have skills in those areas, or you have other skills you believe could contribute to Ubuntu, and you're keen to get started building your career in open source, then this is the role for you. Our junior career path caters for both new graduates and early careers engineers. At Canonical, you will have the opportunity to engage with and contribute to the broader open source community. We're looking for individuals who can help build a thriving community and contribute with enthusiasm and precision to a broad range of technologies. Location : We have remote roles open in every time zone. The role entails Based on the first round of interviews, we identify specific teams where you might be an excellent fit and conduct second-round interviews with those teams. Our engineers are: Designing, building and shipping software in Rust, Go, Python and C/C++ Packaging, integrating, testing and uploading open source software to the Ubuntu repositories Debugging issues, then designing and delivering robust solutions Authoring and improving technical and community documentation Contributing to upstream and neighboring open source projects Collaborating as part of a globally distributed team Continuously learning and progressing their technical and professional skills What we are looking for in you An exceptional academic track record from both high school and university Undergraduate degree in Computer Science or STEM, or a compelling narrative about your alternative path Drive and a track record of going above and beyond expectations A passion for open source software Experience with Rust, Go, Python, Flutter or C/C++ Professional written and spoken English Excellent communication and interpersonal skills Ability to travel twice a year, for company events up to two weeks each Nice-to-have skills Familiarity with Linux distributions Familiarity with system debugging tools and techniques Familiarity with automation tooling and CI/CD systems Experience contributing to open source projects What we offer you We consider geographical location, experience, and performance in shaping compensation worldwide. We revisit compensation annually (and more often for graduates and associates) to ensure we recognize outstanding performance. In addition to base pay, we offer a performance-driven annual bonus. We provide all team members with additional benefits, which reflect our values and ideals. We balance our programs to meet local needs and ensure fairness globally. Distributed work environment with twice-yearly team sprints in person Personal learning and development budget of USD 2,000 per year Annual compensation review Recognition rewards Annual holiday leave Maternity and paternity leave Team Member Assistance Program & Wellness Platform Opportunity to travel to new locations to meet colleagues Priority Pass, and travel upgrades for long haul company events About Canonical Canonical is a pioneering tech firm at the forefront of the global move to open source. As the company that publishes Ubuntu, one of the most important open source projects and the platform for AI, IoT and the cloud, we are changing the world on a daily basis. We recruit on a global basis and set a very high standard for people joining the company. We expect excellence - in order to succeed, we need to be the best at what we do. Canonical has been a remote-first company since its inception in 2004.​ Working here is a step into the future, and will challenge you to think differently, work smarter, learn new skills, and raise your game. Canonical is an equal opportunity employer We are proud to foster a workplace free from discrimination. Diversity of experience, perspectives, and background create a better work environment and better products. Whatever your identity, we will give your application fair consideration.",
+    "technologies": [],
+    "posting_date": null,
+    "deadline": null,
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Home based - Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.9373,
+     "matched_signals": [
+      "tech: python",
+      "tech: go",
+      "keyword: open source",
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior Ubuntu Software Engineer\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.6848477125167847
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/canonical/jobs/6707669",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.946351+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "ritual-swe",
+   "decision": "maybe",
+   "key": "himalayas:https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445",
+   "record": {
+    "title": "Software Engineer Intern",
+    "company": "Ritual",
+    "apply_url": "https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445",
+    "content_fingerprint": "d3ffd492614003ba",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "About Ritual Ritual is building a sovereign, execution layer for AI, with our private testnet already live and running. The Ritual chain is the first blockchain custom-built to support AI-native operations, designed from the ground up to enable a new class of applications at the intersection of crypto and AI. Our first product, Infernet, is pioneering new ground as the first solution to enable developers to access AI models both on-chain via smart contracts and off-chain, demonstrating our commitment to bridging these transformative technologies. About the role Prototype rapidly, iterate and execute quickly based on technical guidance Work at the frontier of modern cryptographic schemes and open-source AI Release your work into the open-source world and build alongside the Ritual community About you Intellectually curious around intersections of interdisciplinary fields ranging from game theory to cryptography to machine learning Quick iteration and development cycles on writing and/or proof-of-concept Extras Experience in cryptography, machine learning software projects, ideally in open-source land Why join us Join a passionate group of engineers, researchers, and operators on a mission to build the next generation of AI infrastructure hardened by cryptographic schemes We work completely in open-source and ship weekly Maximize your knowledge gradient around fields that typically would not intersect We’re open to exceptional people of all backgrounds for research (e.g. high school, undergraduate and postgraduate degree). Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-09-18",
+    "deadline": "2026-11-17",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 1.0,
+     "matched_signals": [
+      "employment type wanted: internship",
+      "stage:fits",
+      "stage:evidence: \"title: Software Engineer Intern\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.9685308337211609
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/ritual-net/jobs/software-engineer-intern-9031169445?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956261+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "ritual-research",
+   "decision": "apply",
+   "key": "himalayas:https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102",
+   "record": {
+    "title": "Research Intern",
+    "company": "Ritual",
+    "apply_url": "https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102",
+    "content_fingerprint": "b5d6ff2f86055b58",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "About Ritual Ritual is building a sovereign, execution layer for AI, with our private testnet already live and running. The Ritual chain is the first blockchain custom-built to support AI-native operations, designed from the ground up to enable a new class of applications at the intersection of crypto and AI. Our first product, Infernet, is pioneering new ground as the first solution to enable developers to access AI models both on-chain via smart contracts and off-chain, demonstrating our commitment to bridging these transformative technologies. About the role Prototype new mechanisms, then work to productionize your research Work at the frontier of modern cryptographic schemes and open-source AI Collaborate closely with our engineering and product team to ensure your research has real-world impact Release your work into the open-source world and build alongside the Ritual community About you Intellectually curious about the latest advancements in machine learning, cryptography, and how they intersect Desire to see your research go beyond academic papers and have a tangible impact Experience with taking research projects or experiments from ideation to prototype code, or implementation either on your own or coordinating with engineering teams Quick iteration and development cycles on writing and/or proof-of-concept Extras Bonus points if you have existing research or writing in conferences or journals Have some level of comfort with algebraic structures, distributed systems, mechanism design, or statistical modeling Why join us Join a passionate group of engineers, researchers, and operators on a mission to build the next generation of AI infrastructure hardened by cryptographic schemes We work completely in open-source and ship weekly Maximize your knowledge gradient around fields that typically would not intersect We’re open to exceptional people of all backgrounds for research (e.g. high school, undergraduate and graduate degrees). Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-09-18",
+    "deadline": "2026-11-17",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.9031,
+     "matched_signals": [
+      "tech: go",
+      "role match: machine learning or AI engineering",
+      "employment type wanted: internship",
+      "stage:fits",
+      "stage:evidence: \"title: Research Intern\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.6805648803710938
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/ritual-net/jobs/research-intern-1464631102?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956250+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "cloudcops",
+   "decision": "maybe",
+   "key": "himalayas:https://himalayas.app/companies/cloudcops/jobs/junior-devops-cloud-engineer",
+   "record": {
+    "title": "Junior DevOps / Cloud Engineer",
+    "company": "CloudCops",
+    "apply_url": "https://himalayas.app/companies/cloudcops/jobs/junior-devops-cloud-engineer",
+    "canonical_url": "https://himalayas.app/companies/cloudcops/jobs/junior-devops-cloud-engineer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/cloudcops/jobs/junior-devops-cloud-engineer",
+    "content_fingerprint": "0310263c57f367b9",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "deine aufgaben Bau und Pflege von CI/CD-Pipelines in GitHub Actions und / oder GitLab CI Infrastructure-as-Code mit Terraform / Terragrunt – von Green-field bis Brown-field Betrieb & Tuning von Kubernetes-Clustern (AWS EKS, GKE, AKS oder on-prem) Einführung von GitOps-Workflows mit ArgoCD oder FluxCD Aufbau eines durchgängigen Observability-Stacks (Prometheus, Grafana, Loki, Tempo, OpenTelemetry) Betrieb verteilter Dienste wie Kafka, RabbitMQ, Redis innerhalb von Kubernetes Enge Zusammenarbeit mit unseren Kund:innen – von Architekturdiskussion bis Incident-Debugging Zwischendurch Hacktime für unsere eigenen Startup-Projekte, an denen du direkt mitbaust Regelmäßige Up-/Crossgrades entlang der CNCF-Landscape – wir probieren neue Projekte gern aus dein profil Leidenschaft für Cloud-Technologien & Automatisierung; du verstehst unseren Ethos \"Everything-as-Code\". Erste Hands-on-Erfahrung mit einer großen Cloud (AWS, GCP, Azure o. Ä.) Solides Git-, Linux- und Shell-Know-how Lernhunger & Neugier: Du probierst gern neue Tools aus und teilst dein Wissen offen Teamspirit, Kommunikationsfreude (Deutsch oder Englisch) und den Mut, Fragen zu stellen warum wir? Remote-first – work from anywhere Output-orientierte Kultur: Wir zählen Ergebnisse, nicht Stunden Kurze Wege, wenig Hierarchie, viel Gestaltungsfreiheit bei Tools & Tech Jahresbudget für Konferenzen, Zertifizierungen (CKA/CKAD etc.) & Hardware deiner Wahl Freie Mitgestaltung deines Vertrages: Bei Arbeitszeit, Urlaub, etc. sind wir flexibel. DU stehst bei uns im Vordergrund Ein Team, das DevOps atmet Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-08",
+    "deadline": "2026-12-07",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.918,
+     "matched_signals": [
+      "tech: kubernetes",
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior DevOps / Cloud Engineer\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.6954593658447266
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/cloudcops/jobs/junior-devops-cloud-engineer",
+      "first_seen": "2026-10-17T08:07:35.242407+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-17T08:07:53.150031+00:00",
+    "notified_at": "2026-10-09T11:00:40.008201+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "cloudcops",
+   "decision": "maybe",
+   "key": "himalayas:https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+   "record": {
+    "title": "Junior DevOps / Cloud Engineer",
+    "company": "CloudCops GmbH",
+    "apply_url": "https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+    "canonical_url": "https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+    "content_fingerprint": "b62755bd1a66c286",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "deine aufgaben Bau und Pflege von CI/CD-Pipelines in GitHub Actions und / oder GitLab CI Infrastructure-as-Code mit Terraform / Terragrunt – von Green-field bis Brown-field Betrieb & Tuning von Kubernetes-Clustern (AWS EKS, GKE, AKS oder on-prem) Einführung von GitOps-Workflows mit ArgoCD oder FluxCD Aufbau eines durchgängigen Observability-Stacks (Prometheus, Grafana, Loki, Tempo, OpenTelemetry) Betrieb verteilter Dienste wie Kafka, RabbitMQ, Redis innerhalb von Kubernetes Enge Zusammenarbeit mit unseren Kund:innen – von Architekturdiskussion bis Incident-Debugging Zwischendurch Hacktime für unsere eigenen Startup-Projekte, an denen du direkt mitbaust Regelmäßige Up-/Crossgrades entlang der CNCF-Landscape – wir probieren neue Projekte gern aus dein profil Leidenschaft für Cloud-Technologien & Automatisierung; du verstehst unseren Ethos \"Everything-as-Code\". Erste Hands-on-Erfahrung mit einer großen Cloud (AWS, GCP, Azure o. Ä.) Solides Git-, Linux- und Shell-Know-how Lernhunger & Neugier: Du probierst gern neue Tools aus und teilst dein Wissen offen Teamspirit, Kommunikationsfreude (Deutsch oder Englisch) und den Mut, Fragen zu stellen warum wir? Remote-first – work from anywhere Output-orientierte Kultur: Wir zählen Ergebnisse, nicht Stunden Kurze Wege, wenig Hierarchie, viel Gestaltungsfreiheit bei Tools & Tech Jahresbudget für Konferenzen, Zertifizierungen (CKA/CKAD etc.) & Hardware deiner Wahl Freie Mitgestaltung deines Vertrages: Bei Arbeitszeit, Urlaub, etc. sind wir flexibel. DU stehst bei uns im Vordergrund Ein Team, das DevOps atmet Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-02",
+    "deadline": "2026-12-01",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.918,
+     "matched_signals": [
+      "tech: kubernetes",
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior DevOps / Cloud Engineer\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.6954593658447266
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/cloudcops-gmbh/jobs/junior-devops-cloud-engineer",
+      "first_seen": "2026-10-05T10:56:59.168905+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-05T10:57:13.177482+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "emetlab",
+   "decision": "apply",
+   "key": "himalayas:https://himalayas.app/companies/emetlab/jobs/junior-software-engineer",
+   "record": {
+    "title": "Junior Software Engineer",
+    "company": "Emetlab",
+    "apply_url": "https://himalayas.app/companies/emetlab/jobs/junior-software-engineer?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/emetlab/jobs/junior-software-engineer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/emetlab/jobs/junior-software-engineer",
+    "content_fingerprint": "85eef02fc79a89fc",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "About the Job The Opportunity As a Junior Software Engineer at Emetlab , you will contribute to building the technology infrastructure behind elite AI training data that powers frontier models worldwide. Emetlab is an AI data infrastructure company delivering expert-produced, rigorously validated datasets and end-to-end AI solutions to laboratories, Fortune 500 enterprises, ambitious startups, and sovereign AI programmes across the globe. In this role, you will work alongside senior engineers to develop, test, and ship features across our data platform, contributor tools, and client-facing systems. You will gain hands-on experience with large-scale data pipelines, quality assurance automation, and the infrastructure that enables over 5,000 domain experts across 120+ countries to produce world-class training data. You will be trusted with meaningful work from day one, not sidelined with tasks that don't matter. This is a rare opportunity to begin your engineering career at the intersection of AI and data infrastructure, where your contributions will be visible, valued, and directly tied to the quality of datasets that train the next generation of intelligent systems. What You'll Do Write clean, well-tested code that contributes to Emetlab 's core platform, data pipelines, and internal tooling. Collaborate with senior engineers on the design and implementation of new features across our contributor platform, quality assurance systems, and client delivery infrastructure. Participate in code reviews, giving and receiving feedback that elevates the quality of the entire team's work. Assist in debugging, troubleshooting, and resolving issues across the platform with attention to detail and persistence. Contribute to building and improving automation that supports our multi-stage quality assurance processes and 98%+ accuracy benchmarks. Learn and grow rapidly by engaging with modern tools, frameworks, and AI-adjacent technologies in a production environment. What You'll Need to Succeed A degree in Computer Science, Software Engineering, or a related discipline, or equivalent practical experience through bootcamps, self-directed learning, or personal projects. Foundational knowledge of at least one programming language such as Python, C#, TypeScript, or JavaScript. Familiarity with web development fundamentals including APIs, databases, and version control with Git. A genuine desire to learn, improve, and take ownership of your growth as an engineer. Strong communication skills and a collaborative disposition, comfortable working within a team and asking thoughtful questions. Genuine interest in AI, data systems, or machine learning infrastructure is highly valued. Role Details Employment Type: Full-Time and Part-Time positions available Location: Fully Remote Stage: Growth stage, operational About Emetlab Emetlab is an AI data infrastructure company built on a single conviction: the quality ceiling of any AI system is determined by its training data, not its architecture or compute. We produce expert-crafted, rigorously validated training datasets across 12 specialised domains, delivered by a global network of over 5,000 vetted domain specialists spanning 100+ languages and 50+ specialisations. Beyond datasets, we offer end-to-end AI solutions including Fine-Tuning, RLHF & Alignment, Red Teaming, Model Evaluation, Data Annotation, Synthetic Data Generation, and Pre-Training Data Pipelines. We are not a crowd-sourcing platform. We are the data partner that matches the ambition of the teams building the next generation of AI, delivering measurable results: 42% accuracy improvements, 3x faster time-to-production, and 99.4% regulatory precision. Equal Opportunity Emetlab is an equal opportunity employer. We welcome dedicated individuals regardless of gender, race, ethnicity, national origin, age, disability, religion, sexual orientation, gender identity or expression, or veteran status. We believe that extraordinary products are built by extraordinary teams, and extraordinary teams are built on inclusion, respect, and the understanding that brilliance has no single origin. If you require accommodation during the application or interview process, please reach out to our team and we will ensure your needs are met with care. Let's build the future of AI training data, together. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-14",
+    "deadline": "2026-12-13",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.9486,
+     "matched_signals": [
+      "tech: python",
+      "role match: machine learning or AI engineering",
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior Software Engineer\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.7261052131652832
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/emetlab/jobs/junior-software-engineer?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956856+00:00",
+    "notified_at": "2026-10-13T11:15:47.530616+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "avary",
+   "decision": "apply",
+   "key": "himalayas:https://himalayas.app/companies/avary-ai/jobs/data-scientist-intern",
+   "record": {
+    "title": "Data Scientist Intern",
+    "company": "Avary.ai",
+    "apply_url": "https://himalayas.app/companies/avary-ai/jobs/data-scientist-intern?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/avary-ai/jobs/data-scientist-intern",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/avary-ai/jobs/data-scientist-intern",
+    "content_fingerprint": "7b6ba9dae2066f93",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "About Avary.ai Avary.ai is building an AI-native recruiting platform designed to make hiring faster, more efficient, and more consistent. Our platform automates key parts of the recruiting workflow, including resume screening, AI-powered structured interviews, candidate evaluation, interview reporting, and hiring workflow orchestration. As a Data Scientist Intern , you will work with real recruiting and interview data and help us improve the intelligence behind Avary’s candidate evaluation and hiring decision-support systems. What You’ll Work On You will work closely with Avary’s engineering and product teams on practical data science problems across candidate evaluation, recruiting analytics, and AI system quality. Depending on the project, your work may include: Analyze structured and unstructured recruiting data, including resumes, interview responses, candidate evaluation results, and hiring funnel data. Develop metrics and analytical frameworks for measuring candidate quality, interview performance, evaluation consistency, and recruiting efficiency. Analyze AI interviewer and LLM-generated evaluation results to identify patterns, failure cases, bias, and opportunities for improvement. Design experiments to evaluate different prompts, interview strategies, scoring rubrics, and AI evaluation models. Build statistical or machine learning models for problems such as candidate-job matching, candidate ranking, interview outcome analysis, and recruiting funnel prediction. Develop datasets and evaluation pipelines for measuring the quality of LLM-based recruiting systems. Perform exploratory data analysis and communicate findings through dashboards, visualizations, and concise analytical reports. Work with product and engineering teams to turn analytical insights into product improvements. Help establish data quality checks, experiment tracking, and reproducible analytical workflows. Explore new applications of machine learning and generative AI in recruiting and talent intelligence. Example Projects Projects may include: Candidate Evaluation Analysis: Study the relationship between interview answers, AI evaluation scores, recruiter decisions, and hiring outcomes. LLM Evaluation Framework: Build benchmarks and metrics to measure the consistency and quality of AI-generated candidate assessments. Resume–Job Matching: Develop or evaluate models that measure how well a candidate’s experience and skills match a job description. Interview Quality Analytics: Analyze interview questions and candidate responses to determine which signals are most useful for candidate assessment. Recruiting Funnel Analytics: Identify bottlenecks and conversion patterns across application, screening, interview, and hiring stages. Evaluation Calibration: Analyze scoring distributions and help improve the consistency of candidate evaluation across jobs and interview sessions. AI Experimentation: Run controlled experiments comparing prompts, models, evaluation rubrics, or interview strategies. What We’re Looking For Currently pursuing or recently completed a degree in Computer Science, Data Science, Statistics, Mathematics, Artificial Intelligence, Machine Learning , or a related technical field. Strong analytical and problem-solving skills. Experience with Python and common data analysis libraries such as Pandas and NumPy. Working knowledge of SQL and relational data analysis. Understanding of statistics, probability, experimental design, and data visualization. Familiarity with machine learning concepts and common ML workflows. Ability to communicate analytical findings clearly to both technical and non-technical teammates. Comfortable working in a fast-moving startup environment and independently exploring ambiguous problems. Nice to Have Experience with machine learning libraries such as scikit-learn, PyTorch, or TensorFlow . Experience with LLMs, prompt engineering, embeddings, RAG, or AI agents . Familiarity with LLM evaluation techniques, benchmarking, or human/AI evaluation workflows. Experience analyzing text or other unstructured data using NLP techniques. Experience with visualization or BI tools. Familiarity with A/B testing, causal inference, ranking systems, recommendation systems, or information retrieval. Experience working with production datasets, data pipelines, or cloud platforms. What You’ll Learn During the internship, you will gain hands-on experience with: Applying data science to a real AI SaaS product. Evaluating and improving production LLM and AI-agent systems. Designing metrics and experiments for AI product development. Working with real-world recruiting and interview datasets. Translating analytical findings into product and engineering decisions. Building data science workflows in an early-stage AI startup. Collaborating directly with founders and engineers on production-facing projects. Ideal Candidate We are looking for someone who enjoys going beyond simply training a model. You should be interested in understanding why a system behaves the way it does, how to measure whether it is actually working, and how data can be used to improve the product . You do not need to know everything before joining. We value strong fundamentals, curiosity, ownership, and the ability to learn quickly. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-13",
+    "deadline": "2026-12-12",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.9504,
+     "matched_signals": [
+      "tech: python",
+      "tech: sql",
+      "role match: machine learning or AI engineering",
+      "employment type wanted: internship",
+      "stage:fits",
+      "stage:evidence: \"title: Data Scientist Intern\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.6978673934936523
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/avary-ai/jobs/data-scientist-intern?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.955938+00:00",
+    "notified_at": "2026-10-14T09:07:35.530040+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "affidea-devops",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/affidea-bv/jobs/junior-devops-engineer",
+   "record": {
+    "title": "Junior DevOps Engineer",
+    "company": "Affidea BV",
+    "apply_url": "https://himalayas.app/companies/affidea-bv/jobs/junior-devops-engineer?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/affidea-bv/jobs/junior-devops-engineer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/affidea-bv/jobs/junior-devops-engineer",
+    "content_fingerprint": "6403bb8822dcd8d9",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "The Junior DevOps Engineer builds foundational DevOps skills by supporting the maintenance of CI/CD pipelines, assisting with monitoring and alerting, and helping with basic infrastructure, access, and security administration tasks, all under the close supervision of more senior engineers. The role is expected to grow steadily in independence and technical scope as competence and confidence increase across the toolchain and internal platforms. CI/CD Pipeline Support Assists with the maintenance and minor configuration changes of existing CI/CD pipelines under guidance from senior engineers. Monitors pipeline runs, flags failures, and helps triage straightforward build/deploy issues. Follows documented runbooks and change procedures when making pipeline adjustments. Escalates ambiguous or higher-risk pipeline changes to a senior engineer before proceeding. Monitoring & Alerting Assistance Helps configure and maintain basic monitoring dashboards and alert rules under supervision. Performs first-line review of alerts and escalates genuine incidents promptly to senior engineers. Documents recurring alert patterns and contributes observations to runbook improvements. Learns the organisation's monitoring stack (e.g., Prometheus, Grafana) and standard thresholds. Basic Infrastructure & Environment Tasks Assists with routine infrastructure tasks (e.g., environment provisioning support, configuration updates) under close supervision. Follows infrastructure-as-code templates and change processes rather than making ad-hoc changes. Documents steps taken and outcomes for tasks performed, to support knowledge transfer. Builds working familiarity with core cloud services and infrastructure tooling used by the team. Access, Security & Platform Administration Support Assists with routine access management tasks (e.g., user provisioning/de-provisioning) following approved processes. Supports basic security hygiene tasks such as patch tracking and access reviews under supervision. Helps administer internal platforms (e.g., Bitrix24 and similar internal collaboration/CRM tools) for routine, well-defined requests. Escalates any anomalous access requests or potential security concerns immediately. Ramp-Up and Learning Velocity Actively works through onboarding materials, toolchain documentation, and internal platform guides. Pairs frequently with senior DevOps engineers to build understanding of pipelines, infrastructure, and security practices. Tracks own learning goals and progress with support from a mentor or the DevOps Lead. Builds toward taking on progressively larger and less-supervised tasks. Adherence to Standards and Process Follows documented change management, security, and operational procedures without bypassing approval gates. Uses agreed tools and ticketing systems consistently and accurately. Applies feedback from senior engineers and the DevOps Lead consistently in subsequent work. Raises process gaps or unclear documentation to the team rather than working around them. Requirements Bachelor's degree or diploma in Computer Science, Information Technology, Software Engineering, or a related field, OR a completed relevant bootcamp/certification path with a demonstrable practical portfolio. 0-2 years' experience in a DevOps, systems administration, or software development support capacity. Basic understanding of version control (e.g., Git) and branching workflows. Exposure to Linux/Windows server environments and basic scripting (e.g., Bash, PowerShell, Python). Some exposure to CI/CD concepts and tools (e.g., Jenkins, GitHub Actions, Azure DevOps Pipelines). Basic understanding of networking fundamentals (DNS, TCP/IP, HTTP/HTTPS). Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-18",
+    "deadline": "2026-12-17",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.8252,
+     "matched_signals": [
+      "tech: python",
+      "role match: systems, infrastructure, cloud or DevOps engineering",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior DevOps Engineer\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.6026520133018494
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/affidea-bv/jobs/junior-devops-engineer?utm_source=api",
+      "first_seen": "2026-10-20T08:58:04.780086+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-20T08:58:22.645201+00:00",
+    "notified_at": "2026-10-18T08:24:51.165080+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "affidea-innov",
+   "decision": "maybe",
+   "key": "himalayas:https://himalayas.app/companies/affidea-bv/jobs/junior-digital-innovation-engineer",
+   "record": {
+    "title": "Junior Digital Innovation Engineer",
+    "company": "Affidea BV",
+    "apply_url": "https://himalayas.app/companies/affidea-bv/jobs/junior-digital-innovation-engineer?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/affidea-bv/jobs/junior-digital-innovation-engineer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/affidea-bv/jobs/junior-digital-innovation-engineer",
+    "content_fingerprint": "331a02f449753306",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "The Junior Digital Innovation Engineer supports the R&D team's mandate to explore and prototype emerging AI/ML capabilities, evaluate new technologies, and investigate improved software development approaches. Working under the guidance of the Team Lead and senior team members, the role conducts technology and literature scanning, assists in building proof-of-concept prototypes and feasibility spikes, documents findings clearly, and presents experiment results to the team. The role is expected to grow steadily in independence and technical scope as competence and confidence increase. Technology & Literature Scanning Researches and tracks developments in AI/ML, emerging frameworks, and developer tooling relevant to the product and team's technology stack. Summarises findings from articles, papers, vendor releases, and community sources into digestible internal notes. Flags technologies, platforms, or techniques (e.g., new LLM capabilities, AI/ML frameworks, cloud AI services) that may warrant a deeper spike. Maintains an up-to-date view of the broader industry landscape relevant to the team's exploration areas. Assisting with Prototypes and Feasibility Spikes Assists in building small-scale proofs-of-concept and feasibility spikes under the guidance of the Team Lead or senior team members. Implements clearly-scoped experimental tasks using assigned frameworks, APIs, or platforms (e.g., LangChain, Azure OpenAI, Hugging Face). Sets up and tears down experimental environments in a controlled, low-risk manner. Escalates technical blockers or scope uncertainty early rather than stalling on unclear experiments. Documentation of Findings Documents experiment setup, methodology, results, and conclusions clearly for each spike or proof-of-concept. Records what worked, what did not, and why, to build the team's shared knowledge base. Uses agreed tools (e.g., Confluence, Jira) consistently to track spikes and their outcomes. Keeps documentation current as experiments evolve or are re-scoped. Presenting Experiment Results Presents proof-of-concept and spike outcomes to the team in a clear, structured manner. Articulates what was tested, the results observed, and a recommendation on next steps (progress, pivot, or shelve). Responds to questions from the Team Lead and peers about methodology and findings. Builds confidence and clarity in presenting technical material as experience grows. Ramp-Up and Learning Velocity Actively works through onboarding materials, prior spike documentation, and internal knowledge bases. Pairs frequently with the Team Lead and senior team members to build understanding of the innovation pipeline and evaluation framework. Builds proficiency with the team's core AI/ML tools, frameworks, and experimentation practices. Tracks own learning goals and progress with support from a mentor or the Team Lead. Adherence to Experimentation Standards Follows the team's defined spike/experiment process, tracking conventions, and documentation standards. Uses agreed tools (e.g., Jira, Confluence, Git) consistently and correctly for tracking spikes. Applies data-handling, security, and ethical-use guidelines when experimenting with AI/ML tools and third-party platforms. Applies feedback from Team Lead and senior reviewers consistently in subsequent spikes. Continuous Improvement and Feedback Attends and engages in team retrospectives and knowledge-sharing sessions, offering observations even as a newer team member. Acts on constructive feedback from the Team Lead and senior reviewers. Reflects on own experiment outcomes and demonstrates visible improvement in technical judgement over time. Builds toward taking on progressively larger and less-supervised exploration work. Requirements Bachelor's degree or diploma in Computer Science, Software Engineering, Information Technology, or a related field, OR a completed coding bootcamp / equivalent self-taught portfolio demonstrating comparable practical ability. 0-3 years' professional software development or technical research experience; recent graduates and career-changers with a strong portfolio are welcome. Working knowledge of at least one modern programming language (e.g., Python, JavaScript/TypeScript, Java, C#). Genuine curiosity about emerging technology, AI/ML capabilities, and new development tooling, evidenced through personal projects, coursework, or prior exposure. Basic understanding of version control (e.g., Git) and the software development lifecycle. Comfortable working with ambiguity and unproven ideas, rather than only well-defined delivery tasks. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-18",
+    "deadline": "2026-12-17",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.7659,
+     "matched_signals": [
+      "tech: python",
+      "role match: technical research engineering",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior Digital Innovation Engineer\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.5433899164199829
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/affidea-bv/jobs/junior-digital-innovation-engineer?utm_source=api",
+      "first_seen": "2026-10-20T08:58:04.780086+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-20T08:58:22.645168+00:00",
+    "notified_at": "2026-10-18T08:24:51.165080+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "gitlab-eoi",
+   "decision": "maybe",
+   "key": "himalayas:https://himalayas.app/companies/gitlab-com/jobs/backend-frontend-and-fullstack-engineering-expression-of-interest-form",
+   "record": {
+    "title": "Backend, Frontend, and Fullstack Engineering Expression of Interest Form",
+    "company": "GitLab",
+    "apply_url": "https://himalayas.app/companies/gitlab-com/jobs/backend-frontend-and-fullstack-engineering-expression-of-interest-form",
+    "canonical_url": "https://himalayas.app/companies/gitlab-com/jobs/backend-frontend-and-fullstack-engineering-expression-of-interest-form",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/gitlab-com/jobs/backend-frontend-and-fullstack-engineering-expression-of-interest-form",
+    "content_fingerprint": "9946589deea1de33",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "GitLab is an open-core software company that develops the most comprehensive AI-powered DevSecOps Platform, used by more than 100,000 organizations. Our mission is to enable everyone to contribute to and co-create the software that powers our world. When everyone can contribute, consumers become contributors, significantly accelerating human progress. Our platform unites teams and organizations, breaking down barriers and redefining what's possible in software development. Thanks to products like Duo Enterprise and Duo Agent Platform, customers get AI benefits at every stage of the SDLC. The same principles built into our products are reflected in how our team works: we embrace AI as a core productivity multiplier, with all team members expected to incorporate AI into their daily workflows to drive efficiency, innovation, and impact. GitLab is where careers accelerate, innovation flourishes, and every voice is valued. Our high-performance culture is driven by our values and continuous knowledge exchange, enabling our team members to reach their full potential while collaborating with industry leaders to solve complex problems. Co-create the future with us as we build technology that transforms how the world develops software This is a future opportunity that may not be immediately available, but we're proactively building our pipeline of exceptional talent. At GitLab , we believe in connecting with outstanding professionals before we have an urgent need, allowing us to move quickly when the right moment arises. If you are excited about co-creating the future as we're building the most comprehensive AI-powered DevSecOps platform, we want to hear from you. We'll keep your information on file and reach out when a position becomes available that matches your skills and interests. Country Hiring Guidelines: GitLab hires new team members in countries around the world. All of our roles are remote, however some roles may carry specific location-based eligibility requirements. Our Talent Acquisition team can help answer any questions about location after starting the recruiting process. Privacy Policy: Please review our Recruitment Privacy Policy. Your privacy is important to us. GitLab is proud to be an equal opportunity workplace and is an affirmative action employer. GitLab ’s policies and practices relating to recruitment, employment, career development and advancement, promotion, and retirement are based solely on merit, regardless of race, color, religion, ancestry, sex (including pregnancy, lactation, sexual orientation, gender identity, or gender expression), national origin, age, citizenship, marital status, mental or physical disability, genetic information (including family medical history), discharge status from the military, protected veteran status (which includes disabled veterans, recently separated veterans, active duty wartime or campaign badge veterans, and Armed Forces service medal veterans), or any other basis protected by law. GitLab will not tolerate discrimination or harassment based on any of these characteristics. See also GitLab ’s EEO Policy and EEO is the Law. If you have a disability or special need that requires accommodation, please let us know during the recruiting process. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-05",
+    "deadline": "2026-12-04",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.8523,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.6597922444343567
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/gitlab-com/jobs/backend-frontend-and-fullstack-engineering-expression-of-interest-form",
+      "first_seen": "2026-10-11T10:23:56.810153+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-11T10:24:04.067687+00:00",
+    "notified_at": "2026-10-05T10:57:20.476176+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "gitlab-sec",
+   "decision": "maybe",
+   "key": "himalayas:https://himalayas.app/companies/gitlab-com/jobs/security-engineer-expression-of-interest-form",
+   "record": {
+    "title": "Security Engineer Expression of Interest Form",
+    "company": "GitLab",
+    "apply_url": "https://himalayas.app/companies/gitlab-com/jobs/security-engineer-expression-of-interest-form",
+    "canonical_url": "https://himalayas.app/companies/gitlab-com/jobs/security-engineer-expression-of-interest-form",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/gitlab-com/jobs/security-engineer-expression-of-interest-form",
+    "content_fingerprint": "a9dea9765a9ab24d",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "GitLab is an open-core software company that develops the most comprehensive AI-powered DevSecOps Platform, used by more than 100,000 organizations. Our mission is to enable everyone to contribute to and co-create the software that powers our world. When everyone can contribute, consumers become contributors, significantly accelerating human progress. Our platform unites teams and organizations, breaking down barriers and redefining what's possible in software development. Thanks to products like Duo Enterprise and Duo Agent Platform, customers get AI benefits at every stage of the SDLC. The same principles built into our products are reflected in how our team works: we embrace AI as a core productivity multiplier, with all team members expected to incorporate AI into their daily workflows to drive efficiency, innovation, and impact. GitLab is where careers accelerate, innovation flourishes, and every voice is valued. Our high-performance culture is driven by our values and continuous knowledge exchange, enabling our team members to reach their full potential while collaborating with industry leaders to solve complex problems. Co-create the future with us as we build technology that transforms how the world develops software This is a future opportunity that may not be immediately available, but we're proactively building our pipeline of exceptional talent. At GitLab , we believe in connecting with outstanding professionals before we have an urgent need, allowing us to move quickly when the right moment arises. If you are excited about co-creating the future as we're building the most comprehensive AI-powered DevSecOps platform, we want to hear from you. We'll keep your information on file and reach out when a position becomes available that matches your skills and interests. Country Hiring Guidelines: GitLab hires new team members in countries around the world. All of our roles are remote, however some roles may carry specific location-based eligibility requirements. Our Talent Acquisition team can help answer any questions about location after starting the recruiting process. Privacy Policy: Please review our Recruitment Privacy Policy. Your privacy is important to us. GitLab is proud to be an equal opportunity workplace and is an affirmative action employer. GitLab ’s policies and practices relating to recruitment, employment, career development and advancement, promotion, and retirement are based solely on merit, regardless of race, color, religion, ancestry, sex (including pregnancy, lactation, sexual orientation, gender identity, or gender expression), national origin, age, citizenship, marital status, mental or physical disability, genetic information (including family medical history), discharge status from the military, protected veteran status (which includes disabled veterans, recently separated veterans, active duty wartime or campaign badge veterans, and Armed Forces service medal veterans), or any other basis protected by law. GitLab will not tolerate discrimination or harassment based on any of these characteristics. See also GitLab ’s EEO Policy and EEO is the Law. If you have a disability or special need that requires accommodation, please let us know during the recruiting process. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-05",
+    "deadline": "2026-12-04",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.4988,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.30630359053611755
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/gitlab-com/jobs/security-engineer-expression-of-interest-form",
+      "first_seen": "2026-10-11T10:23:56.810153+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-11T10:24:04.067619+00:00",
+    "notified_at": "2026-10-06T10:52:58.146828+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "makerble-devops",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/makerble/jobs/devops-volunteer",
+   "record": {
+    "title": "DevOps Volunteer",
+    "company": "Makerble",
+    "apply_url": "https://himalayas.app/companies/makerble/jobs/devops-volunteer?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/makerble/jobs/devops-volunteer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/makerble/jobs/devops-volunteer",
+    "content_fingerprint": "d315892af19f2fc4",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Company Overview Makerble is a pioneering platform that empowers enterprises to track, measure, and analyze their impact. Learn more from Role Overview We are seeking passionate and motivated individuals to join our team. This is an exciting opportunity to contribute to a meaningful cause while gaining valuable experience in software development. As a volunteer, you will work closely with our development team to enhance and maintain our platform. Responsibilities 1. Automate, deploy, handle, and maintain cloud-based production systems 2. Ensure the performance, scalability, and security of the cloud-based production system 3. Leverage best practices to provide the system and cloud security 4. Manage the deployments of the release of production systems 5. Troubleshoot systems and provide problem resolution for different applications and platforms 6. Define and deploy systems for metrics and monitoring on the AWS platform 7. Configure and install different software like Jenkins, Git, Terraform, Ansible, etc. 8. Maintain the existing architecture & server setup. 9. Uphold platform security standards. Required Skills 1. Proficient in working with Kubernetes & Docker. 2. Strong knowledge of AWS. 3. (Optional) Knowledgeable in Security (DevSecOps). 4. Willing to learn new technologies based on organizational preferences. Who Should Apply This volunteer role is ideal for individuals who are truly passionate about our vision and mission. If you are eager to make a difference and gain hands-on experience in a dynamic environment, we encourage you to apply. Note: This is a volunteer role. Please don't apply if you're looking for a full-time paid role Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-16",
+    "deadline": "2026-12-15",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.8126,
+     "matched_signals": [
+      "tech: docker",
+      "tech: kubernetes",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.5600655674934387
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/makerble/jobs/devops-volunteer?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956520+00:00",
+    "notified_at": "2026-10-17T08:07:59.383298+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "tether",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm",
+   "record": {
+    "title": "Research Engineer Intern (Video/Multimodal LLM)",
+    "company": "Tether Operations Limited",
+    "apply_url": "https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm",
+    "content_fingerprint": "acfc3fd59c01348e",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "Join Tether and Shape the Future of Digital Finance At Tether, we’re not just building products, we’re pioneering a global financial revolution. Our cutting-edge solutions empower businesses—from exchanges and wallets to payment processors and ATMs—to seamlessly integrate reserve-backed tokens across blockchains. By harnessing the power of blockchain technology, Tether enables you to store, send, and receive digital tokens instantly, securely, and globally, all at a fraction of the cost. Transparency is the bedrock of everything we do, ensuring trust in every transaction. Innovate with Tether Tether Finance: Our innovative product suite features the world’s most trusted stablecoin, USDT , relied upon by hundreds of millions worldwide, alongside pioneering digital asset tokenization services. But that’s just the beginning: Tether Power: Driving sustainable growth, our energy solutions optimize excess power for Bitcoin mining using eco-friendly practices in state-of-the-art, geo-diverse facilities. Tether Data: Fueling breakthroughs in AI and peer-to-peer technology, we reduce infrastructure costs and enhance global communications with cutting-edge solutions like KEET , our flagship app that redefines secure and private data sharing. Tether Education : Democratizing access to top-tier digital learning, we empower individuals to thrive in the digital and gig economies, driving global growth and opportunity. Tether Evolution : At the intersection of technology and human potential, we are pushing the boundaries of what is possible, crafting a future where innovation and human capabilities merge in powerful, unprecedented ways. Why Join Us? Our team is a global talent powerhouse, working remotely from every corner of the world. If you’re passionate about making a mark in the fintech space, this is your opportunity to collaborate with some of the brightest minds, pushing boundaries and setting new standards. We’ve grown fast, stayed lean, and secured our place as a leader in the industry. If you have excellent English communication skills and are ready to contribute to the most innovative platform on the planet, Tether is the place for you. Are you ready to be part of the future? About the job We are looking for talented individuals to join us for an internship in 2025/2026. MSc/PhD Internships at Tether aim to provide students with the opportunity to actively contribute to our products and research, and to the organization's future plans and emerging technologies. In our team, you will have the opportunity to participate in the development of the state-of-the-art (SOTA) foundation models, and will also be responsible for optimizing our distributed model training framework continuously. PhD internships at Tether provide students with the opportunity to actively contribute to our products and research, and to the organization's future plans and emerging technologies. Our dynamic internship experience blends hands-on learning, enriching community-building and development events, and collaboration with industry experts. Applications will be reviewed on a rolling basis. We encourage you to apply early. Please state your availability clearly in your resume (Start date, End date). Responsibilities Research and develop state-of-the-art LLM and/or video or multimodality models to accelerate open-source progress in the domains. Implement the application of large models in our business scenarios, like pre-training, supervised fine-tuning, post-training, inference etc. Continuously optimize the training framework to better adapt to the training of large models on thousands of multi-node GPUs. In this role, you’ll have the opportunity to advance the development of open-source LLM, vision and/or multimodal foundation models and products. You will have the opportunity to collaborate with broader teams across Tether. Requirements MSc/PhD candidate in computer science or a related technical discipline Related Research Experience at least one of the following areas: LLM, computer vision, multimodality Be proficient with PyTorch deep learning framework and libraries Have excellent analytical and problem-solving skills, logical thinking skills, communication and collaboration skills Publications in the top AI conferences (e.g., ACL, NIPS, ICML, ICLR, CVPR, ICCV, ECCV, TPAMI, IJCV, etc.) is a nice to have. Important information for candidates Recruitment scams have become increasingly common. To protect yourself, please keep the following in mind when applying for roles: Apply only through our official channels. We do not use third-party platforms or agencies for recruitment unless clearly stated. All open roles are listed on our official careers page: Verify the recruiter’s identity. All our recruiters have verified LinkedIn profiles. If you’re unsure, you can confirm their identity by checking their profile or contacting us through our website. Be cautious of unusual communication methods. We do not conduct interviews over WhatsApp, Telegram, or SMS. All communication is done through official company emails and platforms. Double-check email addresses. All communication from us will come from emails ending in @ or @ We will never request payment or financial details. If someone asks for personal financial information or payment at any point during the hiring process, it is a scam. Please report it immediately. When in doubt, feel free to reach out through our official website. Highlights Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-08-31",
+    "deadline": "2026-10-30",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.8155,
+     "matched_signals": [
+      "employment type wanted: internship"
+     ],
+     "concerns": [
+      "stage:advanced_degree",
+      "stage:evidence: \"MSc/PhD Internships at Tether aim to provide students with the opportunity to actively contribute to our products and research, and to the organization's future plans and emerging technologies.\"",
+      "stage:evidence: \"PhD internships at Tether provide students with the opportunity to actively contribute to our products and research, and to the organization's future plans and emerging technologies.\""
+     ],
+     "semantic_similarity": 0.6230120062828064
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/tether-operations-limited/jobs/research-engineer-intern-video-multimodal-llm?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956310+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "tj-backend",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/talent-journey/jobs/junior-backend-developer-future-position",
+   "record": {
+    "title": "Junior Backend Developer - Future Position",
+    "company": "Talent Journey",
+    "apply_url": "https://himalayas.app/companies/talent-journey/jobs/junior-backend-developer-future-position",
+    "canonical_url": "https://himalayas.app/companies/talent-journey/jobs/junior-backend-developer-future-position",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/talent-journey/jobs/junior-backend-developer-future-position",
+    "content_fingerprint": "3c7822d2e95158e4",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Junior Backend Developer (Python, Django, DRF) at Talent Journey Remote (Europe; Middle East; North America) Location: Remote (Relocation to Portugal Available) - This is a potential position. Planned for hiring in Q4 - 2024 About Us: We are an innovative SaaS startup based in Portugal, dedicated to revolutionizing the workforce relocation industry. Our platform streamlines the relocation process, making it seamless and efficient for companies and their employees. We care about our users' experience, and we care about yours. Your contribution helps millions of people relocate around the world with ease. As a rapidly growing startup, we are looking for a dynamic and talented Junior Backend Developer to join our team. This role offers significant growth opportunities, with the potential to advance your career within our company. Key Responsibilities: Collaborate with the development team to build and maintain backend features using Python, Django, and Django REST Framework (DRF). Assist in designing scalable and robust backend systems. Participate in code reviews, testing, and other quality assurance processes. Stay updated with the latest industry trends and best practices to continually improve our platform. Qualifications: Basic experience with Python, Django, and Django REST Framework (DRF). Excellent problem-solving skills and ability to work independently in a remote setting. Fluent in English, both written and spoken. Strong communication and teamwork skills, with the ability to collaborate effectively with other team members. A passion for learning and professional development. Preferred: Knowledge of cloud technologies, with a preference for Google Cloud Platform (GCP). Understanding of CI/CD processes. Benefits: Remote work flexibility from anywhere in the world. Option to relocate to Portugal and be part of our vibrant local team. Opportunities for learning and development from Google experts. Clear career growth plan with a dedicated budget for learning and professional development. The chance to shape the future of our technology and grow into a leadership role. How to Apply: If you are the one, then let us know! Apply here or send your resume, a cover letter, and any relevant portfolio or GitHub links to . If you feel you can be helpful in another way, head to and check other positions! Join us in transforming the workforce relocation industry and advancing your career with exciting opportunities for growth and learning! Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-13",
+    "deadline": "2026-12-12",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.695,
+     "matched_signals": [
+      "tech: python",
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior Backend Developer - Future Position\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.4724813997745514
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/talent-journey/jobs/junior-backend-developer-future-position",
+      "first_seen": "2026-10-15T08:40:03.105684+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-15T08:40:26.104292+00:00",
+    "notified_at": "2026-10-07T10:39:52.361537+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "tj-frontend",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/talent-journey/jobs/junior-frontend-developer-future-position",
+   "record": {
+    "title": "Junior Frontend Developer - Future Position",
+    "company": "Talent Journey",
+    "apply_url": "https://himalayas.app/companies/talent-journey/jobs/junior-frontend-developer-future-position",
+    "canonical_url": "https://himalayas.app/companies/talent-journey/jobs/junior-frontend-developer-future-position",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/talent-journey/jobs/junior-frontend-developer-future-position",
+    "content_fingerprint": "61c04e5116ac39e8",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Junior Frontend Developer (Next.js) at Talent Journey Remote (Europe; Middle East; North America) Location: Remote (Relocation to Portugal Available) - This is a potential position. Planned for hiring in Q4 - 2024 About Us: We are an innovative SaaS startup based in Portugal, dedicated to revolutionizing the workforce relocation industry. Our platform streamlines the relocation process, making it seamless and efficient for companies and their employees. We care about our users' experience, and we care about yours. Your contribution helps millions of people relocate around the world with ease. As a rapidly growing startup, we are looking for a dynamic and talented Junior Frontend Developer to join our team. This role offers significant growth opportunities, with the potential to advance your career within our company. Key Responsibilities: Collaborate with the development team to enhance and maintain our user interface using Next.js 14, both Page router and App router. Build intuitive and visually appealing front-end components. Participate in code reviews, testing, and other quality assurance processes. Stay updated with the latest industry trends and best practices to continually improve our platform's user experience. Qualifications: Basic experience with Next.js and modern frontend development. Excellent problem-solving skills and ability to work independently in a remote setting. Fluent in English, both written and spoken. Strong communication and teamwork skills, with the ability to collaborate effectively with other team members. A passion for learning and professional development. Preferred: Knowledge of user experience (UX) principles and design. Understanding of responsive design and cross-browser compatibility. Familiarity with Material UI Design. Benefits: Remote work flexibility from anywhere in the world. Option to relocate to Portugal and be part of our vibrant local team. Opportunities for learning and development from Google experts. Clear career growth plan with a dedicated budget for learning and professional development. The chance to shape the future of our technology and grow into a leadership role. How to Apply: If you are the one, then let us know! Apply here or send your resume, a cover letter, and any relevant portfolio or GitHub links to . If you feel you can be helpful in another way, head to and check other positions! Join us in transforming the workforce relocation industry and advancing your career with exciting opportunities for growth and learning! Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-12",
+    "deadline": "2026-12-11",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.6451,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Junior Frontend Developer - Future Position\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.4525579810142517
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/talent-journey/jobs/junior-frontend-developer-future-position",
+      "first_seen": "2026-10-16T08:34:58.252446+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-16T08:35:08.521136+00:00",
+    "notified_at": "2026-10-07T10:39:52.361537+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "flowai",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/flowai/jobs/senior-back-end-engineer-intern",
+   "record": {
+    "title": "Senior Back-End Engineer Intern",
+    "company": "Flowai",
+    "apply_url": "https://himalayas.app/companies/flowai/jobs/senior-back-end-engineer-intern?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/flowai/jobs/senior-back-end-engineer-intern",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/flowai/jobs/senior-back-end-engineer-intern",
+    "content_fingerprint": "30602fe115384d17",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "This is an unpaid internship at this time and is suitable for candidates pursuing degree completion that wants to be a Senior Back-End Engineer.Company Overview: Flow Global Software Technologies, LLC., operating in the Information Technology (IT) sector, is a cutting-edge high-tech enterprise AI company that engages in the design, engineering, marketing, sales, and 5-star support of a cloud-based enterprise AI platform with patent pending artificial intelligence, deep learning, and other core proprietary technologies awaiting patent approval. Flow Turbo™, the company's first product, is a brand of next-generation SaaS AI sales prospecting platform that is designed to maximize the productivity day-to-day for B2B sales representatives within B2B outbound, inbound, and inside sales organizations of B2B companies. The company also provides world-class award-winning customer support, professional services, guidance, certifications, training, and advisory services. The company is headquartered in Austin, Texas and is registered in Delaware. Position Overview: Flow is seeking a highly skilled and highly motivated Senior Back-End Engineer Intern to join our engineering organization. This is a demanding role requiring expertise in complex back-end engineering, specifically with Django development, and a significant understanding of API development, API calls, API routes, API endpoints, API tokens, authorization, authentication, OAuth2.0, data management, data flows, data triggers, relational databases, SQL, ER diagramming, schema development, systems architecture, and cloud infrastructure. The ideal candidate is a seasoned engineer with a passion for building robust, scalable systems and possesses a strong background in system architecture and database design. This position is ideal for individuals currently pursuing or have obtained a Master's degree in Computer Science with a strong background in back-end engineering technologies and Django. The internship is remote-only and requires a commitment of at least 30 hours per week. Key Responsibilities: Django Development: Build and maintain scalable back-end applications using Django, ensuring high performance and responsiveness. API Development: Design, implement, and maintain RESTful APIs to support front-end and external service integrations. Data Management & Data Flow: Develop and manage efficient data pipelines, ensuring smooth data flows and triggers across various systems. Database Management: Design and maintain complex database schemas, perform database migrations, and optimize database performance (PostgresSQL experience preferred). ER Diagramming & Schema Development: Create and maintain entity-relationship (ER) diagrams, and develop robust database schemas aligned with business requirements. Authentication & Authorization: Implement and manage secure authentication and authorization mechanisms within the application. Systems Design & Architecture: Participate in the design and architecture of scalable systems, ensuring best practices in systems and database architecture. Cloud Infrastructure: Configure and maintain cloud infrastructure services to support live production deployments. Experience with cloud platforms (AWS, Google Cloud, etc.) is preferred. Testing & QA: Develop and execute unit tests, integration tests, regression tests, and API tests to ensure code quality and reliability. Linux & Shell Scripting: Utilize Linux-based environments for server management and automation tasks using Bash, SSH, and shell scripting. Collaboration & Documentation: Work closely with cross-functional teams to ensure seamless integration of all systems, and maintain comprehensive documentation for all projects. Qualifications: Experience: 2-3+ years of professional experience in complex back-end engineering, especially with Django. Technical Skills: Expert in Django, Python, and RESTful API development. Expert with data management, data flows, and data triggers. Expertise in database design, including ER diagramming, schema development, and PostgresSQL. Expert in system design, architecture, and cloud infrastructure configuration for production deployments. Hands-on experience with testing frameworks for unit, integration, regression, and API testing. Expert in Linux, Bash, SSH, and shell scripting. Expertise with a wide variety of cloud infrastructure platforms and deployment configurations for hosting servers and live production environments. Remote Work: Must be able to work remotely and dedicate a minimum of 30 hours per week. Benefits: Remote native; Location freedom Professional industry experience in the SaaS and AI industry Creative freedom Potential to convert into a full-time position Note: This internship offers an exciting opportunity to gain hands-on experience in back-end engineering within a high pressure and innovative environment. Candidates must be self-motivated, proactive, and capable of delivering high-quality results independently. The internship provides valuable exposure to cutting-edge technologies and real-world software development practices, making it an ideal opportunity for aspiring back-end engineers. This is an unpaid internship at this time and is suitable for candidates pursuing degree completion that wants to be a Senior Back-End Engineer. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-16",
+    "deadline": "2026-12-15",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.9776,
+     "matched_signals": [
+      "tech: python",
+      "tech: sql",
+      "role match: software engineering intern",
+      "keyword: remote",
+      "employment type wanted: internship"
+     ],
+     "concerns": [
+      "penalized keyword: senior",
+      "stage:advanced_degree",
+      "stage:evidence: \"This position is ideal for individuals currently pursuing or have obtained a Master's degree in Computer Science with a strong background in back-end engineering technologies and Django.\""
+     ],
+     "semantic_similarity": 0.7251169681549072
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/flowai/jobs/senior-back-end-engineer-intern?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.955876+00:00",
+    "notified_at": "2026-10-17T08:07:59.383298+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "xp-swe",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/xperteez-technology/jobs/junior-software-engineer-remote-contract",
+   "record": {
+    "title": "Junior Software Engineer | Remote - Contract",
+    "company": "Xperteez Technology",
+    "apply_url": "https://himalayas.app/companies/xperteez-technology/jobs/junior-software-engineer-remote-contract?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/xperteez-technology/jobs/junior-software-engineer-remote-contract",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/xperteez-technology/jobs/junior-software-engineer-remote-contract",
+    "content_fingerprint": "ef5fb7ccc4b561fc",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Role Title: Junior Software Engineer Role Type: Contractor Location: Remote About the Role : we are partnering with a leading AI lab to hire junior software engineers from top companies. You'll evaluate AI-generated code, create challenging engineering problems, and help push model performance on real-world software tasks. Required Skills System Design Code Review Debugging Algorithms Data Structures Software Architecture Scope of Work Evaluate AI-generated code for correctness, quality, and design Write challenging coding problems, reference solutions, and test cases Review model reasoning on architecture, debugging, and system design Provide detailed technical feedback to improve model performance Preferred Qualifications At least one year of experience as a software engineer at a top technology company, with at least part of this experience within the past 3 years Based in an English-speaking country Ability to explain technical decisions clearly in writing Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-14",
+    "deadline": "2026-12-13",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.6982,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:stretch",
+      "stage:evidence: \"Required Skills System Design Code Review Debugging Algorithms Data Structures Software Architecture Scope of Work Evaluate AI-generated code for correctness, quality, and design Write challenging coding problems, reference solutions, and test cases Review model reasoning on architecture, debugging, and system design Provide detailed technical feedback to improve model performance Preferred Qualifications At least one year of experience as a software engineer at a top technology company, with at least part of this experience within the past 3 years Based in an English-speaking country Ability to explain technical decisions clearly in writing Originally posted on Himalayas\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.5056800842285156
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/xperteez-technology/jobs/junior-software-engineer-remote-contract?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956691+00:00",
+    "notified_at": "2026-10-15T08:40:33.304736+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "xp-ds",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/xperteez-technology/jobs/junior-data-scientist-remote-contract",
+   "record": {
+    "title": "Junior Data Scientist | Remote - Contract",
+    "company": "Xperteez Technology",
+    "apply_url": "https://himalayas.app/companies/xperteez-technology/jobs/junior-data-scientist-remote-contract?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/xperteez-technology/jobs/junior-data-scientist-remote-contract",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/xperteez-technology/jobs/junior-data-scientist-remote-contract",
+    "content_fingerprint": "f7fd1699f0516762",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Role Title: Junior Data Scientist Role Type: Contractor Location: Remote About the Role we are partnering with a leading AI lab to hire data scientists and quantitative professionals from top companies. You'll bring rigor to how AI models handle statistics, machine learning, experimentation, and quantitative reasoning. Required Skills Python Machine Learning Statistics Data Analysis Experimentation Pandas Data Modeling Scope of Work Evaluate AI model outputs on data science, statistics, ML, and quantitative problems Create expert-level prompts, datasets, and reference solutions Identify flawed methodology, statistical errors, and weak quantitative reasoning Provide structured feedback that improves model capability Preferred Qualifications At least one year of experience working at a top company (tech, finance, or research), with at least part of this experience within the past 3 years Based in an English-speaking country Clear written communication of technical and statistical concepts Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-14",
+    "deadline": "2026-12-13",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.583,
+     "matched_signals": [
+      "tech: python",
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:stretch",
+      "stage:evidence: \"Required Skills Python Machine Learning Statistics Data Analysis Experimentation Pandas Data Modeling Scope of Work Evaluate AI model outputs on data science, statistics, ML, and quantitative problems Create expert-level prompts, datasets, and reference solutions Identify flawed methodology, statistical errors, and weak quantitative reasoning Provide structured feedback that improves model capability Preferred Qualifications At least one year of experience working at a top company (tech, finance, or research), with at least part of this experience within the past 3 years Based in an English-speaking country Clear written communication of technical and statistical concepts Originally posted on Himalayas\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.360474556684494
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/xperteez-technology/jobs/junior-data-scientist-remote-contract?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956702+00:00",
+    "notified_at": "2026-10-15T08:40:33.304736+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "xp-da",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/xperteez-technology/jobs/data-analyst-remote-contact",
+   "record": {
+    "title": "🌎 Data Analyst - Remote, Contact",
+    "company": "Xperteez Technology",
+    "apply_url": "https://himalayas.app/companies/xperteez-technology/jobs/data-analyst-remote-contact?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/xperteez-technology/jobs/data-analyst-remote-contact",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/xperteez-technology/jobs/data-analyst-remote-contact",
+    "content_fingerprint": "8e8c2ac27d87452d",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Role Title: Data Analyst Role Type: Contractor Location: Remote We are engaging Data Analysts to contribute to a high-impact customer project focused on business data. In this role, you'll apply your expertise to help train next-generation AI systems. Your work will shape how models learn, reason, and perform through high-quality, real-world input. This opportunity is ideal for experienced professionals who can expertly review, analyze, and ensure the privacy of large-scale data sets, with a particular emphasis on business data and quality assurance. Required Skills PII Data Privacy Document Review Data Analysis Quality Assurance Scope of Work Review and analyze extensive business data sets for accuracy, completeness, and relevance. Conduct thorough document review with strict adherence to data privacy and PII protocols. Identify, flag, and resolve data quality issues, inconsistencies, and anomalies. Deliver detailed feedback and recommendations on data findings to inform AI training processes. Contribute to the development and refinement of quality assurance standards for data review assignments. Collaborate with project stakeholders through clear, professional written and verbal communication. Ensure compliance with all established data privacy and security guidelines throughout project deliverables. Preferred Qualifications Demonstrated expertise in handling and analyzing large business data sets. Proven experience managing data containing personally identifiable information (PII) and sensitive material. Strong understanding of data privacy regulations and best practices. Background in document review, data quality assurance, or audit projects. Exceptional written and verbal communication skills; ability to convey complex findings clearly and concisely. High attention to detail and commitment to data accuracy and integrity. Experience working remotely and delivering consistent, reliable output in a distributed project environment. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-11",
+    "deadline": "2026-12-10",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.4335,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.24103975296020508
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/xperteez-technology/jobs/data-analyst-remote-contact?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956907+00:00",
+    "notified_at": "2026-10-12T11:25:36.867243+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "holiday",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/holiday-world/jobs/software-engineer-internship-unpaid",
+   "record": {
+    "title": "Software Engineer Internship (UNPAID)",
+    "company": "Holiday World",
+    "apply_url": "https://himalayas.app/companies/holiday-world/jobs/software-engineer-internship-unpaid?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/holiday-world/jobs/software-engineer-internship-unpaid",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/holiday-world/jobs/software-engineer-internship-unpaid",
+    "content_fingerprint": "f4c40ebc47ac8c41",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "Who We Are Holiday Channel is a forward-thinking startup focused on creating innovative solutions like Digital Magazines, Marketplace and Streaming Platform to enhance holiday experiences. Holiday World is a digital media and entertainment company building the world’s first platform for ALL THINGS HOLIDAY where consumers can conveniently find all their holiday needs 24x7x365 — entertainment, shopping, trends, traditions, food, travel, DIY, and the best deals. We created Holiday World to inspire, celebrate, and unite people through holidays, as well as all the traditions and rituals that accompany them. As the first inclusive destination devoted to sharing a global lens on holiday celebrations and preparation, Holiday World is a catalyst for more diverse storytelling and cross-cultural education. Our mission is to give millions of people a reason to celebrate and savor every day, every moment, all year by uniting communities with more joy, more fun, and more compassion. Holiday World is a for-profit company that holds its social mission at its core. What We Offer Immediate opportunity to make an impact on our team, product, and business. A chance to work with a startup that has over 110K users. A get-stuff-done and fun and caring culture. Meaningful work and a strong shared sense of mission. A remote first working environment with an office in Colorado Springs, CO. A platform to lead and innovate within a dynamic startup environment, offering substantial opportunities for professional growth and development. Sponsorship for international students on F-1 OPT ((Optional Practical Training) What This Role Is We are seeking talented and motivated individuals to join our team for an exciting opportunity to work on cutting-edge technologies and projects. This unpaid internship is designed for software engineers who are passionate about web development and want to enhance their skills in full-stack development, with a focus on TypeScript, Next.js, React.js, Node.js, Tailwind CSS, Framer Motion, MongoDB, PostgreSQL, and microservice architecture. As a Software Engineer Intern (MERN Stack with TypeScript), you will work alongside experienced developers, contribute to real-world projects, and gain invaluable experience in full-stack web development. You’ll be involved in all stages of the development process, from concept to deployment, and will have the opportunity to sharpen your skills while building meaningful applications. What You'll Do Collaborate with the development team to design, build, and maintain full-stack web applications using Next.js/React.js, Node.js and Express.js with TypeScript. Implement responsive user interfaces using Tailwind CSS. Create engaging animations and interactions with Framer Motion. Develop and manage PostgreSQL databases. Assist in integrating APIs and third-party services. Participate in code reviews and contribute to team discussions on best practices. Troubleshoot, debug, and upgrade existing systems. Stay updated with the latest web technologies and tools. Work on both front-end and back-end features of the application. Contribute to the planning and design of new software products. What You'll Have 2+ years of experience working with the MERN stack (MongoDB, Express.js, React, Node.js). Proficiency in TypeScript. Strong understanding of JavaScript, HTML, and CSS. Experience with front-end frameworks (Next.js, React.js) and back-end frameworks (Node.js, Express.js). Familiarity with Tailwind CSS for responsive design. Experience with Framer Motion for animations. Knowledge of PostgreSQL and database management. Understanding of microservice architecture. Familiarity with RESTful APIs and version control systems (Git). Excellent problem-solving skills and the ability to work both independently and collaboratively in a team environment. Strong communication skills and the ability to contribute ideas in a constructive manner. Experience in eCommerce development is a plus. What Helps You Stand Out Familiarity with cloud services such as AWS, Azure, or Google Cloud. Experience with CI/CD pipelines. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-15",
+    "deadline": "2026-12-14",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.9293,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: internship",
+      "stage:fits",
+      "stage:evidence: \"title: Software Engineer Internship (UNPAID)\"",
+      "stage:evidence: \"years mentioned (not applied to internships): What You'll Have 2+ years of experience working with the MERN stack (MongoDB, Express.js, React, Node.js).\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.7367996573448181
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/holiday-world/jobs/software-engineer-internship-unpaid?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.955904+00:00",
+    "notified_at": "2026-10-15T08:40:33.304736+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "bridges",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/bridges-for-enterprise/jobs/cyber-security-volunteer",
+   "record": {
+    "title": "Cyber Security Volunteer",
+    "company": "Bridges for Enterprise",
+    "apply_url": "https://himalayas.app/companies/bridges-for-enterprise/jobs/cyber-security-volunteer?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/bridges-for-enterprise/jobs/cyber-security-volunteer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/bridges-for-enterprise/jobs/cyber-security-volunteer",
+    "content_fingerprint": "7b7e7466863771b8",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "THIS IS AN UNPAID, REMOTE NONPROFIT STARTUP VOLUNTEER ROLE. Read carefully before applying. As a rapidly growing global nonprofit with a large network of entrepreneurs, professionals and students, we are developing and maintaining web services that handle a large influx of confidential data on a day-to-day basis. We are looking for an Security Expert who has experience with Microsoft Azure to oversee our Microsoft Azure Environment. The Cyber Security Volunteer will work closely with Global Cyber Security Manager and Global Technology Head in upcoming Projects. You may also find out more about Technology at BfE here . Responsibilities Automation. - Automate User/ Group to help improve our User Onboarding across all platforms we currently use. Administration. - Assist in administration of Microsoft Azure IAM, Budget and Cost utilization and Deployment of Azure Resources IT Policy. - Assist in creating new IT and Security Policies for Bridges for Enterprise . Requirements Enthusiasm and commitment to BfE’s cause Experience with Azure, Security and IT and care about quality Highly organised with excellent planning skills Flexible and always keen to stay up-to-date with latest tools and practices relevant to Cloud and Automation Min. 2 years of coding experience. High familiarity with at least one mainstream web development framework. Prior exposure to information security through studying, working or personal projects is highly desirable. Exposure to at least one of cloud architecture and DevOps via courses or projects is highly desirable. This role is open to students and working professionals. There are no geographical restrictions. Experience with scripting technologies such as PowerShell. Experience with securing webhosts. **Commitment: 5-8 hrs/week Perks An opportunity to join the global leadership team in a large global nonprofit and network with people across different disciplines who share a joint passion in social entrepreneurship and startups Constant interactions with a growing global community of diverse, talented and passionate BfE members across the world Making a social impact with your professional skills while further developing them in the business context of an nonprofit incubator Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-17",
+    "deadline": "2026-12-16",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.5206,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:stretch",
+      "stage:evidence: \"2 years of coding experience.\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.3280879259109497
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/bridges-for-enterprise/jobs/cyber-security-volunteer?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956510+00:00",
+    "notified_at": "2026-10-18T08:24:51.165080+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "archwell",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/archwell-health/jobs/it-analyst-network-engineer-jr-network-engineer",
+   "record": {
+    "title": "IT - Analyst, Network Engineer (Jr. Network Engineer)",
+    "company": "ArchWell Health",
+    "apply_url": "https://himalayas.app/companies/archwell-health/jobs/it-analyst-network-engineer-jr-network-engineer",
+    "canonical_url": "https://himalayas.app/companies/archwell-health/jobs/it-analyst-network-engineer-jr-network-engineer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/archwell-health/jobs/it-analyst-network-engineer-jr-network-engineer",
+    "content_fingerprint": "5cf19ed020964f23",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "ArchWell Health is a new, innovative healthcare provider devoted to improving the lives of our senior members. We deliver best-in-class care at comfortable, accessible neighborhood clinics where seniors can feel at home and become part of a vibrant, wellness-focused community. Our members experience greater continuity of care, as well as the comfort of knowing they will be treated with respect by people who genuinely care about them, their families, and their communities. Job Summary: The Network Engineer will remotely help maintain the operational IT infrastructure at ArchWell Health . This includes the data and voice network at our clinical centers as well as our cloud network infrastructure. This can include anything from diagnosing and fixing issues to reconfiguring the network to accept new devices. The Network Engineer will likewise have opportunities for involvement in various IT projects and center network deployments. Duties/Responsibilities: Investigate reported network issues and diagnose root cause Remotely work with onsite technicians to deploy new hardware or troubleshoot existing Working with vendors as necessary to resolve issues Reconfigure switchports to accommodate specific devices Reconfiguring network devices according to established standards Assist in the creation and maintenance of documentation Remotely assist in turning-up new Internet circuits Remotely assist in deploying networks at new sites Configure/re-configure Azure Resource Groups Complying with documented processes for standard tasks Required Skills/Abilities: Strong understanding of networking fundamentals and common protocols Working knowledge of VLANs and network segmentation Ability to do independent research on unfamiliar topics Working knowledge of Cisco Meraki and Cisco ASA VoIP and QoS deployment and troubleshooting Familiarity with the Microsoft Windows Server operating system and Active Directory Working knowledge of Microsoft Azure Cloud and Azure AD Familiarity with Azure NSGs, reserved instances, and public and private endpoints Good communication skills Education and Experience: Bachelor's degree required 2 to 4 Years networking experience required CCNA or CCNP certification preferred ArchWell Health is an equal opportunity employer. Qualified applicants will receive consideration for employment without regard to their race, color, religion, age, sex, sexual orientation, gender identity, national origin, disability, veteran status, or any other protected classification. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-08",
+    "deadline": "2026-12-07",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.6879,
+     "matched_signals": [
+      "employment type wanted: new_grad",
+      "stage:stretch",
+      "stage:evidence: \"Duties/Responsibilities: Investigate reported network issues and diagnose root cause Remotely work with onsite technicians to deploy new hardware or troubleshoot existing Working with vendors as necessary to resolve issues Reconfigure switchports to accommodate specific devices Reconfiguring network devices according to established standards Assist in the creation and maintenance of documentation Remotely assist in turning-up new Internet circuits Remotely assist in deploying networks at new sites Configure/re-configure Azure Resource Groups Complying with documented processes for standard tasks Required Skills/Abilities: Strong understanding of networking fundamentals and common protocols Working knowledge of VLANs and network segmentation Ability to do independent research on unfamiliar topics Working knowledge of Cisco Meraki and Cisco ASA VoIP and QoS deployment and troubleshooting Familiarity with the Microsoft Windows Server operating system and Active Directory Working knowledge of Microsoft Azure Cloud and Azure AD Familiarity with Azure NSGs, reserved instances, and public and private endpoints Good communication skills Education and Experience: Bachelor's degree required 2 to 4 Years networking experience required CCNA or CCNP certification preferred ArchWell Health is an equal opportunity employer.\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.49541592597961426
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/archwell-health/jobs/it-analyst-network-engineer-jr-network-engineer",
+      "first_seen": "2026-10-16T08:34:58.252446+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-16T08:35:08.521101+00:00",
+    "notified_at": "2026-10-09T11:00:40.008201+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "canon-grad",
+   "decision": "skip",
+   "key": "greenhouse:8142329",
+   "record": {
+    "title": "Graduate Software Engineer, Open Source and Linux, Canonical Ubuntu",
+    "company": "Canonical",
+    "apply_url": "https://job-boards.greenhouse.io/canonical/jobs/8142329",
+    "canonical_url": "https://job-boards.greenhouse.io/canonical/jobs/8142329",
+    "ats_provider": "greenhouse",
+    "ats_job_id": "8142329",
+    "content_fingerprint": "381962dbbb446cee",
+    "location_raw": "Home based - Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Canonical is a leading provider of open source software and operating systems to the global enterprise and technology markets. Our platform, Ubuntu, is very widely used in breakthrough enterprise initiatives such as public cloud, data science, AI, engineering innovation, and IoT. Our customers include the world's leading public cloud and silicon providers, and industry leaders in many sectors. The company is a pioneer of global distributed collaboration, with 1200+ colleagues in 75+ countries and very few office-based roles. Teams meet two to four times yearly in person, in interesting locations around the world, to align on strategy and execution. The company is founder led, profitable and growing. We are hiring 2025 and 2026 Graduate Software Engineers into engineering teams around the world. As a global platform company we offer a wide range of software engineering challenges, in both open source products and commercial business systems. We have teams that work in a variety of languages, typically Python, Golang, Rust, C/C++, JavaScript and of course... Bash. We work from the very lowest levels of the Linux system - BIOS and boot loaders, firmware, kernel and drivers, all the way up to desktop applications and containers. We work on tiny devices like the Raspberry Pi and new RISC-V boards, all the way up to supercomputers, clouds and Kubernetes clusters. We work on compilers and toolchains, and we work on security, cryptography, performance and documentation. Some of our teams focus on packaging thousands of pieces of software, others focus on deep contributions to a single body of code. If you are excited about the potential that open source has for humanity and the enterprise, you have outstanding results in your academic career, and you are excited to contribute to the open source stack, this is the best way to apply to Canonical. We will work with you to identify teams and projects that would be interesting and a good fit for your skills and motivations. The process is highly competitive, it will require effort and excellence to succeed if you apply here. Most of our engineering teams work from home. We try to align a single team in a single time zone - EMEA (Europe, Middle East and Africa), APAC (Asia Pacific and Indian Ocean), and AMER (North, South and Central Americas). Even though you work from home, we try to ensure you always have colleagues alongside to coach and mentor you, and for the companionship of shared problem solving and pair programming. Larger projects have multiple teams and might span the globe. We work with the open source community and specialize in building teams that work well in the 'fishbowl' of open source engineering. This is full time work, five days a week, often solving hard problems with significant responsibility. We don't generally work weekends and nights and we do enjoy good holidays but we also expect productive and intense engagement Monday to Friday. We bring all our engineering teams together in person twice a year for a deep 'sprint' with other teams to stimulate discussion and enable a wide range of career development paths. This is a fantastic way to demonstrate and develop your skill in software, learn about a wide range of technologies, make a meaningful impact to open source, and see some very interesting new cities that you might never otherwise get to visit. If you find the open source stack amazing, and you have been a consistent high-performing student in your school and university, then this will be a challenging and exciting start to your career. Location: This is a Globally remote role. The role entails Shaping the roadmap for your product at global sprints every six months Focusing on design and user experience, even for developer tooling and command line apps Writing high quality, resilient and performant code, potentially serving millions of demanding daily users Working towards mastery of key programming languages and Linux system knowledge Engaging with users and the open source community through code reviews and issue trackers Responding to customer issues as a priority, develop an understanding of enterprise requirements Developing skills and awareness of security in software design and implementation What we are looking for in you Exceptional academic track record from both high school and university Undergraduate degree in Computer Science, Business Informatics, Mathematics or another STEM discipline with programming courses Confidence to get started and deliver high quality code in one of Python, Rust, C/C++, Golang, JavaScript or Java Experience with Ubuntu or another Linux distribution Track record of going above-and-beyond expectations to achieve outstanding results Result-oriented and organized, with the drive to meet commitments Personal projects in technology and software engineering beyond the curriculum Professional written and spoken English Excellent interpersonal skills, curiosity, flexibility, and accountability Personal responsibility and accountability Thoughtfulness, self-awareness and the ability to reflect and develop Ability to travel internationally twice a year for company events up to two weeks long Nice-to-have skills Upstream open source contributions Packaging and Linux distribution contributions - Debian, Fedora, Arch, Nix or another Leadership and organization skills Presentation and writing skills Business and commercial interests What we offer colleagues We consider geographical location, experience, and performance in shaping compensation worldwide. We revisit compensation annually (and more often for graduates and associates) to ensure we recognize outstanding performance. In addition to base pay, we offer a performance-driven annual bonus or commission. We provide all team members with additional benefits which reflect our values and ideals. We balance our programs to meet local needs and ensure fairness globally. Distributed work environment with twice-yearly team sprints in person Personal learning and development budget of USD 2,000 per year Annual compensation review Recognition rewards Annual holiday leave Maternity and paternity leave Team Member Assistance Program & Wellness Platform Opportunity to travel to new locations to meet colleagues Priority Pass and travel upgrades for long-haul company events About Canonical Canonical is a pioneering tech firm at the forefront of the global move to open source. As the company that publishes Ubuntu, one of the most important open source projects and the platform for AI, IoT and the cloud, we are changing the world of software. We recruit on a global basis and set a very high standard for people joining the company. We expect excellence - in order to succeed, we need to be the best at what we do. Most colleagues at Canonical have worked from home since its inception in 2004.​ Working here is a step into the future, and will challenge you to think differently, work smarter, learn new skills, and raise your game. Canonical is an equal opportunity employer We are proud to foster a workplace free from discrimination. Diversity of experience, perspectives, and background create a better work environment and better products. Whatever your identity, we will give your application fair consideration. #LI-remote",
+    "technologies": [],
+    "posting_date": null,
+    "deadline": null,
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Home based - Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.933,
+     "matched_signals": [
+      "tech: python",
+      "tech: kubernetes",
+      "role match: Linux, kernel or open source engineering",
+      "keyword: open source",
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:graduate_only",
+      "stage:evidence: \"title: Graduate Software Engineer, Open Source and Linux, Canonical Ubuntu\"",
+      "stage:evidence: \"We are hiring 2025 and 2026 Graduate Software Engineers into engineering teams around the world.\""
+     ],
+     "semantic_similarity": 0.6804969906806946
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/canonical/jobs/8142329",
+      "first_seen": "2026-10-05T10:56:59.168905+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-05T10:57:13.163171+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "ewor-dev",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/ewor-gmbh/jobs/devtools-co-founder-head-of-engineering-100-remote-m-f-d-4866789568",
+   "record": {
+    "title": "DevTools Co-Founder / Head of Engineering (100 % remote) (m/f/d)",
+    "company": "EWOR GmbH",
+    "apply_url": "https://himalayas.app/companies/ewor-gmbh/jobs/devtools-co-founder-head-of-engineering-100-remote-m-f-d-4866789568?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/ewor-gmbh/jobs/devtools-co-founder-head-of-engineering-100-remote-m-f-d-4866789568",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/ewor-gmbh/jobs/devtools-co-founder-head-of-engineering-100-remote-m-f-d-4866789568",
+    "content_fingerprint": "5c4f4f0ddf453769",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "We are looking to hire ambitious entrepreneurs to start and scale their own startups. We are serial entrepreneurs, for example Paul Müller (founder Adjust, €1.2B exit) and Petter Made (founder SumUp, €8B) who are eager to support outlier personalities and serial entrepreneurs to build €1B+ companies. Our offer: A salary while you build your startup as you will directly be employed by us. Alternatively, you can opt for up to €500k in funding. 1:1 sparring with unicorn founders on a weekly basis Community : Access to the top 0.1% of founders, peers and investors Team building : Hiring top notch talent supported through our network (over 50,000 professionals) Distribution : Support in reaching product-market-fit and building up a sales force / marketing machine Funding support for securing a multi-million euro funding round within 12 months (on average, EWOR Fellows raise > €2M after our Grand Pitch) One of our fellows set a record for Europe’s largest pre-seed round by a first-time founder, securing a €12M pre-seed investment. Tasks You will own, build, and run your startup in fields such as DevTools You will embark on an extensive personal development journey crafted by unicorn founders and follow a fully customised programme enhancing your goal, time, and energy management You will receive support in hiring through our network to over 50,000 professionals and advice as well as best practices from serial entrepreneurs You will receive intensive coaching to make your startup ready to raise millions in funding You will iterate your product with us until having reached product-market-fit and receive support in building up a sales force or creating a marketing engine respectively Requirements You are based in Europe or the Americas or open to relocate You are willing to take full responsibility for your own startup and scale it to €100M+ in revenues You have excellent communication skills in the English language Highlights Join us and build a €1B+ company with us! Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-17",
+    "deadline": "2026-12-16",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.5862,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: internship"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.3936725854873657
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/ewor-gmbh/jobs/devtools-co-founder-head-of-engineering-100-remote-m-f-d-4866789568?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.955849+00:00",
+    "notified_at": "2026-10-18T08:24:51.165080+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "banco",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/banco-plata-s-a-institucion-de-banca-multiple/jobs/antifraud-analyst-junior",
+   "record": {
+    "title": "Antifraud Analyst Junior",
+    "company": "Banco Plata, S.A., Institución de Banca Múltiple",
+    "apply_url": "https://himalayas.app/companies/banco-plata-s-a-institucion-de-banca-multiple/jobs/antifraud-analyst-junior?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/banco-plata-s-a-institucion-de-banca-multiple/jobs/antifraud-analyst-junior",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/banco-plata-s-a-institucion-de-banca-multiple/jobs/antifraud-analyst-junior",
+    "content_fingerprint": "2be62559077ab85c",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "We are looking for a proactive Junior Antifraud Analyst to strengthen our Fraud Prevention team . This is a role focused on using and developing antifraud rules, analyzing fraud cases, and collaborating closely with agents to improve fraud detection and operational efficiency. If you have strong analytical thinking, hands-on analyst experience, and want to directly influence risk management and system logic, this is your opportunity to make a measurable impact on fraud prevention at scale. Challenges that await you: Your main responsibility will be to test and improve antifraud rules for existing products and new fraud scenarios related to products launching in 2026, balancing security and customer experience Optimize, and document antifraud rules across multiple channels (card, transfers, tokenization, etc.) Improve cost efficiency and controls for operational antifraud tools Collaborate with agents to investigate alerts, verify rule logic, and adjust thresholds Analyze confirmed fraud cases and identify new patterns or emerging risks Conduct back-testing and assess the efficiency of existing rules Propose and implement new approaches for fraud detection automation Monitor fraud metrics, build queries, and create dashboards to track performance What makes you a great fit: Strong knowledge of mathematical statistics and probability theory Strong analytical and systematic thinking, with attention to detail and the ability to translate insights into actionable solutions Strong SQL skills for data analysis and Python skills for automation or modeling Ability to effectively leverage AI tools in day-to-day analytical work Excellent communication skills and the ability to collaborate effectively with cross-functional teams B1 or higher English level for effective communication within an international team Your bonus skills: Hands-on experience with machine learning techniques or models, particularly in analytical or fraud-related use cases Understanding of payment processes, transaction flows, and common fraud typologies A mathematical or technical degree from a leading university such as MSU, MIPT, HSE, MSTU, MEPhI, or NES Our ways of working: Innovative Spirit: A commitment to creativity and groundbreaking solutions Honest Feedback: valuing open, transparent communication Supportive Team: a strong, collaborative community Celebrating Achievements: recognizing our wins together High-Tech Environment: a team full of smart and revolutionary people who date to challenge the status quo of incumbent finances Our benefits: Relocation support to one of our hubs — Serbia, Mexico — with assistance for the employee and their family Flexible work from one of our offices or remote Healthcare Coverage Education Budget: Language lessons, professional training and certifications Wellness Budget: Mental health and fitness activity reimbursements Vacation policy: 20 days of annual leave and paid sick leave Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-19",
+    "deadline": "2026-12-18",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.5975,
+     "matched_signals": [
+      "tech: python",
+      "tech: sql",
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"title: Antifraud Analyst Junior\""
+     ],
+     "concerns": [],
+     "semantic_similarity": 0.3449833393096924
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/banco-plata-s-a-institucion-de-banca-multiple/jobs/antifraud-analyst-junior?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956443+00:00",
+    "notified_at": "2026-10-19T09:23:56.282132+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "makerble-test",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/makerble/jobs/automated-tester",
+   "record": {
+    "title": "Automated Tester",
+    "company": "Makerble",
+    "apply_url": "https://himalayas.app/companies/makerble/jobs/automated-tester?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/makerble/jobs/automated-tester",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/makerble/jobs/automated-tester",
+    "content_fingerprint": "3dca59ef5b97ebd6",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "Company Overview Makerble is a pioneering platform that empowers enterprises to track, measure, and analyze their impact. Learn more from Position Title Automated Tester Role Overview We are seeking an enthusiastic and proactive Automated Tester to join our team. This internship offers a unique opportunity to work directly in a production environment, collaborating with other developers to enhance our platform's testing systems. The ideal candidate will be passionate about contributing to impactful projects. Responsibilities: Architecting the complete testing mechanism with a proper plan. Create, maintain, and execute automated test cases using tools like BugBug , GetScandium , and/or similar low-code/no-code testing platforms. Identify, document, and track defects, collaborating with developers for resolution. Maintain accurate and detailed automated testing documentation, including test plans, scripts, and reports. Find edge cases and improve test coverage. (End-to-end responsibility from test planning to implementation and deployment) Regularly update the client and internal teams on test progress, findings, and automation improvements. Incorporate feedback into automated test workflows and enhance coverage over time. Requirements: Experience or strong interest in automated testing using low-code/no-code platforms (BugBug, GetScandium, TestSigma, etc.). Good understanding of JavaScript and HTML for creating advanced automation scripts and troubleshooting (Optional) Strong attention to detail, ensuring automated scripts accurately reflect client requirements before Go Live. Excellent written and verbal English for clear communication and documentation. Ability and willingness to learn quickly, especially in the domain of impact measurement and the charity sector. Familiarity with Agile methodologies, regression testing, and CI/CD integration for automated tests is a plus. Analytical mindset with strong problem-solving skills. PLEASE NOTE: THIS IS A FIXED-TERM CONTRACT, AND THE COMPENSATION IS GOAL-BASED / PERFORMANCE-BASED, PAID IN LUMP-SUM AT THE END OF THE TENURE. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-17",
+    "deadline": "2026-12-16",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.5863,
+     "matched_signals": [
+      "tech: go",
+      "employment type wanted: internship"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.3638039529323578
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/makerble/jobs/automated-tester?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.955862+00:00",
+    "notified_at": "2026-10-18T08:24:51.165080+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "c1-ta",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/correlation-one/jobs/teaching-assistant-supply-chain-analyst",
+   "record": {
+    "title": "Teaching Assistant: Supply Chain Analyst",
+    "company": "Correlation One",
+    "apply_url": "https://himalayas.app/companies/correlation-one/jobs/teaching-assistant-supply-chain-analyst?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/correlation-one/jobs/teaching-assistant-supply-chain-analyst",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/correlation-one/jobs/teaching-assistant-supply-chain-analyst",
+    "content_fingerprint": "055718964cca76d7",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Correlation One is the largest provider of AI and data workforce development programs globally, having trained over 500,000 professionals across 11 countries. As the largest training provider for Amazon Career Choice, and a growing partner to state governments building registered apprenticeship programs, Correlation One sits at the intersection of employer talent needs and scalable workforce training. We work with Fortune 500 enterprises, federal and state government agencies, and leading employers to close skills gaps in AI, data analytics, cybersecurity, and operations leadership. Our programs produce job-ready graduates who are prepared to contribute from day one. This is a part time, contract position. Program Details We are currently adding Teaching Assistant: Supply Chain Analyst to our Expert Network, in anticipation of upcoming programs. This is a proactive hiring effort, where you will participate in our interview process and be added to our Expert Network. Once approved for our Expert Network, our team will be able to share various opportunities for you to support projects, programs, and our learners. If you are already a member of our Expert Network, you do not need to apply to this role. You are already in our system. A day in the life Onboarding (Pre-Program): We will host a live onboarding session, where we will walk through the program elements, set you up on our platforms, and ensure that you are prepared to support our Amazon learners effectively before the program launches. All training materials will be provided in advance of, during, and after onboarding sessions. Key Responsibilities: Expectations during live (synchronous) sessions: Attend and proactively engage in the mandatory Pre-Program TA Onboarding. Dates and times will be announced. Monitor appropriate Pumble channels (#c1-TA, #live-chat, #extra-help, and other relevant channels) for learner questions and answer them promptly. Check-in with learners after each live session by asking how they’re feeling about the content, if they have any questions, or if there is anything that they need further clarity. Facilitate breakout rooms during lecture time, when applicable. Assist in keeping the session progressing should the Lead Instructor experience technical difficulty or is otherwise unable to deliver the lecture. If assigned to cover a specific live lecture, be present throughout the lecture and addressing learner concerns. Expectations during days of no live sessions: Monitor appropriate Pumble channels for learner questions and answer them within 24 hours. Foster discussion by posing questions of your own and sharing relevant links in the #resources channel or in other appropriate Pumble channels. Use the #c1-TA channel to share any important information during a lecture that needs the attention of Correlation One staff or fellow Expert Network staff. Review content materials (including lab, projects, extended cases, etc..) for the next lecture to ensure you are prepared to answer Learner questions. Hold up to six (6) Individual Office Hours per week with learners in the program so they can ask any additional questions or get support as necessary. Grade Learner submissions of exercises and projects within seven (7) days of submission. Video walkthroughs for asynchronous assignments, such as extended cases and portfolio tasks. Support continuous program improvement by providing thoughtful feedback to Correlation One team via Weekly Write Ups. Submit weekly write-ups summarizing the week’s accomplishments and challenges and provide insights on each learner. In addition to potential improvements. Attend and participate in the weekly staff meeting with Correlation One team and other Expert Network staff. Attend all scheduled meetings with your camera on, ensuring active engagement and professional presence. Who you are Data Analytics professional with exceptional leadership, communication, collaboration, organizational skills and experience working in Supply Chain Analytics. Holds the Supply Chain Procurement Certificate or equivalent Empathy, flexibility, patience; passion for working with diverse learners who are new to data analytics & logistics content. Experience operating in a fully virtual environment. Excellent written and spoken English and Spanish language skills. Working experience with the following technical skills/platforms: Microsoft Excel SQL Zoom Pumble Prior teaching experience with adult learners is a plus Compensation The compensation for this position is specific to location and takes into account the wide range of factors that are considered in making compensation decisions. These factors include (but are not limited to) location, experience, education and skill sets. Correlation One ’s Commitment Correlation One is proud to be an Equal Opportunity Employer and is committed to providing equal opportunity for all employees and applicants. Correlation One provides a work environment free of discrimination and harassment. Employment decisions at Correlation One are based solely on business needs, job requirements and individual qualifications, without regard to race, color, religion or belief, national, social or ethnic origin, sex (including pregnancy), age, sexual orientation, gender identity and/or expression, marital, civil union or domestic partnership status, past or present military service, or any other status protected by the laws or regulations in the locations where we operate. We encourage applicants to bring their unique skills, experiences, and outlook to our work environment. Correlation One is committed to the full inclusion of all qualified individuals. In keeping with our commitment, Correlation One strives to provide reasonable accommodations for persons with disabilities to enable them to access the hiring process. If you need an accommodation to access the job application or interview process, please contact . #noad Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-16",
+    "deadline": "2026-12-15",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.5659,
+     "matched_signals": [
+      "tech: sql",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.34335610270500183
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/correlation-one/jobs/teaching-assistant-supply-chain-analyst?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956575+00:00",
+    "notified_at": "2026-10-16T08:35:13.050430+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "ewor-cmo",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/ewor-gmbh/jobs/ai-research-lab-co-founder-cmo-100-remote-m-f-d-5545667816",
+   "record": {
+    "title": "AI Research Lab Co-Founder / CMO (100 % remote) (m/f/d)",
+    "company": "EWOR GmbH",
+    "apply_url": "https://himalayas.app/companies/ewor-gmbh/jobs/ai-research-lab-co-founder-cmo-100-remote-m-f-d-5545667816?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/ewor-gmbh/jobs/ai-research-lab-co-founder-cmo-100-remote-m-f-d-5545667816",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/ewor-gmbh/jobs/ai-research-lab-co-founder-cmo-100-remote-m-f-d-5545667816",
+    "content_fingerprint": "46f10125a1fa4e23",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "We are looking to hire ambitious entrepreneurs to start and scale their own startups. We are serial entrepreneurs, for example Paul Müller (founder Adjust, €1.2B exit) and Petter Made (founder SumUp, €8B) who are eager to support outlier personalities and serial entrepreneurs to build €1B+ companies. Our offer: A salary while you build your startup as you will directly be employed by us. Alternatively, you can opt for up to €500k in funding. 1:1 sparring with unicorn founders on a weekly basis Community : Access to the top 0.1% of founders, peers and investors Team building : Hiring top notch talent supported through our network (over 50,000 professionals) Distribution : Support in reaching product-market-fit and building up a sales force / marketing machine Funding support for securing a multi-million euro funding round within 12 months (on average, EWOR Fellows raise > €2M after our Grand Pitch) One of our fellows set a record for Europe’s largest pre-seed round by a first-time founder, securing a €12M pre-seed investment. Tasks You will own, build, and run your startup in fields such as AI Research Lab You will embark on an extensive personal development journey crafted by unicorn founders and follow a fully customised programme enhancing your goal, time, and energy management You will receive support in hiring through our network to over 50,000 professionals and advice as well as best practices from serial entrepreneurs You will receive intensive coaching to make your startup ready to raise millions in funding You will iterate your product with us until having reached product-market-fit and receive support in building up a sales force or creating a marketing engine respectively Requirements You are based in Europe or the Americas or open to relocate You are willing to take full responsibility for your own startup and scale it to €100M+ in revenues You have excellent communication skills in the English language Highlights Join us and build a €1B+ company with us! Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-18",
+    "deadline": "2026-12-17",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.57,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: internship"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.3775482177734375
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/ewor-gmbh/jobs/ai-research-lab-co-founder-cmo-100-remote-m-f-d-5545667816?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.955795+00:00",
+    "notified_at": "2026-10-18T08:24:51.165080+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "xp-video",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/xperteez-technology/jobs/video-data-collector-smartphone",
+   "record": {
+    "title": "Video Data Collector (Smartphone)",
+    "company": "Xperteez Technology",
+    "apply_url": "https://himalayas.app/companies/xperteez-technology/jobs/video-data-collector-smartphone?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/xperteez-technology/jobs/video-data-collector-smartphone",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/xperteez-technology/jobs/video-data-collector-smartphone",
+    "content_fingerprint": "bc3fbc9aca6e33dc",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Role Title: Video Data Collector (Smartphone) Role Type: Contract Location: Remote In this role, you'll apply your expertise to help train next-generation AI systems. Your work will shape how models learn, reason, and perform through high-quality, real-world input. No prior experience in AI is required — your domain knowledge is what matters. Scope of Work Capture natural, first-person video footage of everyday activities in real-world environments using your personal smartphone with a head strap (initial phase). Carefully follow detailed capture instructions and submit video recordings through an internal platform, ensuring all required metadata is complete and accurate. Leverage your initiative to independently identify shooting locations within approved settings and comply with privacy, consent, and safety protocols. Transition to using company-provided video equipment and updated workflows in subsequent project phases, recording across public, commercial, and outdoor settings. Coordinate and record group activities with others when assignments require additional participants, ensuring all written consents and permissions are obtained. Maintain high standards of data quality and reliability throughout the project to ensure all deliverables meet specified guidelines. Communicate effectively with project coordinators, reporting progress, challenges, or clarifications as required. Preferred Qualifications Proven experience in video capture or similar data collection activities, with a keen eye for detail. Reliable access to a high-quality personal smartphone suitable for video recording (for the initial phase). Strong written and verbal communication skills, with a particular emphasis on accuracy and clarity in submissions and correspondence. Ability to follow complex instructions with meticulous attention to privacy, consent, and metadata requirements. Comfort navigating both home and public environments for data collection, with adaptability to evolving project needs. Demonstrated ability to collaborate or coordinate with others when group recordings are assigned. Flexibility to manage varied tasks and adapt quickly to new workflows and equipment as the project evolves. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-15",
+    "deadline": "2026-12-14",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.3221,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.12961603701114655
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/xperteez-technology/jobs/video-data-collector-smartphone?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956930+00:00",
+    "notified_at": "2026-10-12T11:25:36.867243+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "micro1",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/micro1/jobs/usability-tester",
+   "record": {
+    "title": "Usability Tester",
+    "company": "micro1",
+    "apply_url": "https://himalayas.app/companies/micro1/jobs/usability-tester?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/micro1/jobs/usability-tester",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/micro1/jobs/usability-tester",
+    "content_fingerprint": "29a0a1a30dc6097c",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Role Title: Usability Tester Role Type: Contractor Location: Remote Time Commitment: 5-10 hours/week, short-term project micro1 is looking for Plain-Language Usability Testers to help evaluate and improve AI systems that answer questions about government services. You’ll read short questions and answers and tell us what is easy to follow and where it gets confusing. There are no wrong answers, and your honest reaction is what helps. No AI or technical background is needed. What You’ll Do Read short questions and answers on government services. Tell us where you felt confused, lost, or stuck, in your own words. Say what was easy to follow and what was not. Suggest simple changes that would make something clearer. Who We’re Looking For Adults who do everyday tasks on a phone or the web, even basic ones Patient with step-by-step reading Honest, specific feedback US-based Nice to Have Living in a rural or smaller community. We want a mix of regions. Past experience giving feedback or testing products or services Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-13",
+    "deadline": "2026-12-12",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.489,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\""
+     ],
+     "semantic_similarity": 0.29645290970802307
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/micro1/jobs/usability-tester?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956733+00:00",
+    "notified_at": "2026-10-14T09:07:35.530040+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "crm",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+   "record": {
+    "title": "CRM Developer",
+    "company": "NightOwl Consulting",
+    "apply_url": "https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+    "canonical_url": "https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+    "content_fingerprint": "f65768b30cd1e287",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "We are seeking a CRM Developer with a focus on Salesforce to support the design, development, and optimization of our CRM systems. The ideal candidate has hands-on Salesforce experience, is detail-oriented, and can deliver efficient solutions that improve system performance and user experience. Key Responsibilities Build and manage custom fields, objects, and page layouts within Salesforce. Design and maintain automation flows, validation rules, and process builders. Develop and implement email templates, reports, and dashboards. Customize Lightning pages and build custom-coded components when needed. Research and recommend new Salesforce features, apps, or integrations to improve workflow efficiency. Troubleshoot and resolve system issues in a timely manner. Ensure data integrity and streamline reporting processes. Collaborate with business stakeholders to translate requirements into technical solutions. Skills, Knowledge and Expertise 1+ years of hands-on Salesforce development or administration experience. Strong knowledge of Salesforce Lightning and automation tools (Flow, Process Builder, Apex triggers a plus). Experience building and managing reports, dashboards, and layouts. Proficient in customizing and extending Salesforce functionality using configuration and code. Ability to research, evaluate, and implement new CRM features or tools. Strong problem-solving skills and an analytical mindset. Resourceful and efficient coding habits with attention to scalability and performance. Salesforce Developer or Administrator certification is preferred but not required. Benefits Above market salary HMO on Day 1 for principal and two dependents Government-mandated benefits Performance-based Incentives Quarterly Company Events 1,000 PHP De Minimis Equipment and software provided Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-03",
+    "deadline": "2026-12-02",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.6116,
+     "matched_signals": [
+      "employment type wanted: new_grad",
+      "stage:stretch",
+      "stage:evidence: \"Skills, Knowledge and Expertise 1+ years of hands-on Salesforce development or administration experience.\""
+     ],
+     "concerns": [
+      "interest:veto: crm"
+     ],
+     "semantic_similarity": 0.41914302110671997
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/nightowl-consulting/jobs/crm-developer",
+      "first_seen": "2026-10-06T10:52:40.030416+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-06T10:52:52.724583+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "flowmingo",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+   "record": {
+    "title": "QA/QC Intern",
+    "company": "Flowmingo",
+    "apply_url": "https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+    "canonical_url": "https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+    "content_fingerprint": "1209ec8d4d34c2fd",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "internship",
+    "description": "About Flowmingo AI Flowmingo is a Y Combinator-backed startup (plus VinaCapital & top global investors) on a mission to democratize hiring. We believe the current hiring model is broken: recruiters only have time to interview 5% of applicants, leaving 95% of talent—the \"hidden gems\"—undiscovered. We are fixing this with an AI-native, high-volume interviewing platform. Our model is unique: we offer our tool for free to recruiters to capture the massive, uncontested markets of Southeast Asia, LATAM, and Africa. This allows us to process massive volumes of candidates that traditional, expensive platforms cannot touch. The QA Challenge This is not a typical \"click around and find bugs\" internship. You are the last line of defense for a platform used by millions of candidates in high-stakes situations (getting a job). You will face the \"Device Fragmentation\" challenge: How do we ensure our AI Speech-to-Text works on a budget phone in Jakarta just as well as it does on a MacBook in Singapore? You will help us answer that. What You Will Do Rigorous Testing: You will test our AI interview flow across a massive variety of mobile devices and browsers, identifying edge cases that only happen in the real world. \"Breaker\" Mindset: You will try to break the platform before our users do. What happens if the internet cuts out mid-interview? What if the user denies camera permissions? You find out. Release Management: You will work directly with the Engineering and Product team to green-light releases. If you say \"No,\" we don't ship. Process Improvement: You will proactively identify gaps in our testing workflow and suggest better ways to catch bugs early, using data from user reports. Quality Documentation: You will translate messy bug reports into clear, actionable engineering tickets with precise reproduction steps. Who You Are Detail-Obsessed: You notice when a button is 2 pixels off or when a loading spinner spins for too long. Tech-Savvy: You know how to open the Browser Console (Inspect Element) and look at network errors. Empathy for the User: You understand that a bug isn't just an error; it's a candidate losing a job opportunity. Logical Thinker: You can isolate variables to find the root cause of a bug, not just the symptom. Bonus: A strong interest in tech products, data analytics, or coding, with deep curiosity about how things work \"under the hood\" is a huge plus. Compensation & Benefits Competitive Remuneration: Monthly compensation tailored to your experience level. The YC Playbook: Learn how Silicon Valley startups build and scale products. Real Impact: You will see your ideas go live and directly affect the user experience for thousands of people. Mentorship: Work closely with the Founder and Product team. Application Process Please fill out the form on the right and submit your CV, a 30-minute AI interview will appear on the next screen. Completing the interview is mandatory. You can do it immediately or save the link for later, but early submissions receive priority processing. Location: Remote (Global) Employment type: Internship Compensation: Stipend + potential full-time offer How to apply Apply here: Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-09-15",
+    "deadline": "2026-10-14",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.7189,
+     "matched_signals": [
+      "tech: go",
+      "keyword: mentorship",
+      "keyword: remote",
+      "employment type wanted: internship",
+      "stage:fits",
+      "stage:evidence: \"title: QA/QC Intern\""
+     ],
+     "concerns": [
+      "interest:veto: qa"
+     ],
+     "semantic_similarity": 0.49636781215667725
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/flowmingo/jobs/qa-qc-intern",
+      "first_seen": "2026-10-13T11:15:29.642995+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-13T11:15:43.065567+00:00",
+    "notified_at": "2026-10-04T11:51:55.441659+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "vantum",
+   "decision": "apply",
+   "key": "himalayas:https://himalayas.app/companies/vantum/jobs/qa-tester",
+   "record": {
+    "title": "QA Tester",
+    "company": "Vantum",
+    "apply_url": "https://himalayas.app/companies/vantum/jobs/qa-tester",
+    "canonical_url": "https://himalayas.app/companies/vantum/jobs/qa-tester",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/vantum/jobs/qa-tester",
+    "content_fingerprint": "b1cefd10ff618efc",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "About Vantum Vantum helps fractional operators win new clients while delivering for the clients they already have. When you are managing several engagements, client work can consume the week and leave little time to find the next one. The product is a web app for planning, tasks, calendar, goals, and Ask Vantum, an AI chat that helps an operator decide what to do next. We are a team of five, working toward product-market fit. We are looking for a QA tester to use the live product the way a customer would, and to write bugs we can reproduce. You will work directly with the founders. What you will own Your job is to find what is broken, write it so someone else can reproduce it, and check that the fix actually holds. Walk the main flows. Sign-in, home, plan, tasks, calendar, goals, notes, and Ask Vantum. Write each bug so it can be reproduced. Steps, what you expected, and what actually happened. Include the page, the account state, and a screenshot when it helps. Recheck fixes. A bug is not done because someone said it was fixed. Confirm the original steps, and check that a nearby flow did not break. Notice gaps. If a button does nothing, a save does not stick, or the page says one thing and the data shows another, file it. Ask when a behavior might be intentional. Do not guess, and do not redesign the product. You are not building features, and you are not writing production code. Clear written English is the job. What we are looking for You notice when software is wrong, and you can describe it without a developer sitting next to you. You should be able to: Follow a flow from start to finish. Include empty states, errors, and the second time through. Write a bug report a stranger can follow. Steps, expected result, actual result. Tell a display problem from a data problem. The page looks saved, but a refresh brings the old value back. Show the evidence. Use a browser, screenshots, and a short screen recording when steps are hard to write. Communicate clearly in written English. We read your reports every day. Take ownership. Retest what you filed, and say when you cannot reproduce it. Prior QA employment is useful. It is not required. Testing your own projects, a client product, or a careful write-up of bugs in software you use counts. We do not need test automation, a computer science degree, or experience with our stack. Why join You will see real product decisions, talk to the founders, and watch your reports turn into fixes. The work is part-time and remote. You set a steady weekly rhythm with us, and you tell us what you found in writing. Compensation and working arrangements $500 to $1,000 USD per month, depending on hours and how clearly you report what you find. Part-time, remote. At least three hours of weekday overlap with Bangkok (GMT+7), so we can review bugs the same day. Hours are agreed on the call. This is not a full-time engineering role. How we hire 1. Written application. We read how you describe a bug. 2. Screening call. We talk through a product you tested and a bug you filed. 3. A short look at the live app. You walk one flow and write up what you find. Apply Describe one bug you found that was easy to miss. Include the steps, what you expected, and what actually happened. Tell us your timezone, your weekday overlap with Bangkok, when you can start, how many hours a week you can give, and your expected monthly pay. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-08",
+    "deadline": "2026-10-30",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.4458,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad"
+     ],
+     "concerns": [
+      "stage:no_evidence",
+      "stage:evidence: \"requirements not present in the feed text — check the posting\"",
+      "interest:veto: qa"
+     ],
+     "semantic_similarity": 0.25330203771591187
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/vantum/jobs/qa-tester",
+      "first_seen": "2026-10-11T10:23:56.810153+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-11T10:24:04.067644+00:00",
+    "notified_at": "2026-10-05T10:57:20.476176+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "affidea-qa",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/affidea-bv/jobs/qa-and-uat-tester",
+   "record": {
+    "title": "QA and UAT Tester",
+    "company": "Affidea BV",
+    "apply_url": "https://himalayas.app/companies/affidea-bv/jobs/qa-and-uat-tester?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/affidea-bv/jobs/qa-and-uat-tester",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/affidea-bv/jobs/qa-and-uat-tester",
+    "content_fingerprint": "6bf32cc90cdea8aa",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "The QA and UAT Tester is responsible for ensuring that software releases meet functional, quality, and business acceptance requirements before reaching production, through rigorous manual and UAT testing. This is a defined growth role: the successful candidate is expected to progressively build test automation skills and contribute an increasing share of automated coverage over time, supported by structured training and mentorship, with a clear path toward a Test Automation Engineer profile as capability develops. Test Planning & Case Design Writes clear, traceable test cases and scripts from requirements, user stories, and acceptance criteria. Maintains an organised, up-to-date test case repository aligned to current functionality. Ensures test coverage maps back to requirements and identifies gaps before test execution begins. Participates in requirement/acceptance-criteria reviews to raise testability concerns early. Manual & UAT Test Execution Executes functional, regression, and end-to-end test cycles according to the test plan. Plans and coordinates UAT cycles with business stakeholders, including scheduling, scripts, and sign-off. Documents test results, evidence, and outcomes clearly for audit and traceability. Flags scope, environment, or data issues that put a test cycle at risk. Defect Management & Reporting Logs defects with clear reproduction steps, evidence, severity, and priority. Tracks defects through to resolution and retests fixes before closure. Maintains accurate defect status and communicates blockers or high-risk defects promptly. Analyses defect trends to identify recurring problem areas. Quality Gate & Release Readiness Contributes to and upholds the team's Definition of Done and quality gate criteria. Provides a clear go/no-go quality recommendation ahead of each release. Escalates quality risks early rather than allowing them to surface at release time. Maintains release-level test summary documentation for audit and stakeholder visibility. Test Automation Skill-Building & Contribution Actively develops automation skills through training, mentorship, and hands-on practice as part of an agreed development plan. Contributes to and maintains automated test scripts for repetitive regression scenarios, with support from senior team members. Progressively takes on greater ownership of automation as competence grows, moving from assisted to independent contribution. Shares learnings and automation progress with the wider QA and development team. Collaboration with Development & Product Works closely with developers, Business Analysts, and the Product Owner to clarify requirements and acceptance criteria. Participates in sprint planning, refinement, and review to provide a quality perspective early (\"shift-left\" testing). Pairs with developers to understand root causes of defects and prevent recurrence. Provides constructive, timely feedback on testability and edge cases during design and development. Continuous Improvement & Documentation Identifies and proposes improvements to test processes, templates, and tooling. Maintains clear, current test documentation and a shared testing knowledge base. Actively participates in retrospectives and follows through on agreed improvement actions. Stays current with testing best practice and emerging automation tools/techniques. Requirements Bachelor's degree or diploma in Computer Science, Information Technology, or a related field (or equivalent practical experience). ISTQB Foundation Certification (or equivalent testing certification) is advantageous. 1-3 years' experience in manual and/or User Acceptance Testing (UAT) within a software development environment. Experience writing clear, traceable test cases and test scripts from requirements and acceptance criteria. Experience executing functional, regression, and UAT test cycles and documenting results. Experience logging, tracking, and retesting defects using a defect-tracking tool (e.g. Jira, Azure DevOps, Zephyr, Xray). Working understanding of the Software Development Lifecycle (SDLC) and Agile/Scrum ways of working. Basic SQL skills for data validation and test-data setup. Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-16",
+    "deadline": "2026-12-15",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.4928,
+     "matched_signals": [
+      "tech: sql",
+      "tech: go",
+      "keyword: mentorship",
+      "employment type wanted: new_grad",
+      "stage:stretch",
+      "stage:evidence: \"1-3 years' experience in manual and/or User Acceptance Testing (UAT) within a software development environment.\""
+     ],
+     "concerns": [
+      "interest:veto: qa"
+     ],
+     "semantic_similarity": 0.24030345678329468
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/affidea-bv/jobs/qa-and-uat-tester?utm_source=api",
+      "first_seen": "2026-10-19T09:23:33.985280+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-19T09:23:48.882549+00:00",
+    "notified_at": "2026-10-17T08:07:59.383298+00:00",
+    "history": []
+   }
+  },
+  {
+   "label_id": "resilio",
+   "decision": "skip",
+   "key": "himalayas:https://himalayas.app/companies/resilio-partners/jobs/remote-ui-ux-reviewer-quality-assurance-qa",
+   "record": {
+    "title": "Remote UI/UX Reviewer & Quality Assurance (QA)",
+    "company": "Resilio Partners",
+    "apply_url": "https://himalayas.app/companies/resilio-partners/jobs/remote-ui-ux-reviewer-quality-assurance-qa?utm_source=api",
+    "canonical_url": "https://himalayas.app/companies/resilio-partners/jobs/remote-ui-ux-reviewer-quality-assurance-qa",
+    "ats_provider": "himalayas",
+    "ats_job_id": "https://himalayas.app/companies/resilio-partners/jobs/remote-ui-ux-reviewer-quality-assurance-qa",
+    "content_fingerprint": "fb4769b76715ba80",
+    "location_raw": "Worldwide",
+    "remote_status": "remote",
+    "employment_type": "new_grad",
+    "description": "Remote | Website & App Reviews | Entry-Level Friendly About the Role We're looking for a detail-oriented UI/UX Reviewer & Quality Assurance (QA) professional to review websites, landing pages, and web applications to ensure they provide a smooth, intuitive, and consistent user experience. In this role, you'll evaluate user interfaces, identify usability issues, check design consistency, and help ensure that digital products meet quality standards before they reach users. You'll work with design and development teams to provide actionable feedback and help improve the overall user experience. This opportunity is suitable for individuals who have an interest in UI/UX design, website usability, and software quality assurance. Familiarity with modern design tools and AI-powered productivity tools is a plus. Responsibilities Review websites, landing pages, and web applications for usability, accessibility, and visual consistency. Evaluate user interfaces to identify layout issues, confusing navigation, inconsistent spacing, and design inconsistencies. Perform quality assurance checks across different browsers, screen sizes, and devices. Identify and document bugs, UI defects, and user experience issues with clear descriptions and supporting screenshots. Test key user flows, including registration, login, navigation, form submissions, and other interactive elements. Compare implemented interfaces against design references, mockups, and expected functionality. Provide constructive feedback and actionable recommendations to improve usability and user satisfaction. Collaborate with designers and developers to verify fixes and maintain quality standards. Use AI tools and productivity software to support documentation, analysis, and review workflows. Requirements Basic understanding of UI/UX design principles and website usability. Strong attention to detail and the ability to identify visual and functional inconsistencies. Good analytical, problem-solving, and communication skills. Ability to document issues clearly and provide practical recommendations. Familiarity with web browsers, responsive design, and common website interactions. Willingness to learn QA methodologies, usability testing, and modern review tools. Ability to work independently and manage assigned tasks in a remote environment. Nice to Have: Familiarity with Figma or other UI/UX design tools. Basic knowledge of software testing and bug reporting. Understanding of accessibility principles and responsive web design. Experience using tools such as Jira, Trello, or similar task management platforms. Familiarity with AI-powered tools for productivity and quality assurance. What You'll Gain Hands-on experience reviewing websites and digital products. Practical exposure to UI/UX design principles and quality assurance workflows. Opportunities to develop analytical, communication, and problem-solving skills. Experience collaborating with remote design and development teams. Opportunities to build a portfolio of review work and quality improvement projects. Work Arrangement Location: Remote Job Type: Part-time — specify as applicable] Experience Level: Entry-Level Friendly Compensation: 35$/hr How to Apply If you're passionate about creating better digital experiences and enjoy identifying ways to improve websites and applications, we'd love to hear from you. Submit your application with your resume and any relevant UI/UX, website review, or quality assurance experience. IMPORTANT: I know you guys are eager but please DON’T CONTACT our LinkedIn and other staffs as it is causing problems for them. Anyone who tries to contact other staff of Resilio Partners will be BANNED and DISQUALIFIED. Thank you! Originally posted on Himalayas",
+    "technologies": [],
+    "posting_date": "2026-10-19",
+    "deadline": "2026-11-18",
+    "salary_raw": null,
+    "salary_is_estimated": false,
+    "eligibility": {
+     "category": "worldwide_remote",
+     "confidence": 0.85,
+     "evidence": [
+      "location 'Worldwide' is worldwide ('worldwide')"
+     ]
+    },
+    "relevance": {
+     "score": 0.4032,
+     "matched_signals": [
+      "keyword: remote",
+      "employment type wanted: new_grad",
+      "stage:fits",
+      "stage:evidence: \"Remote | Website & App Reviews | Entry-Level Friendly About the Role We're looking for a detail-oriented UI/UX Reviewer & Quality Assurance (QA) professional to review websites, landing pages, and web applications to ensure they provide a smooth, intuitive, and consistent user experience.\""
+     ],
+     "concerns": [
+      "interest:veto: qa"
+     ],
+     "semantic_similarity": 0.21074554324150085
+    },
+    "status": "active",
+    "provenance": [
+     {
+      "source": "himalayas",
+      "url": "https://himalayas.app/companies/resilio-partners/jobs/remote-ui-ux-reviewer-quality-assurance-qa?utm_source=api",
+      "first_seen": "2026-10-21T08:58:04.713937+00:00"
+     }
+    ],
+    "discovered_date": "2026-10-21T08:58:23.956467+00:00",
+    "notified_at": "2026-10-19T09:23:56.282132+00:00",
+    "history": []
+   }
+  }
+ ]
+}

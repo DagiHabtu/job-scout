@@ -21,7 +21,8 @@ def _o(title="Software Engineer Intern", etype=ET.INTERNSHIP, cat=EC.WORLDWIDE_R
        notified=None, sim=0.5):
     o = Opportunity(title=title, company="C", apply_url=f"https://x/{title}", canonical_url=f"https://x/{title}",
                     employment_type=etype, status=status, notified_at=notified)
-    o.eligibility = Eligibility(cat, 0.8, ["ev"])
+    # UNKNOWN at 0.5 (a bare "Remote"): UNKNOWN ≥ 0.6 is now the "unverified" tier (spec 2026-10-21 §4.2)
+    o.eligibility = Eligibility(cat, 0.5 if cat == EC.UNKNOWN else 0.8, ["ev"])
     o.relevance = Relevance(score=sim, semantic_similarity=sim)
     return o
 

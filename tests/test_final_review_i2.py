@@ -9,7 +9,7 @@ import pytest
 
 from job_scout.config import AppConfig, ScoringConfig
 from job_scout.models import Eligibility, EligibilityCategory as EC, EmploymentType as ET, Lifecycle, Opportunity
-from job_scout.notify import gate_reasons, render_heartbeat_md, render_issue_md, section_of
+from job_scout.notify import UNKNOWN_INTERN_CAP, gate_reasons, render_heartbeat_md, render_issue_md, section_of
 from job_scout.score import score_opportunity, stage_fit
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -101,10 +101,10 @@ def test_d3_unknown_vetoed_is_outside_interests():
 def test_d3_caps_act_per_section():
     msc = "Currently pursuing a Master's or PhD in Computer Science."
     asp = [_scored(f"Research Engineer Intern {i}", cat=EC.UNKNOWN, body=msc) for i in range(3)]
-    chk = [_scored(f"Software Engineer Intern {i}", cat=EC.UNKNOWN) for i in range(6)]
+    chk = [_scored(f"Software Engineer Intern {i}", cat=EC.UNKNOWN) for i in range(UNKNOWN_INTERN_CAP + 1)]   # cap 10 (§4.6)
     r = gate_reasons(asp + chk, 0.4)
     assert r[:3].count(None) == 2 and r[:3].count("stage:advanced_cap") == 1
-    assert r[3:].count(None) == 5 and r[3:].count("unknown_cap") == 1
+    assert r[3:].count(None) == UNKNOWN_INTERN_CAP and r[3:].count("unknown_cap") == 1
 
 
 # M2 / D4 — role family is checked before the interest veto: non-technical titles are not selected.
