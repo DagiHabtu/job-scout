@@ -7,7 +7,7 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
 Step in progress: none — build COMPLETE, merged (PR #21, `a9b2999`); checks 1–4 done. NEXT: step 5 (four Monday
-digests → Dagi replies → `scripts/label_report.py`). Still open: step 2(c) device confirmation from Dagi.
+digests → Dagi replies → `scripts/label_report.py`). Step 2(c) confirmed by Dagi 2026-10-22 (email arrived).
 Dagi (2026-10-21) asked Claude to run the git/GitHub commands (push, dispatch, PR, merge, test reply) itself.
 Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`) · review 4.6 CLOSED (`65f21ad`) · 5.1 (`f13c664`) · 5.2 · 5.3 · whole-branch review CLOSED (`e9ca7ef`).
 Deviations from spec (iteration 3):
