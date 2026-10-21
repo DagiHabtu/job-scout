@@ -33,6 +33,13 @@ class Education(BaseModel):
     max_required_years: int = 2                # roles demanding more years of experience are not surfaced
 
 
+class Pay(BaseModel):
+    """Pay preference (spec 2026-10-21 §4.4)."""
+
+    # Dagi 2026-10-21: unpaid not wanted; paid part-time work is wanted even outside stated interests
+    accept_unpaid: bool = False
+
+
 class UserProfile(BaseModel):
     """What the user is looking for and what they are eligible for. All of this is configurable."""
 
@@ -43,7 +50,7 @@ class UserProfile(BaseModel):
     # Current preference, not an absolute exclusion: a title matching one of these is still delivered,
     # in "Eligible, outside your stated interests" — unless it also names a strong-interest term.
     not_interested: list[str] = Field(default_factory=lambda: [
-        "qa", "qc", "quality assurance", "manual testing", "crm", "salesforce"])
+        "qa", "qc", "quality assurance", "manual testing", "crm", "salesforce", "tester"])
     strong_interest_terms: list[str] = Field(default_factory=lambda: [
         "linux", "kernel", "systems", "infrastructure", "compiler", "embedded", "distributed",
         "machine learning", "ml", "ai", "research", "open source"])
@@ -54,6 +61,7 @@ class UserProfile(BaseModel):
     )
     experience_level: str = "entry"          # free text used as an embedding signal
     education: Education = Field(default_factory=lambda: Education())
+    pay: Pay = Field(default_factory=lambda: Pay())
 
     @model_validator(mode="before")
     @classmethod

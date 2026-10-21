@@ -334,6 +334,9 @@ def score_opportunity(opp: Opportunity, profile: UserProfile, cfg: ScoringConfig
     interest_matched, interest_concerns = interest_signals(opp, profile)
     matched += interest_matched
     concerns += interest_concerns
+    pay_matched, pay_concerns = pay_signals(opp, profile)
+    matched += pay_matched
+    concerns += pay_concerns
 
     return Relevance(score=round(final, 4), matched_signals=matched, concerns=concerns, semantic_similarity=sim)
 
@@ -439,6 +442,68 @@ def interest_of(opp: Opportunity) -> tuple[str | None, str | None]:
     veto = next((x[len("interest:veto: "):] for x in r.concerns if x.startswith("interest:veto: ")), None)
     note = next((x[len("interest:note: "):] for x in r.matched_signals if x.startswith("interest:note: ")), None)
     return veto, note
+
+
+# --------------------------------------------------------------------------------------------- #
+# Pay (spec 2026-10-21 §4.4) — read from the title and body, first match wins: unpaid → contingent →
+# stipend → stated → unstated. Carried in Relevance as "pay:" strings (no spine change).
+# --------------------------------------------------------------------------------------------- #
+
+_UNPAID_TITLE = re.compile(r"\b(unpaid|volunteer)\b", re.IGNORECASE)
+_UNPAID_BODY = re.compile(
+    r"\b(this|it)\s+(is|will be)\s+an?\s+(unpaid|volunteer)\b|\bunpaid\s+(internship|role|position)\b|"
+    r"\bvolunteer\s+(role|position)\b", re.IGNORECASE)
+_CONTINGENT = re.compile(r"\b(goal|performance)[- ]based\b", re.IGNORECASE)
+_CONTINGENT_NEAR = re.compile(r"compensation|paid", re.IGNORECASE)
+_STIPEND = re.compile(r"\bstipend\b", re.IGNORECASE)
+_CURRENCY = r"(?:US\$|\$|USD\s?|€|EUR\s?|£)"
+_AMOUNT = rf"{_CURRENCY}\s?\d[\d,.]*k?"
+_STATED = re.compile(
+    rf"{_AMOUNT}(?:\s?(?:-|–|to)\s?{_CURRENCY}?\s?\d[\d,.]*k?)?(?:\s?(?:USD|EUR|GBP))?"
+    r"\s?(?:/|per|a)\s?(?:hour|hr|week|month|mo|year|yr)\b"
+    r"|\d[\d,.]*\s?\$\s?/\s?(?:hr|hour)\b", re.IGNORECASE)
+# Not pay: a budget or allowance amount ("learning and development budget of USD 2,000 per year", Canonical).
+_NOT_PAY = re.compile(r"\b(budget|allowance|reimburse\w*)\b[^.]{0,20}$", re.IGNORECASE)
+
+
+def pay_of(opp: Opportunity) -> tuple[str, str | None]:
+    """(verdict, quoted snippet) from the title and description: unpaid | contingent | stipend | stated |
+    unstated."""
+    title, body = opp.title or "", opp.description or ""
+    m = _UNPAID_TITLE.search(title) or _UNPAID_BODY.search(body)
+    if m:
+        return "unpaid", m.group(0)
+    for m in _CONTINGENT.finditer(body):
+        if _CONTINGENT_NEAR.search(body[max(0, m.start() - 80): m.end() + 80]):
+            return "contingent", body[max(0, m.start() - 40): m.end() + 40].strip()
+    stated = next((m for m in _STATED.finditer(body) if not _NOT_PAY.search(body[max(0, m.start() - 60): m.start()])),
+                  None)
+    if _STIPEND.search(body):
+        return "stipend", stated.group(0) if stated else "stipend"
+    if stated:
+        return "stated", stated.group(0)
+    return "unstated", None
+
+
+def pay_signals(opp: Opportunity, profile: UserProfile) -> tuple[list[str], list[str]]:
+    """(matched, concerns): "pay:<verdict>" plus 'pay:evidence: "<snippet>"'. An unpaid role the profile
+    accepts is recorded as "pay:unpaid_accepted" (the gate has no profile — as for graduate programs)."""
+    verdict, snippet = pay_of(opp)
+    if verdict == "unstated":
+        return [], []
+    if verdict == "unpaid" and profile.pay.accept_unpaid:
+        verdict = "unpaid_accepted"
+    entries = [f"pay:{verdict}", *([f'pay:evidence: "{snippet}"'] if snippet else [])]
+    return ([], entries) if verdict in ("unpaid", "contingent") else (entries, [])
+
+
+def pay_verdict(opp: Opportunity) -> tuple[str, str | None]:
+    """Read (verdict, snippet) back from `opp.relevance`; "unstated" when there is none."""
+    r = opp.relevance
+    entries = [x for x in (*r.matched_signals, *r.concerns) if x.startswith("pay:")] if r else []
+    verdict = next((x[len("pay:"):] for x in entries if not x.startswith("pay:evidence:")), "unstated")
+    snippet = next((x[len('pay:evidence: "'):-1] for x in entries if x.startswith("pay:evidence:")), None)
+    return verdict, snippet
 
 
 # --------------------------------------------------------------------------------------------- #

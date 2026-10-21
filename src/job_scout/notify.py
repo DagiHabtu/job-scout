@@ -21,7 +21,7 @@ from pathlib import Path
 from .config import AppConfig
 from .eligibility import UNSTATED_EVIDENCE
 from .models import EligibilityCategory, EmploymentType, Lifecycle, Opportunity
-from .score import interest_of, role_family_ok, stage_of
+from .score import interest_of, pay_verdict, role_family_ok, stage_of
 
 # Statuses that are worth telling the user about. ACTIVE (seen again, unchanged) is deliberately
 # excluded — re-announcing an unchanged posting is exactly the noise we are avoiding.
@@ -63,6 +63,10 @@ def gate_reason(opp: Opportunity, threshold: float) -> str | None:
     # ("CRM Assistant" → role_family); a technical not-interested one goes to its own section (§12 S11).
     if not role_family_ok(opp.title, opp.description):
         return "role_family"
+    # Pay (spec 2026-10-21 §4.4): unpaid roles are not wanted unless the profile accepts them (recorded
+    # at score time as "unpaid_accepted"). Stipend programs returned above, so they are exempt.
+    if pay_verdict(opp)[0] == "unpaid":
+        return "pay:unpaid"
     # Stage fit (§12 S10): stated conditions a current student cannot meet now. An advanced-degree
     # role with positive eligibility is selected into "Aspirational" (capped in `gate_reasons`).
     stage, _ = stage_of(opp)
@@ -270,13 +274,24 @@ def _issue_item(opp: Opportunity) -> str:
     if note:
         lines.append(f"  - interest: {note}")
     matched = [x for x in (opp.relevance.matched_signals if opp.relevance else [])
-               if not x.startswith(("stage:", "interest:"))]
+               if not x.startswith(("stage:", "interest:", "pay:"))]
     if matched:
         lines.append(f"  - matched: {', '.join(matched)}")
     if opp.ats_provider == "himalayas":
         listing = opp.ats_job_id if (opp.ats_job_id or "").startswith("http") else url
         lines.append(f"  - via [Himalayas]({listing})")
     return "\n".join(lines)
+
+
+_PAID = frozenset({"stated", "stipend"})
+
+
+def _outside_line(opp: Opportunity) -> str:
+    """'- [ ] [Title](url) — Company · pay: <snippet>' (+ the unconfirmed-eligibility note)."""
+    snippet = pay_verdict(opp)[1] if pay_verdict(opp)[0] in _PAID else None
+    meta = " · ".join(x for x in (opp.company, f"pay: {snippet}" if snippet else None) if x)
+    line = f"- [ ] [{opp.title}]({opp.canonical_url or opp.apply_url})" + (f" — {meta}" if meta else "")
+    return line + ("" if _positive(opp) else f" — {_UNCONFIRMED}")
 
 
 def _title_fit(opp: Opportunity) -> float:
@@ -296,13 +311,14 @@ def render_issue_md(opps: list[Opportunity], cfg: AppConfig) -> str:
            "Tick the items worth applying to.\n"]
     for section in SECTIONS:
         key = (lambda o: o.relevance.score if o.relevance else 0.0) if section == ACTIONABLE else _title_fit
+        if section == OUTSIDE_INTERESTS:      # paid roles first (spec 2026-10-21 §4.4), then title fit
+            key = lambda o: (pay_verdict(o)[0] in _PAID, _title_fit(o))  # noqa: E731
         items = sorted((o for o in opps if section_of(o) == section), key=key, reverse=True)
         if not items:
             continue
         out.append(f"## {section}\n")
-        if section == OUTSIDE_INTERESTS:      # title-and-link lines only (§12 S11)
-            out.append("\n".join(f"- [ ] [{o.title}]({o.canonical_url or o.apply_url})"
-                                 + ("" if _positive(o) else f" — {_UNCONFIRMED}") for o in items) + "\n")
+        if section == OUTSIDE_INTERESTS:      # one line per item: title, company and pay (§12 S11, §4.4)
+            out.append("\n".join(_outside_line(o) for o in items) + "\n")
         else:
             out.append("\n".join(_issue_item(o) for o in items) + "\n")
     return _with_cc("\n".join(out))

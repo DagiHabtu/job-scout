@@ -82,7 +82,8 @@ def test_outside_interests_rendered_as_title_and_link_only():
     md = render_issue_md([o], AppConfig())
     block = md[md.index(f"## {OUTSIDE}"):]
     item_lines = [l for l in block.splitlines() if l.startswith("- [ ]")]
-    assert item_lines == [f"- [ ] [QA/QC Intern]({o.canonical_url})"]
+    # spec 2026-10-21 §4.4: the line also shows the company (and pay when stated)
+    assert item_lines == [f"- [ ] [QA/QC Intern]({o.canonical_url}) — {o.company}"]
     assert "eligibility:" not in block and "stage:" not in block
 
 
