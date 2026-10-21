@@ -17,6 +17,7 @@ logged, others continue; ALL queries failing → raise.
 from __future__ import annotations
 
 import logging
+import re
 import time
 import urllib.error
 from datetime import date, datetime, timezone
@@ -24,6 +25,7 @@ from datetime import date, datetime, timezone
 from .._geo import NO_RESTRICTION_LISTED
 from ..config import SourceConfig
 from ..models import EmploymentType, Opportunity, RemoteStatus
+from ..normalize import _SENIOR_TITLE
 from ._http import get_json
 from ._text import html_to_text
 
@@ -32,12 +34,16 @@ log = logging.getLogger("job_scout.sources.himalayas")
 _SEARCH_URL = "https://himalayas.app/jobs/api/search?{query}&sort=recent&page={page}"
 _PAGES = 3
 _PAUSE_S = 1.0
+_COFOUNDER = re.compile(r"co-?founder", re.IGNORECASE)
 
 
 def _employment(job: dict) -> EmploymentType:
     etype = str(job.get("employmentType") or "")
     seniority = job.get("seniority") or []
-    if etype == "Intern":
+    # "Intern" is not trusted over a title naming a founder or senior role (EWOR "DevTools Co-Founder /
+    # Head of Engineering", spec 2026-10-21 §4.7): fall through to the other rules.
+    title = str(job.get("title") or "")
+    if etype == "Intern" and not (_COFOUNDER.search(title) or _SENIOR_TITLE.search(title)):
         return EmploymentType.INTERNSHIP
     if any("entry-level" in str(s).lower() for s in seniority):
         return EmploymentType.NEW_GRAD

@@ -171,7 +171,8 @@ _YEARS = re.compile(
 _NOT_REQUIREMENT = re.compile(
     r"\b(combined|collective(ly)?|team of|founded|founders?|in business|ago|has been|have been|"
     r"our (team|company|engineers|clients|customers)|we(?:'ve| have| bring| were)|"
-    r"old|older|age|aged|vest(s|ed|ing)?|stock options|equity|contract|lasts?|duration)\b",
+    r"old|older|age|aged|vest(s|ed|ing)?|stock options|equity|contract|lasts?|duration|"
+    r"operational|operating|established)\b",   # company age: "Established, 20+ years operational" (§4.7)
     re.IGNORECASE)
 _SENTENCE_MAX = 200
 # A span, not a requirement: "within 3 years", "over 10 years", "in the last 2 years", "up to 2 years".
