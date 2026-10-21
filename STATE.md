@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: review of 4.6 running (fresh-context, read-only); 4.8 done meanwhile → acceptance 5.1 next.
+Step in progress: acceptance 5.1 (tests/test_labels_2026_10_21.py) → 5.2–5.4 → whole-branch review.
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`) · review 4.6 CLOSED (`65f21ad`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -174,6 +174,21 @@ Deviations from spec (iteration 3):
   on the seed it reads the stored rows' pre-iteration-3 classification, so it is not a measurement — use `--since`
   the first weekly digest for criterion 5. Tests `tests/test_labels_i3.py` (21: grammar table, errors, injection-shaped
   comments stored nowhere and executed never, workflow never interpolates comment/issue text, seed file). **597 passed.**
+- 2026-10-21 — **Review of 4.6 CLOSED** (`65f21ad`; general-purpose, read-only; no high findings). Each finding a test
+  first in `tests/test_delivery_i3.py` (all 4 failed before the fix):
+  M1 a failed Monday issue (state not committed) was not re-delivered until the next Monday → the digest is now *due*
+  unless a stored run already wrote one this week (Monday..today, run record `digest_date`; `pipeline._digest_due`).
+  Consequence: the first weekly-cadence run after setup writes a digest on any day. L1 a second Monday run posted a
+  second 0-item digest → fixed by the same rule. M2 weekday deferrals filled the 5 near-miss slots and were then
+  dropped by the heartbeat → `NOT_NEAR_MISS` reasons are excluded before the top 5 (test_funnel near-miss test
+  changed: it asserted near misses = seen records; now uses real role_family misses). L2 a key containing `-->` could
+  end the hidden map comment → `>` written as `>` (same JSON). Recorded, not fixed: L3 the seed step on a 0-item
+  weekly body puts the test item above the header line (cosmetic); L4 `--today` mixes the injected date with
+  wall-clock `first_seen`/`notified_at` (manual testing only — dispatch with `today` = the current week's Monday, not
+  a future one, or the stored `digest_date` suppresses that week's real digest). **601 passed.**
+  **Finding for the human checks (not in the spec):** GitHub runs `issue_comment` workflows from the *default branch*
+  only, so `labels.yml` cannot react to a reply before it is on `main`; the "reply on the test issue" check (§5.4) has
+  to happen after merge.
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
