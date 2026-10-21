@@ -2,8 +2,9 @@
 
 Endpoint: `GET https://himalayas.app/jobs/api/search?<query>&sort=recent&page=N` → `{"jobs": [...],
 "totalCount": n, "limit": 20, ...}`. Unlike company ATS boards, each listing carries a structured
-`locationRestrictions` (empty = no restriction), `employmentType` and `seniority`, so location
-eligibility comes from a field, not from prose.
+`locationRestrictions`, `employmentType` and `seniority`. An empty `locationRestrictions` means
+Himalayas lists no restriction — not that the employer hires worldwide — so the adapter writes
+`_geo.NO_RESTRICTION_LISTED` and the body decides (spec 2026-10-21 §4.1).
 
 Terms: Himalayas asks for a link back and attribution and forbids resubmitting listings to other job
 platforms. The issue line for every Himalayas item links its Himalayas listing ("via Himalayas");
@@ -20,6 +21,7 @@ import time
 import urllib.error
 from datetime import date, datetime, timezone
 
+from .._geo import NO_RESTRICTION_LISTED
 from ..config import SourceConfig
 from ..models import EmploymentType, Opportunity, RemoteStatus
 from ._http import get_json
@@ -66,7 +68,7 @@ def _to_opportunity(job: dict) -> Opportunity:
         canonical_url="",
         ats_provider="himalayas",
         ats_job_id=guid,                           # the Himalayas listing URL — linked as attribution
-        location_raw="; ".join(restrictions) or "Worldwide",
+        location_raw="; ".join(restrictions) or NO_RESTRICTION_LISTED,
         remote_status=RemoteStatus.REMOTE,
         employment_type=_employment(job),
         description=html_to_text(job.get("description") or job.get("excerpt") or ""),

@@ -46,7 +46,7 @@ def test_mapping_from_recorded_fixture():
     swe = by_title["Software Engineer Intern"]
     assert swe.ats_provider == "himalayas" and swe.ats_job_id.startswith("https://himalayas.app/")
     assert swe.employment_type == ET.INTERNSHIP and swe.remote_status == RemoteStatus.REMOTE
-    assert swe.location_raw == "Worldwide"
+    assert swe.location_raw == "Remote (no location restriction listed)"   # spec 2026-10-21 §4.1 (was "Worldwide")
     assert swe.posting_date is not None and swe.deadline is not None
     assert "<" not in swe.description                          # HTML stripped
     restricted = by_title["Data Annotation Specialist (Remote / Part-Time)"]
@@ -67,11 +67,14 @@ def test_employment_mapping(etype, seniority, expected):
     assert src.fetch(SourceConfig())[0].employment_type == expected
 
 
-def test_empty_restrictions_are_worldwide_through_s2():
+def test_empty_restrictions_are_unstated_through_s2():
+    # spec 2026-10-21 §4.1: an empty locationRestrictions is "no restriction listed", not worldwide — the
+    # body (Ritual's states no place) decides → UNKNOWN 0.6 (was WORLDWIDE_REMOTE)
     src, _ = _src(FIXTURE)
     profile = AppConfig().profile
-    cats = {o.title: classify_eligibility(normalize(o), profile).category for o in src.fetch(SourceConfig())}
-    assert cats["Software Engineer Intern"] == EC.WORLDWIDE_REMOTE
+    elig = {o.title: classify_eligibility(normalize(o), profile) for o in src.fetch(SourceConfig())}
+    cats = {t: e.category for t, e in elig.items()}
+    assert cats["Software Engineer Intern"] == EC.UNKNOWN and elig["Software Engineer Intern"].confidence == 0.6
     assert cats["Data Annotation Specialist (Remote / Part-Time)"] == EC.REMOTE_REGION_INCLUDES_USER
 
 

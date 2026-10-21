@@ -35,8 +35,10 @@ SOURCEGRAPH = ("While we hire almost anywhere in the world, we do require succes
 
 
 def test_h2_residency_requirement_cancels_worldwide_phrase():
+    # spec 2026-10-21 §4.1(a): a required location naming only other places is checked before any worldwide
+    # phrase → excluded at the disqualify threshold (was UNKNOWN 0.5, deviation (p))
     e = _c("Remote", SOURCEGRAPH)
-    assert e.category == EC.UNKNOWN and e.confidence == 0.5
+    assert e.category == EC.REMOTE_EXCLUDES_USER and e.confidence == 0.75
 
 
 def test_h2_worldwide_phrase_alone_still_worldwide():

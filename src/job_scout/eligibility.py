@@ -89,10 +89,13 @@ _EU_HOURS = ("central european", " cet ", " cest ", "european hours", "overlap w
 _WORLDWIDE = (
     "work from anywhere", "fully remote worldwide", "remote worldwide", "remote - global", "remote, global",
     "no location requirement", "location independent", "anywhere in the world", "hire anywhere", "any country",
+    "no geographic restrictions", "no geographical restrictions", "remote (global)",
 )
 
 # Labels for one location segment (spec S2).
 USER, WORLD, BARE, ELSEWHERE, OTHER = "USER", "WORLD", "BARE", "ELSEWHERE", "OTHER"
+# The aggregator's "no restriction listed" marker (spec 2026-10-21 §4.1): like BARE, the body decides.
+UNSTATED = "UNSTATED"
 
 _SEGMENT_SPLIT = re.compile(r";|\||/| or | and ")
 _EDGE_CHARS = " \t-–—,:()[]."
@@ -187,10 +190,11 @@ def _classify_location(loc_raw: str | None, title: str, profile: UserProfile,
 
     Returns (verdict, evidence) with verdict in USER / WORLD / ELSEWHERE — decisive; MIXED — names
     places elsewhere next to an unqualified segment ("Remote; Remote, Canada"), never positive and
-    never decided by body text; BARE / OTHER — the location does not decide, read the body. None
-    when there is no location at all.
+    never decided by body text; BARE / UNSTATED / OTHER — the location does not decide, read the body.
+    None when there is no location at all.
     """
-    loc = loc_raw or ""
+    unstated = (loc_raw or "").strip() == _geo.NO_RESTRICTION_LISTED
+    loc = "" if unstated else (loc_raw or "")
     for name in _AND_NAMES:   # protect "bosnia and herzegovina" from the " and " split
         loc = re.sub(re.escape(name), name.replace(" and ", " & "), loc, flags=re.IGNORECASE)
     labelled = [_label_segment(s, profile, remote_mode) for s in _SEGMENT_SPLIT.split(loc) if s.strip()]
@@ -203,7 +207,7 @@ def _classify_location(loc_raw: str | None, title: str, profile: UserProfile,
             title_elsewhere = True
             labelled = [x for x in labelled if x[0] != BARE] + [(ELSEWHERE, f"title marker '{m.group(1)}'")]
     if not labelled:
-        return None
+        return (UNSTATED, "") if unstated else None
     labels = {lab for lab, _ in labelled}
     if USER in labels:
         return USER, next(h for lab, h in labelled if lab == USER)
@@ -275,8 +279,8 @@ _BODY_RESTRICTION = re.compile(
 _CLAUSE_SPLIT = re.compile(r",|\band\b|\bor\b|/")
 
 
-def _body_restriction_elsewhere(description: str, profile: UserProfile) -> str | None:
-    """The clause of a body restriction whose places are ALL outside the user's scope, or None.
+def _body_restrictions(description: str, profile: UserProfile):
+    """Each body restriction whose places are ALL outside the user's scope, as (match, clause).
 
     Every part of the clause must name a place elsewhere ("the US and Canada only", "Europe or North
     America"); a part naming the user, the world, or no recognised place ("any time zone") means the
@@ -287,8 +291,126 @@ def _body_restriction_elsewhere(description: str, profile: UserProfile) -> str |
         parts = [re.sub(r"^\s*(?:the|either)\s+", "", p).strip() for p in _CLAUSE_SPLIT.split(clause)]
         parts = [p for p in parts if p]
         if parts and all(_label_segment(p, profile)[0] == ELSEWHERE for p in parts):
-            return clause.strip()
-    return None
+            yield m, clause.strip()
+
+
+def _body_restriction_elsewhere(description: str, profile: UserProfile) -> str | None:
+    """The clause of the first body restriction naming only places elsewhere, or None."""
+    return next((clause for _, clause in _body_restrictions(description, profile)), None)
+
+
+# Body location statements for a location field that does not decide (spec 2026-10-21 §4.1 step 4).
+EXCLUDE, INCLUDE = "EXCLUDE", "INCLUDE"
+_PLACE_IN = re.compile(r"\b(?:based|located|resid(?:e|ing|ent)|living)\s+in\s+([^.;:!?\n]{1,80})")
+_PLACE_BASED = re.compile(r"[- ]based\b(?!\s+(?:on|upon|off)\b)")
+_REMOTE_LIST = re.compile(r"\bremote\s*\(([^()]{1,120})\)")
+_PREFERENCE = re.compile(r"\b(?:preferred|nice to have|bonus|a plus|a preference)\b")   # + i3-b
+# A pay note is not a location requirement ("The base salary range … is for residents of the United
+# States only") — deviation i3-c.
+_PAY_NOTE = re.compile(r"\b(?:salary|pay range|base pay|compensation)\b")
+_PREFERENCE_WINDOW = 250
+_PREFERENCE_AFTER = re.compile(r"\b(?:is|are|would be|will be)\s+(?:a\s+|an\s+)?(?:strong\s+)?"
+                               r"(?:plus|bonus|preferred|nice to have|advantage)\b")
+_RELOCATION = re.compile(r"relocat")
+_SENTENCE_END = re.compile(r"[.!?:\n]")
+# "a US-based company", "our team is based in Berlin": the place describes the employer, not the hire.
+# Spec §4.1 guards "-based" with a|an|our|the within three words; "based in" also takes the company
+# nouns (deviation i3-a: "We are an innovative SaaS startup based in Portugal").
+_ARTICLES = frozenset({"a", "an", "our", "the"})
+_EMPLOYER_WORDS = _ARTICLES | {"we", "company", "startup", "firm", "agency", "business", "team",
+                               "headquartered", "office", "offices", "customers", "clients", "users", "partners"}
+_LEADING_ARTICLE = re.compile(r"^(?:a|an|either|one of the)\s+")
+# Also the employer, not the hire (deviation i3-c, stored Himalayas bodies): "US-based employers",
+# "U.S.-based companies"; "Based in Melbourne, Australia, we are growing"; and "NOT based in …".
+_EMPLOYER_AFTER = re.compile(r"\s+(?:employers?|compan(?:y|ies)|clients?|customers?|business(?:es)?|firms?|"
+                             r"startups?|organi[sz]ations?|teams?|brands?|agenc(?:y|ies))\b")
+_EMPLOYER_CLAUSE = re.compile(r",\s*(?:we|our)\b")
+_NEGATION = frozenset({"not", "aren't", "isn't", "never"})
+
+
+def _sentence_at(text: str, start: int, end: int) -> str:
+    """The sentence around text[start:end]; a ':' ends one too ("… North America) Location: Remote …")."""
+    s = max((m.end() for m in _SENTENCE_END.finditer(text, 0, start)), default=0)
+    m = _SENTENCE_END.search(text, end)
+    sentence = text[s: m.start() if m else len(text)].strip()
+    if len(sentence) > 200:   # a flattened list block: quote the part around the match
+        sentence = text[max(s, start - 80): min(m.start() if m else len(text), end + 80)].strip()
+    return sentence
+
+
+def _words_before(text: str, pos: int, n: int = 3) -> set[str]:
+    """The last `n` words before `pos`, within its sentence ("A plus: based in …" has none)."""
+    head = text[max(0, pos - 60): pos]
+    head = _SENTENCE_END.split(head)[-1]
+    return set(re.findall(r"[a-z0-9'’]+", head)[-n:])
+
+
+def _body_location(description: str, profile: UserProfile) -> list[tuple[str, str, int, bool]]:
+    """Every body statement of where the hire must be, in text order, as (kind, sentence, position,
+    preferred): kind EXCLUDE (names only places elsewhere), INCLUDE (`Remote (<list>)` naming the
+    user's region) or WORLD (`Remote (Global)`); `preferred` when a preference word ("preferred",
+    "nice to have", "bonus", "a plus") comes within 250 chars before it.
+
+    Shapes: "(based|located|resid…|living) in <place>"; "<place>-based" not describing the employer;
+    "Remote (<list>)"; and the older restriction sentences ("must be based in …", "the position will be
+    based in …", "candidates in …").
+    """
+    raw = description or ""
+    low = raw.lower()
+    own_country = profile.location.country_name.lower()
+    places = _elsewhere_places(own_country)
+    hits: list[tuple[str, int, int]] = []          # (kind, start, end)
+
+    for m in _PLACE_IN.finditer(low):
+        if _words_before(low, m.start()) & (_EMPLOYER_WORDS | _NEGATION) or _EMPLOYER_CLAUSE.search(m.group(1)):
+            continue
+        parts = [p.strip() for p in _CLAUSE_SPLIT.split(m.group(1)) if p.strip()]
+        first = _LEADING_ARTICLE.sub("", parts[0]) if parts else ""
+        if first.startswith("the ") and not first.startswith("the us"):
+            first = first[4:]
+        term = _find_term(first, places)
+        if not (term and first.startswith(term)):
+            continue
+        if any(_label_segment(_LEADING_ARTICLE.sub("", p), profile)[0] in (USER, WORLD) for p in parts[1:]):
+            continue
+        hits.append((EXCLUDE, m.start(), m.end()))
+
+    based_terms = sorted((places - {"the us", "in us", "us only"}) | {"us"}, key=len, reverse=True)
+    for m in _PLACE_BASED.finditer(low):
+        before = low[: m.start()]
+        term = next((t for t in based_terms if before.endswith(t)
+                     and (len(before) == len(t) or not before[-len(t) - 1].isalnum())), None)
+        if term is None or (term == "us" and raw[m.start() - 2: m.start()] != "US"):   # "join us based …"
+            continue
+        start = m.start() - len(term)
+        if _words_before(low, start) & (_ARTICLES | _NEGATION) or _EMPLOYER_AFTER.match(low, m.end()):
+            continue
+        hits.append((EXCLUDE, start, m.end()))
+
+    for m in _REMOTE_LIST.finditer(low):
+        inner = m.group(1)
+        if _RELOCATION.search(inner):                   # "Remote (Relocation to Portugal Available)"
+            continue
+        verdict = _classify_location(inner, "", profile)
+        kind = {ELSEWHERE: EXCLUDE, USER: INCLUDE, WORLD: WORLD}.get(verdict[0] if verdict else None)
+        if kind:
+            hits.append((kind, m.start(), m.end()))
+
+    for m, _ in _body_restrictions(raw, profile):
+        hits.append((EXCLUDE, m.start(), m.end()))
+
+    out = []
+    for kind, start, end in sorted(hits, key=lambda h: h[1]):
+        sentence = _sentence_at(raw, start, end)
+        if kind == EXCLUDE and _PAY_NOTE.search(sentence.lower()):
+            continue
+        # also a predicate preference after it in the same sentence ("Being based in Europe is a plus") —
+        # deviation i3-b; the spec reads only the 250 chars before. Predicate form only: a flattened
+        # heading after a requirement ("… US-based Nice to Have Living in …") is not one.
+        preferred = bool(_PREFERENCE.search(low[max(0, start - _PREFERENCE_WINDOW): start])
+                         or _PREFERENCE_AFTER.search(sentence.lower()))
+        out.append((kind, sentence, start, preferred))
+    return out
 
 
 def _program_verdict(opp: Opportunity, profile: UserProfile) -> Eligibility:
@@ -395,9 +517,35 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
                       "next to an unqualified segment — eligibility unknown")
             return Eligibility(EligibilityCategory.UNKNOWN, 0.5, ev)
 
-    # 4) The location is bare ("Remote"), unrecognized, or absent → read the body, conservatively.
-    #    Kept from before: a body that names an excluding region, with no sign of the user's region.
-    names_user_region = (
+    # 4) The location is bare ("Remote"), the aggregator's "no restriction listed" marker, unrecognized,
+    #    or absent → read the body, conservatively (spec 2026-10-21 §4.1). First match wins:
+    #    (a) a required location naming only other places → excluded at the disqualify threshold (0.75),
+    #        or UNKNOWN 0.5 when the same sentence mentions relocation;
+    #    (b) a location preference naming only other places → UNKNOWN 0.45;
+    #    both before any worldwide phrase: an explicit region list beats benefit boilerplate ("Remote work
+    #    flexibility from anywhere in the world"), as the location field does (Decision #6).
+    stated = _body_location(opp.description, profile)
+    required = [h for h in stated if h[0] == EXCLUDE and not h[3]]
+    preferred = [h for h in stated if h[0] == EXCLUDE and h[3]]
+    if required:
+        sentence = required[0][1]
+        if _RELOCATION.search(sentence.lower()):
+            ev.append(f"{where} not decisive; the posting names places outside {profile.location.country_name} "
+                      f"but mentions relocation: '{sentence}' — eligibility unknown")
+            return Eligibility(EligibilityCategory.UNKNOWN, 0.5, ev)
+        ev.append(f"{where} not decisive; the posting requires a location outside "
+                  f"{profile.location.country_name}: '{sentence}'")
+        return Eligibility(EligibilityCategory.REMOTE_EXCLUDES_USER, 0.75, ev)
+    if preferred:
+        ev.append(f"states a location preference: '{preferred[0][1]}'")
+        return Eligibility(EligibilityCategory.UNKNOWN, 0.45, ev)
+
+    #    Kept from before: a body that names an excluding region, with no sign of the user's region —
+    #    but not for the aggregator marker (deviation i3-d): this coarse substring rule ("apac" inside
+    #    "capacity", "roles outside the U.S.") would turn listings that used to read worldwide into
+    #    confident exclusions; for the marker only the shapes above may exclude.
+    unstated = loc is not None and loc[0] == UNSTATED
+    names_user_region = unstated or (
         own_country in hay
         or (own_city and own_city in hay)
         or _has(hay, _EAST_AFRICA)
@@ -412,6 +560,17 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
         hit = next((p for p in _EXCLUDES_ET if p in hay), "region-restricted")
         ev.append(f"remote restricted to a region excluding {profile.location.country_name} ('{hit}')")
         return Eligibility(EligibilityCategory.REMOTE_EXCLUDES_USER, 0.8, ev)
+
+    #    (c) "Remote (<list>)" in the body naming the user's region, or "Remote (Global)" — an explicit
+    #    statement, not a bare boilerplate word; body evidence, so 0.7 like a worldwide phrase.
+    listed = next((h for h in stated if h[0] in (INCLUDE, WORLD)), None)
+    if listed:
+        if listed[0] == INCLUDE:
+            ev.append(f"{where} not decisive; the posting says '{listed[1]}', which includes "
+                      f"{profile.location.country_name}")
+            return Eligibility(EligibilityCategory.REMOTE_REGION_INCLUDES_USER, 0.7, ev)
+        ev.append(f"{where} not decisive; body states worldwide ('{listed[1]}')")
+        return Eligibility(EligibilityCategory.WORLDWIDE_REMOTE, 0.7, ev)
 
     #    An explicit worldwide phrase in the body (never a bare "global"/"EMEA" word), and only when
     #    the words right after it do not name a place ("work from anywhere within the US") and the
@@ -431,7 +590,11 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
             conf -= 0.2
         return Eligibility(EligibilityCategory.WORLDWIDE_REMOTE, round(conf, 2), ev)
 
-    # 5) No decisive signal — honestly unknown. Surfaced, never dropped.
+    # 5) No decisive signal — honestly unknown. Surfaced, never dropped. (d) of spec 2026-10-21 §4.1: 0.6
+    #    for the aggregator marker, 0.5 for a bare "Remote", 0.3 for no location.
+    if loc is not None and loc[0] == UNSTATED:
+        ev.append("Himalayas lists no location restriction; the posting states none")
+        return Eligibility(EligibilityCategory.UNKNOWN, 0.6, ev)
     if loc is not None and loc[0] == BARE:
         ev.append(f"{where} is plain 'Remote' with no stated scope — eligibility unknown")
         return Eligibility(EligibilityCategory.UNKNOWN, 0.5, ev)
