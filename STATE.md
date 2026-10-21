@@ -6,7 +6,8 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: none — build COMPLETE. Then: the end-of-pass checks ("Pending checks" below).
+Step in progress: none — build COMPLETE, merged (PR #21, `a9b2999`); checks 1–4 done. NEXT: step 5 (four Monday
+digests → Dagi replies → `scripts/label_report.py`). Still open: step 2(c) device confirmation from Dagi.
 Dagi (2026-10-21) asked Claude to run the git/GitHub commands (push, dispatch, PR, merge, test reply) itself.
 Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`, `f5ac17d`) · 4.8 (`057750b`) · review 4.6 CLOSED (`65f21ad`) · 5.1 (`f13c664`) · 5.2 · 5.3 · whole-branch review CLOSED (`e9ca7ef`).
 Deviations from spec (iteration 3):
@@ -224,6 +225,10 @@ Pending checks (in order; Claude runs the commands, Dagi confirms only (c) of st
   5.2 all pre-existing tests pass; the changed ones carry a one-line justification (listed per step above).
   **639 passed.** 5.3 see the 4.5 entry (role 71%, asks 89%, picked facts printed).
   5.4 **not run** — it needs the branch pushed and a real issue posted: a human check (below).
+- 2026-10-22 — **5.4 done.** Push, seeded dispatch (issue #20, 1 item: Mimidentalclinic Junior Software Engineer),
+  PR #21 merged by Dagi (`a9b2999`). Dagi's real decision: skip (needs a CS degree, still at university). Posted
+  `skip 1` on #20 → 👍 reaction, `labels.yml` committed `575cce4` (labels.jsonl line, source issue-comment,
+  comment_id 6326642130). Local `main` fast-forwarded to origin/main.
 - 2026-10-21 — **Whole-branch review CLOSED** (fixes `e9ca7ef`). Two fresh-context read-only reviewers (one
   started before a /clear, one re-run) on 06dc4c6..HEAD. Every finding → `tests/test_branch_review_i3.py` first:
   **16 failed → confirmed → fixed.** H1 a weekday-deferred item not re-fetched on Monday was never delivered
