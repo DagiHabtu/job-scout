@@ -323,10 +323,24 @@ _EMPLOYER_WORDS = _ARTICLES | {"we", "company", "startup", "firm", "agency", "bu
 _LEADING_ARTICLE = re.compile(r"^(?:a|an|either|one of the)\s+")
 # Also the employer, not the hire (deviation i3-c, stored Himalayas bodies): "US-based employers",
 # "U.S.-based companies"; "Based in Melbourne, Australia, we are growing"; and "NOT based in …".
-_EMPLOYER_AFTER = re.compile(r"\s+(?:employers?|compan(?:y|ies)|clients?|customers?|business(?:es)?|firms?|"
-                             r"startups?|organi[sz]ations?|teams?|brands?|agenc(?:y|ies))\b")
+_EMPLOYER_AFTER = re.compile(r"(?:\s+(?:and|or|&)\s+[a-z.-]+)?\s+(?:employers?|compan(?:y|ies)|clients?|customers?|"
+                             r"business(?:es)?|firms?|startups?|organi[sz]ations?|teams?|brands?|agenc(?:y|ies)|"
+                             r"hours|time ?zones?|schedules?)\b")   # + "US-based and European customers", "US-based hours"
 _EMPLOYER_CLAUSE = re.compile(r",\s*(?:we|our)\b")
 _NEGATION = frozenset({"not", "aren't", "isn't", "never"})
+# 4.1 review (2026-10-21), read over the five words before "based/located/… in": a negated or conditional
+# statement is no requirement ("You do not need to be based in the US", "If you're based in Europe"), and
+# neither is one about other people or the company ("Most engineers are based in Europe", "HQ located in
+# Austin", "the cost of living in London") — unless the sentence is hiring ("hiring engineers based in …").
+_NOT_REQUIRED = frozenset({"not", "don't", "doesn't", "aren't", "isn't", "never", "no", "without", "if", "whether",
+                           "wherever"})
+_DESCRIPTIVE = frozenset({"most", "many", "some", "several", "hq", "headquarters", "founded", "cost", "colleagues",
+                          "employees", "staff", "teammates", "engineers", "members"})
+_HIRING = frozenset({"hiring", "seeking", "looking", "recruiting"})
+# "a US-based engineer": the article guard is for the employer ("a US-based company"); a person noun after
+# it is the hire (4.1 review M1).
+_PERSON_AFTER = re.compile(r"\s+(?:engineers?|developers?|candidates?|applicants?|individuals?|persons?|people|"
+                           r"professionals?|contractors?|freelancers?|hires?|talent|interns?|graduates?|students?)\b")
 
 
 def _sentence_at(text: str, start: int, end: int) -> str:
@@ -365,6 +379,9 @@ def _body_location(description: str, profile: UserProfile) -> list[tuple[str, st
     for m in _PLACE_IN.finditer(low):
         if _words_before(low, m.start()) & (_EMPLOYER_WORDS | _NEGATION) or _EMPLOYER_CLAUSE.search(m.group(1)):
             continue
+        five = _words_before(low, m.start(), 5)
+        if five & _NOT_REQUIRED or (five & _DESCRIPTIVE and not five & _HIRING):
+            continue
         parts = [p.strip() for p in _CLAUSE_SPLIT.split(m.group(1)) if p.strip()]
         first = _LEADING_ARTICLE.sub("", parts[0]) if parts else ""
         if first.startswith("the ") and not first.startswith("the us"):
@@ -384,8 +401,13 @@ def _body_location(description: str, profile: UserProfile) -> list[tuple[str, st
         if term is None or (term == "us" and raw[m.start() - 2: m.start()] != "US"):   # "join us based …"
             continue
         start = m.start() - len(term)
-        if _words_before(low, start) & (_ARTICLES | _NEGATION) or _EMPLOYER_AFTER.match(low, m.end()):
+        if _EMPLOYER_AFTER.match(low, m.end()):
             continue
+        before = re.findall(r"[a-z0-9'’]+", _SENTENCE_END.split(low[max(0, start - 60): start])[-1])
+        if set(before[-3:]) & _NEGATION or (set(before[-3:]) & _ARTICLES and not _PERSON_AFTER.match(low, m.end())):
+            continue
+        if before[-1:] in (["is"], ["was"]) and not {"you", "candidate", "applicant"} & set(before):
+            continue   # "Acme is London-based but hires globally" (4.1 review H2)
         hits.append((EXCLUDE, start, m.end()))
 
     for m in _REMOTE_LIST.finditer(low):
@@ -408,7 +430,10 @@ def _body_location(description: str, profile: UserProfile) -> list[tuple[str, st
         # also a predicate preference after it in the same sentence ("Being based in Europe is a plus") —
         # deviation i3-b; the spec reads only the 250 chars before. Predicate form only: a flattened
         # heading after a requirement ("… US-based Nice to Have Living in …") is not one.
-        preferred = bool(_PREFERENCE.search(low[max(0, start - _PREFERENCE_WINDOW): start])
+        # The window stops at a sentence end ("Perks: performance bonus. … located in the US" — 4.1 review
+        # M2), but not at ':' ("Nice to have: EU-based" is a preference).
+        window = re.split(r"[.!?\n]", low[max(0, start - _PREFERENCE_WINDOW): start])[-1]
+        preferred = bool(_PREFERENCE.search(window)
                          or _PREFERENCE_AFTER.search(sentence.lower()))
         out.append((kind, sentence, start, preferred))
     return out
@@ -525,7 +550,8 @@ def classify_eligibility(opp: Opportunity, profile: UserProfile) -> Eligibility:
     #    (b) a location preference naming only other places → UNKNOWN 0.45;
     #    both before any worldwide phrase: an explicit region list beats benefit boilerplate ("Remote work
     #    flexibility from anywhere in the world"), as the location field does (Decision #6).
-    stated = _body_location(opp.description, profile)
+    # Only for an absent, bare "Remote" or marker location (§3); an unrecognised field keeps the older rules.
+    stated = _body_location(opp.description, profile) if loc is None or loc[0] in (BARE, UNSTATED) else []
     required = [h for h in stated if h[0] == EXCLUDE and not h[3]]
     preferred = [h for h in stated if h[0] == EXCLUDE and h[3]]
     if required:
