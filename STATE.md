@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: 4.2.
+Step in progress: 4.3 (review of 4.1+4.2 running).
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -40,6 +40,13 @@ Deviations from spec (iteration 3):
   "Location: <place>") → UNKNOWN 0.6; both are non-target titles. Pre-existing tests changed (one-line justification
   inline): `test_final_review::test_h2…` (Sourcegraph "require … located in the United States" now excluded 0.75 —
   §4.1(a) before (c)), `test_himalayas` marker + `…_are_unstated_through_s2`. **488 passed.**
+- 2026-10-21 — **4.2 done** (`7a5f58f`). Tests first (`tests/test_gate_i3.py`). Unverified = UNKNOWN with
+  confidence ≥ 0.6 → selected for INTERNSHIP and NEW_GRAD into "Check eligibility", never Apply; UNKNOWN < 0.6
+  unchanged (intern selected, new-grad `eligibility_unknown`). The "Check eligibility" cap (`unknown_cap`, 5/run)
+  now covers every target-class item in that section (unverified new-grads share it with UNKNOWN interns). The
+  marker case's eligibility line reads "No location restriction listed on Himalayas or in the posting. Confirm
+  before applying." Pre-existing test changed: `test_gate::_o` builds UNKNOWN at 0.5 instead of 0.8 (0.8 is now
+  the unverified tier; the tests mean a bare "Remote"). **498 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
