@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -35,6 +35,7 @@ from .eligibility import classify_eligibility
 from .models import EmploymentType, Opportunity, Provenance
 from .normalize import normalize
 from .notify import (
+    NOT_NEAR_MISS,
     gate_reasons,
     heartbeat_body,
     in_pending_pool,
@@ -77,6 +78,7 @@ class RunSummary:
     lifecycle: dict[str, int] = field(default_factory=dict)  # new/updated/active
     notified: int = 0
     digest_path: str | None = None
+    digest_date: str | None = None   # set when this run wrote the weekly digest (spec 2026-10-21 §4.6)
     rejects: dict[str, int] = field(default_factory=dict)          # hard-filter reason -> count
     gate: dict[str, int] = field(default_factory=dict)             # notify-gate reason -> count
     by_type: dict[str, int] = field(default_factory=dict)          # employment type after normalize
@@ -104,6 +106,7 @@ class RunSummary:
             "by_eligibility": self.by_eligibility,
             "near_misses": self.near_misses,
             "internship_funnel": self.internship_funnel,
+            "digest_date": self.digest_date,
         }
 
 
@@ -185,6 +188,14 @@ def _local_today(cfg: AppConfig) -> date:
         return datetime.now(timezone.utc).date()
 
 
+def _digest_due(conn, today: date) -> bool:
+    """The weekly digest is due unless a stored run already wrote one this week (Monday to `today`). So a
+    Monday digest whose issue step failed — its state never committed — is written by the next run, and a
+    second Monday run writes none (4.6 review M1, L1). The first run after setup writes one on any day."""
+    monday = (today - timedelta(days=today.weekday())).isoformat()
+    return not any(monday <= (r.get("digest_date") or "") <= today.isoformat() for r in recent_runs(conn, 30))
+
+
 def run_once(
     cfg: AppConfig,
     sources: list[Source],
@@ -244,7 +255,7 @@ def run_once(
         # within 14 days); Monday delivers it all, other days only urgent items (the rest `deferred:weekly`).
         threshold = cfg.scoring.relevance_threshold
         weekly = cfg.notify.cadence == "weekly"
-        digest_day = weekly and today.weekday() == 0
+        digest_day = weekly and _digest_due(conn, today)
         pending = [in_pending_pool(o, f, today) for o, f in zip(ranked, first_seen_of(conn, ranked))] if weekly else None
         reasons = gate_reasons(ranked, threshold, pending=pending,
                                urgent_only=today if weekly and not digest_day else None)
@@ -252,7 +263,8 @@ def run_once(
         for o, r in zip(ranked, reasons):
             reason_of[id(o)] = r
         gate = Counter(reason_of[id(o)] for o in ranked if reason_of[id(o)] is not None)
-        unselected = [o for o in ranked if reason_of[id(o)] is not None]
+        # seen or waiting records are not misses — kept out before the top-N, or deferrals fill it (4.6 review M2)
+        unselected = [o for o in ranked if reason_of[id(o)] is not None and reason_of[id(o)] not in NOT_NEAR_MISS]
         near_misses = [
             {**_brief(o), "score": o.relevance.score if o.relevance else 0.0, "gate_reason": reason_of[id(o)]}
             for o in sorted(unselected, key=lambda o: -(o.relevance.score if o.relevance else 0.0))[:_MAX_SAMPLES]
@@ -279,6 +291,7 @@ def run_once(
             by_type=dict(by_type),
             by_eligibility=dict(by_eligibility),
             near_misses=near_misses,
+            digest_date=today.isoformat() if digest_day else None,
             internship_funnel=_internship_funnel(target_raw, {id(o) for o in deduped}, reason_of),
             ranked=ranked,
         )

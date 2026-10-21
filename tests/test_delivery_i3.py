@@ -39,6 +39,11 @@ def _sources(today):
                                 _intern("Backend Intern B"), _intern("Backend Intern C")])]
 
 
+def _after_monday_digest(cfg):
+    """A weekday run needs this week's digest already stored; else it is the (first) digest (review M1)."""
+    run_once(cfg, [FakeSource("empty", [])], today=MONDAY - timedelta(days=7))
+
+
 def _notify(tmp_path) -> str:
     p = Path(tmp_path) / "notify.md"
     return p.read_text(encoding="utf-8") if p.exists() else ""
@@ -87,6 +92,7 @@ def test_urgent():
 
 def test_tuesday_delivers_only_urgent_and_defers_the_rest(tmp_path):
     cfg = _cfg(tmp_path)
+    _after_monday_digest(cfg)
     s = run_once(cfg, _sources(TUESDAY), today=TUESDAY)
     md = _notify(tmp_path)
     assert s.notified == 1 and "Backend Intern A" in md and "Backend Intern B" not in md
@@ -102,6 +108,7 @@ def test_tuesday_delivers_only_urgent_and_defers_the_rest(tmp_path):
 
 def test_tuesday_with_nothing_urgent_writes_no_issue(tmp_path):
     cfg = _cfg(tmp_path)
+    _after_monday_digest(cfg)
     run_once(cfg, [FakeSource("fake", [_intern("Backend Intern B")])], today=TUESDAY)
     assert _notify(tmp_path) == ""
 
@@ -122,6 +129,7 @@ def test_monday_delivers_all_numbered_with_map_and_funnel(tmp_path):
 
 def test_monday_after_deferral_delivers_the_deferred_records(tmp_path):
     cfg = _cfg(tmp_path)
+    _after_monday_digest(cfg)
     run_once(cfg, _sources(TUESDAY), today=TUESDAY)               # A delivered, B and C deferred
     s = run_once(cfg, _sources(TUESDAY), today=MONDAY)            # seen again unchanged → ACTIVE, still pending
     md = _notify(tmp_path)
@@ -161,3 +169,41 @@ def test_heartbeat_near_misses_exclude_known_and_deferred():
     rec = {"started": "2026-10-20T04:00", "discovered": 4, "after_filter": 4, "notified": 0, "near_misses": nm}
     md = render_heartbeat_md([rec])
     assert "Kept" in md and "| Dn |" not in md and "| Nn |" not in md and "| Df |" not in md
+
+
+# --- 4.6 review findings ----------------------------------------------------------------------- #
+
+def test_m1_failed_monday_digest_is_replayed_next_run(tmp_path):
+    cfg = _cfg(tmp_path)
+    run_once(cfg, _sources(MONDAY), today=MONDAY)
+    Path(cfg.db_path).unlink()                                    # the issue step failed: state never committed
+    s = run_once(cfg, _sources(MONDAY), today=MONDAY + timedelta(days=1))
+    assert s.notified == 3 and "Weekly funnel" in _notify(tmp_path)
+
+
+def test_l1_second_monday_run_posts_no_second_digest(tmp_path):
+    cfg = _cfg(tmp_path)
+    run_once(cfg, _sources(MONDAY), today=MONDAY)
+    run_once(cfg, _sources(MONDAY), today=MONDAY)
+    assert _notify(tmp_path) == ""
+
+
+def test_m2_deferred_records_do_not_crowd_out_near_misses(tmp_path):
+    cfg = _cfg(tmp_path)
+    run_once(cfg, [FakeSource("empty", [])], today=MONDAY)
+    miss = _intern("Sales Associate Intern")                     # a real miss: role_family
+    opps = [_intern(f"Backend Intern {c}") for c in "BCDEFG"] + [miss]
+    s = run_once(cfg, [FakeSource("fake", opps)], today=MONDAY + timedelta(days=1))
+    assert s.gate.get("deferred:weekly") == 6
+    assert [n["gate_reason"] for n in s.near_misses] == ["role_family"]
+
+
+def test_l2_map_survives_a_key_containing_comment_end():
+    from job_scout.notify import render_issue_md
+    from job_scout.labels import item_map_of
+    o = _opp(Lifecycle.NEW)
+    o.ats_provider, o.ats_job_id = "himalayas", "https://h/x-->y"
+    md = render_issue_md([o], AppConfig())
+    map_line = next(ln for ln in md.splitlines() if ln.startswith("<!-- scout-items"))
+    assert map_line.count("-->") == 1 and map_line.endswith(" -->")
+    assert item_map_of(md) == {"1": "himalayas:https://h/x-->y"}

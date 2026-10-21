@@ -66,12 +66,18 @@ def test_internship_funnel_accounts_for_every_fetched_target_record(tmp_path):
 
 def test_near_misses_are_unselected_survivors_ordered_by_score(tmp_path):
     cfg = _cfg(tmp_path)
-    run_once(cfg, gate0_sources())
-    s2 = run_once(cfg, gate0_sources())
-    nm = s2.near_misses
+    def misses():   # real misses (role_family): the gate0 survivors are all selected on the first run
+        return gate0_sources() + [FakeSource("misses", [
+            Opportunity(title=t, company="Co", apply_url=f"https://x/{t}", canonical_url="", location_raw="Worldwide",
+                        description=d, employment_type=EmploymentType.INTERNSHIP)
+            for t, d in (("Sales Intern", "Remote worldwide. Python."), ("Marketing Intern", "Remote worldwide."))])]
+    s1 = run_once(cfg, misses())
+    s2 = run_once(cfg, misses())
+    nm = s1.near_misses
     assert 0 < len(nm) <= 5
     assert [n["score"] for n in nm] == sorted((n["score"] for n in nm), reverse=True)
-    assert all(n["gate_reason"] in ("not_new", "already_notified") for n in nm)
+    # 4.6 review M2: seen (not_new / already_notified) and deferred records are not near misses
+    assert all(n["gate_reason"] not in ("not_new", "already_notified", "deferred:weekly") for n in nm + s2.near_misses)
 
 
 def test_source_report_is_copied_into_the_run_record(tmp_path):

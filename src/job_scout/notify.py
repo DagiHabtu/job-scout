@@ -377,7 +377,8 @@ def render_issue_md(opps: list[Opportunity], cfg: AppConfig, *, funnel: str | No
         out.append(f"<details><summary>Weekly funnel</summary>\n\n{funnel.rstrip()}\n\n</details>\n")
     if keys:
         out.append(REPLY_HINT + "\n")
-    out.append(f"<!-- scout-items {json.dumps(keys)} -->")
+    # ">" escaped (still the same JSON) so a key containing "-->" cannot end the comment (4.6 review L2)
+    out.append(f"<!-- scout-items {json.dumps(keys).replace('>', chr(92) + 'u003e')} -->")
     return _with_cc("\n".join(out))
 
 
@@ -492,7 +493,7 @@ def _sum_counts(dicts) -> dict[str, int]:
     return total
 
 
-_NOT_NEAR_MISS = frozenset({"already_notified", "not_new", DEFERRED})   # seen or waiting, not "missed"
+NOT_NEAR_MISS = frozenset({"already_notified", "not_new", DEFERRED})   # seen or waiting, not "missed"
 
 
 def render_heartbeat_md(records: list[dict], extra: list[str] | None = None) -> str:
@@ -528,7 +529,7 @@ def heartbeat_body(records: list[dict], extra: list[str] | None = None) -> str:
         best: dict[tuple, dict] = {}
         for r in records:
             for n in r.get("near_misses", []):
-                if n.get("gate_reason") in _NOT_NEAR_MISS:
+                if n.get("gate_reason") in NOT_NEAR_MISS:
                     continue
                 k = (n["title"], n["company"])
                 if k not in best or n["score"] > best[k]["score"]:
