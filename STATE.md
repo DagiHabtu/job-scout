@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: 4.4.
+Step in progress: 4.7.
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -34,6 +34,11 @@ Deviations from spec (iteration 3):
   or "hours/time zone/schedule"; the spec's a/an/our/the guard does NOT apply when a person noun follows
   ("a US-based engineer" → excluded 0.75); the preference window stops at . ! ? or a newline (not ':'); the
   §4.1 body shapes run only for an absent, bare "Remote" or marker location (§3), not an unrecognised field.
+  (i3-f) §4.4: `accept_unpaid` is applied at score time (verdict `pay:unpaid_accepted`) because `gate_reason`
+  has no profile (as i2-c). A currency amount preceded within 60 chars by budget/allowance/reimburse… is not pay
+  (Canonical "learning and development budget of USD 2,000 per year" would read `stated`). The stipend snippet
+  is the stated amount when there is one, else "stipend". "unstated" carries no `pay:` entry. `tester` is
+  also in the `UserProfile` default `not_interested` (as i2-m) and in profile.example.yaml.
 
 ### Iteration-3 pass log
 - 2026-10-21 — **4.1 done** (`1f59601`). Tests first (`tests/test_eligibility_i3.py`; collection failed before the
@@ -77,6 +82,15 @@ Deviations from spec (iteration 3):
   role_family; cited in the commit) → P 1.000 / R 1.000. Stored rows (380): role_family_ok drops 6 titles, adds
   none — Antifraud Analyst Junior, Global Treasury Analyst, Staff Data Analyst, Teaching Assistant: Supply Chain
   Analyst, Video Data Collector (Smartphone), Data Analyst - Remote, Contact. **531 passed.**
+- 2026-10-21 — **4.4 done** (`4fe21fd`). Tests first (`tests/test_pay_i3.py`; collection failed before the code).
+  `pay_of` → unpaid (Holiday World, Flowai, Makerble DevOps, Bridges) · contingent (Makerble Automated Tester) ·
+  stated (Vantum "$500 to $1,000 USD per month", Resilio "35$/hr") · stipend (Flowmingo) · unstated ("Our team
+  volunteers at local food banks"). Gate: after role_family, before stage → `pay:unpaid`; stipend programs
+  exempt. "Outside your stated interests": paid (stated/stipend) first, then title fit; each line shows company
+  and pay. Stored rows (380): 13 stated, 6 unpaid, 4 stipend, 2 contingent (one false: "Paid leave … Performance
+  based Incentives", a non-target role; contingent does not gate), 355 unstated. Pre-existing test changed:
+  `test_interest_s11::test_outside_interests_rendered_as_title_and_link_only` (the line now ends "— <company>").
+  Deviation i3-f. **549 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
