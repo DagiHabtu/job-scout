@@ -21,6 +21,10 @@ on:
         description: "Delivery test: post a seeded test item if the run selects nothing"
         type: boolean
         default: false
+      today:
+        description: "Run as if today were YYYY-MM-DD (a Monday gives the weekly digest); empty = today"
+        type: string
+        default: ""
 
 # Only one scout run at a time — it commits state back, so overlapping runs would race on push.
 concurrency:
@@ -57,8 +61,12 @@ jobs:
           # succeeds at $0 on the lexical fallback (load_model() returns None → rules-only scoring).
           python -m pip install -e ".[embeddings]" || echo "::warning::embeddings unavailable — using lexical fallback ($0)"
 
+      # Cadence (spec 2026-10-21 §4.6) is decided by the pipeline: Mondays (Africa/Addis_Ababa) write the
+      # weekly digest with the funnel, other days only urgent items; it also writes the issue title.
       - name: Run scout
-        run: python -m job_scout -c config/profile.yaml -v
+        env:
+          TODAY: ${{ inputs.today }}
+        run: python -m job_scout -c config/profile.yaml -v ${TODAY:+--today "$TODAY"}
 
       # The reason-coded funnel on the run page: every zero reads as a specific cause.
       - name: Funnel summary
@@ -76,13 +84,21 @@ jobs:
 
       # S1 acceptance: a seeded item proves an issue opened by the bot reaches the owner's device.
       # It never touches the DB, so it cannot suppress or fake a real notification.
+      # Numbered, with the reply hint and the hidden item map, so the labels channel can be tested on it;
+      # a weekly body with no items keeps its funnel.
       - name: Seed delivery test item
         if: ${{ inputs.seed }}
         run: |
-          if [ ! -s data/notify.md ]; then
-            printf -- '- [ ] [Job Scout delivery test](%s) — seeded test item · not a real listing\n' \
-              "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > data/notify.md
-            printf -- '\ncc @%s\n' "${{ github.repository_owner }}" >> data/notify.md
+          if ! grep -q '^1\. \[' data/notify.md 2>/dev/null; then
+            {
+              printf -- '1. [Job Scout delivery test](%s) — seeded test item · not a real listing\n\n' \
+                "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              grep -v -e '^<!-- scout-items' -e '^cc @' data/notify.md 2>/dev/null || true
+              printf -- '\nReply with a comment such as: `apply 1,4 · maybe 2 · skip rest`\n'
+              printf -- '<!-- scout-items {"1": "seed:delivery-test"} -->\n\ncc @%s\n' "${{ github.repository_owner }}"
+            } > data/notify.seed && mv data/notify.seed data/notify.md
+            if [ -s data/notify_title.txt ]; then sed -i 's/ 0 new / 1 new /' data/notify_title.txt
+            else echo "Job Scout: 1 new — $(date -u +%F)" > data/notify_title.txt; fi
           fi
 
       # Delivery (S9): the issue is assigned to the owner and its body ends with `cc @owner` —
@@ -93,9 +109,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ -s data/notify.md ]; then
-            N=$(grep -c '^- \[ \]' data/notify.md)
             gh label create scout --color 0e8a16 --description "Job Scout delivery" --force
-            gh issue create --title "Job Scout: $N new — $(date -u +%F)" --body-file data/notify.md --label scout \
+            gh issue create --title "$(cat data/notify_title.txt)" --body-file data/notify.md --label scout \
               --assignee "${{ github.repository_owner }}"
           else
             echo "nothing selected this run — no issue"
@@ -115,16 +130,5 @@ jobs:
             git push
           fi
 
-      # Weekly heartbeat (Mondays, UTC): the funnel over the last 7 runs plus near misses, so
-      # silence is distinguishable from failure.
-      - name: Weekly heartbeat
-        if: success()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ "$(date -u +%u)" = "1" ]; then
-            python -m job_scout -c config/profile.yaml --heartbeat
-            gh label create scout --color 0e8a16 --description "Job Scout delivery" --force
-            gh issue create --title "Job Scout weekly funnel — $(date -u +%F)" --body-file data/heartbeat.md --label scout \
-              --assignee "${{ github.repository_owner }}"
-          fi
+      # No separate heartbeat issue: Monday's weekly digest carries the funnel (spec 2026-10-21 §4.6).
+      # `python -m job_scout --heartbeat` still writes data/heartbeat.md for a manual look.

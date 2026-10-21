@@ -81,9 +81,9 @@ def test_outside_interests_rendered_as_title_and_link_only():
     o = _scored("QA/QC Intern")
     md = render_issue_md([o], AppConfig())
     block = md[md.index(f"## {OUTSIDE}"):]
-    item_lines = [l for l in block.splitlines() if l.startswith("- [ ]")]
-    # spec 2026-10-21 §4.4: the line also shows the company (and pay when stated)
-    assert item_lines == [f"- [ ] [QA/QC Intern]({o.canonical_url}) — {o.company}"]
+    item_lines = [l for l in block.splitlines() if re.match(r"\d+\. \[", l)]
+    # spec 2026-10-21 §4.4: the line also shows the company (and pay when stated); §4.6: numbered
+    assert item_lines == [f"1. [QA/QC Intern]({o.canonical_url}) — {o.company}"]
     assert "eligibility:" not in block and "stage:" not in block
 
 
@@ -131,7 +131,7 @@ def _sections(md: str) -> dict[str, str]:
     for line in md.splitlines():
         if line.startswith("## "):
             current = line[3:].strip()
-        m = re.match(r"- \[ \] \[(.+?)\]\(", line)
+        m = re.match(r"\d+\. \[(.+?)\]\(", line)   # numbered items (spec 2026-10-21 §4.6)
         if m:
             out[m.group(1)] = current
     return out
@@ -144,6 +144,7 @@ def test_first_run_regression(tmp_path, monkeypatch):
     cfg = AppConfig.load(ROOT / "config" / "profile.yaml")
     cfg.db_path = str(tmp_path / "s.db")
     cfg.notify.digest_path = str(tmp_path / "data" / "digest.html")
+    cfg.notify.cadence = "every_run"   # placement, not cadence: the profile's weekly cadence defers on non-Mondays (§4.6)
     opps = [_fresh(r["record"]) for r in FIXTURE["records"]]
     opps += [_synthetic("Junior Backend Engineer", ET.NEW_GRAD), _synthetic("Frontend Engineer Intern", ET.INTERNSHIP),
              _synthetic("QA Automation Engineer, Linux Kernel", ET.INTERNSHIP)]

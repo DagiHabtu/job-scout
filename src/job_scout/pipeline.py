@@ -36,16 +36,19 @@ from .models import EmploymentType, Opportunity, Provenance
 from .normalize import normalize
 from .notify import (
     gate_reasons,
+    heartbeat_body,
+    in_pending_pool,
+    issue_title,
     pick_samples,
     render_digest,
     render_funnel_md,
     render_issue_md,
-    select_for_notification,
     write_digest,
 )
 from .score import filter_reason, hard_filter, rank, score_opportunity, stage_of
 from .sources.base import Source
-from .store import connect, mark_notified, record_run, upsert_and_reconcile
+from .sources.known_programs import maintenance_notes
+from .store import connect, first_seen_of, mark_notified, recent_runs, record_run, upsert_and_reconcile
 
 log = logging.getLogger("job_scout.pipeline")
 
@@ -172,6 +175,16 @@ def _discover(sources: list[Source], cfg: AppConfig) -> tuple[list[Opportunity],
     return raw, results
 
 
+def _local_today(cfg: AppConfig) -> date:
+    """Today in the user's timezone (the weekly digest is a Monday there). Falls back to UTC where the
+    tz database is missing (Windows without `tzdata`); the scheduled run at 04:00 UTC is the same date."""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo(cfg.profile.location.timezone)).date()
+    except Exception:  # ZoneInfoNotFoundError, or an invalid name in the profile
+        return datetime.now(timezone.utc).date()
+
+
 def run_once(
     cfg: AppConfig,
     sources: list[Source],
@@ -207,7 +220,7 @@ def run_once(
     by_eligibility = Counter(o.eligibility.category.value for o in deduped)
 
     # 5. hard filter (confident disqualifiers, passed deadlines, unwanted employment types)
-    today = today or date.today()
+    today = today or _local_today(cfg)
     survivors = hard_filter(deduped, cfg.profile, cfg.scoring, today=today)
     reason_of: dict[int, str | None] = {id(o): filter_reason(o, cfg.profile, cfg.scoring, today) for o in deduped}
     rejects = Counter(r for r in reason_of.values() if r is not None)
@@ -226,10 +239,17 @@ def run_once(
     try:
         lifecycle = upsert_and_reconcile(conn, ranked, run_id)
 
-        # 9. notify (deterministic gate: new/updated, not notified, class ∧ role family ∧ eligibility) → deliver
+        # 9. notify (deterministic gate: new/updated, not notified, class ∧ role family ∧ eligibility) → deliver.
+        # Weekly cadence (spec 2026-10-21 §4.6): the gate reads the pending pool (never notified, first seen
+        # within 14 days); Monday delivers it all, other days only urgent items (the rest `deferred:weekly`).
         threshold = cfg.scoring.relevance_threshold
-        to_notify = select_for_notification(ranked, threshold)
-        for o, r in zip(ranked, gate_reasons(ranked, threshold)):
+        weekly = cfg.notify.cadence == "weekly"
+        digest_day = weekly and today.weekday() == 0
+        pending = [in_pending_pool(o, f, today) for o, f in zip(ranked, first_seen_of(conn, ranked))] if weekly else None
+        reasons = gate_reasons(ranked, threshold, pending=pending,
+                               urgent_only=today if weekly and not digest_day else None)
+        to_notify = [o for o, r in zip(ranked, reasons) if r is None]
+        for o, r in zip(ranked, reasons):
             reason_of[id(o)] = r
         gate = Counter(reason_of[id(o)] for o in ranked if reason_of[id(o)] is not None)
         unselected = [o for o in ranked if reason_of[id(o)] is not None]
@@ -239,14 +259,8 @@ def run_once(
         ]
         digest = render_digest(to_notify, cfg)
         digest_path = write_digest(digest, cfg)
-        # The issue body exists only when there is something to deliver; a stale one is removed so
-        # the workflow never re-posts a previous run's selection.
-        notify_path = Path(digest_path).parent / "notify.md"
         if to_notify:
-            notify_path.write_text(render_issue_md(to_notify, cfg), encoding="utf-8")
             mark_notified(conn, to_notify)
-        else:
-            notify_path.unlink(missing_ok=True)
 
         finished = datetime.now(timezone.utc).isoformat()
         summary = RunSummary(
@@ -273,6 +287,19 @@ def run_once(
         record_run(conn, run_id, started, record)
         funnel_path = Path(cfg.notify.digest_path).parent / "funnel.md"
         funnel_path.write_text(render_funnel_md(record), encoding="utf-8")
+        # The issue body exists only when there is something to deliver — always on the weekly digest
+        # day, which carries the funnel (it replaces the heartbeat issue); a stale one is removed so the
+        # workflow never re-posts a previous run's selection.
+        notify_path = Path(digest_path).parent / "notify.md"
+        title_path = notify_path.with_name("notify_title.txt")
+        if to_notify or digest_day:
+            funnel = heartbeat_body(recent_runs(conn), maintenance_notes(today)) if digest_day else None
+            notify_path.write_text(render_issue_md(to_notify, cfg, funnel=funnel), encoding="utf-8")
+            title_path.write_text(issue_title(len(to_notify), today, weekly=digest_day, urgent=weekly),
+                                  encoding="utf-8")
+        else:
+            notify_path.unlink(missing_ok=True)
+            title_path.unlink(missing_ok=True)
     finally:
         if owns_conn:
             conn.close()

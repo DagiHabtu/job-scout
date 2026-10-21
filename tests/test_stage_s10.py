@@ -156,7 +156,7 @@ def test_issue_shows_stage_verdict_and_sentence():
     # neutral title: since S11 a "CRM" title is a title-only line in "outside your stated interests"
     o = _scored("Backend Developer", "1+ years of hands-on Salesforce development or administration experience.")
     md = render_issue_md([o], AppConfig())
-    assert "stage: **stretch**" in md and "1+ years of hands-on Salesforce" in md
+    assert "**Stage:** stretch — " in md and "1+ years of hands-on Salesforce" in md   # §4.6 item format
     assert "matched: stage:" not in md
 
 

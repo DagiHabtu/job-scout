@@ -87,7 +87,8 @@ def test_l3_pipeline_exercises_target_class_unknown_and_cap_codes(tmp_path):
         return Opportunity(title=title, company="Globex", apply_url=f"https://gh/{i}", canonical_url="",
                            ats_provider="greenhouse", ats_job_id=str(i), location_raw=loc, description="We build tools.")
     # "QA Automation" → "Cloud": a QA title now goes to its own section, never a Check-eligibility slot (final review M3)
-    roles = ["Software Engineer", "Data Engineer", "Machine Learning", "Platform", "Security", "Cloud"]
+    roles = ["Software Engineer", "Data Engineer", "Machine Learning", "Platform", "Security", "Cloud",
+             "DevOps", "Infrastructure", "Site Reliability", "Embedded Systems", "Compiler"]   # cap 10 now (§4.6)
     opps = [gh(i, f"{r} Intern") for i, r in enumerate(roles[: UNKNOWN_INTERN_CAP + 1])]   # distinct: no fuzzy merge
     opps += [gh(90, "Backend Engineer"), gh(91, "Junior Data Engineer")]
     s = run_once(cfg, [FakeSource("mix", opps)])

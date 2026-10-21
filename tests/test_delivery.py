@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from job_scout.cli import write_heartbeat
@@ -35,9 +36,10 @@ def test_issue_md_sections_links_and_attribution():
     md = render_issue_md([doubt, good], AppConfig())
     # "Actionable" renamed "Apply" (§12 S11)
     assert md.index("## Apply") < md.index("Good Intern") < md.index("## Check eligibility") < md.index("Doubt Intern")
-    assert "- [ ] [Good Intern](https://x/Good Intern) — Co · internship · Remote" in md
-    assert "eligibility: **worldwide_remote** (confidence 0.85)" in md
-    assert "evidence for Good Intern" in md and "matched: tech: python" in md
+    # spec 2026-10-21 §4.6: numbered items, eligibility on one line with its first evidence, no "matched:" line
+    assert "1. [Good Intern](https://x/Good Intern) — Co · internship · Remote" in md
+    assert "**Eligibility:** worldwide_remote (0.85) — evidence for Good Intern" in md
+    assert "matched:" not in md
     assert "via [Himalayas](https://himalayas.app/companies/co/jobs/good)" in md
     assert md.count("via [Himalayas]") == 1                      # only the Himalayas item
 
@@ -47,7 +49,7 @@ def test_notify_md_written_when_selected_and_removed_when_not(tmp_path):
     s1 = run_once(cfg, gate0_sources())
     notify = Path(tmp_path) / "notify.md"
     assert s1.notified >= 1 and notify.exists()
-    assert notify.read_text(encoding="utf-8").count("- [ ] ") == s1.notified
+    assert len(re.findall(r"^\d+\. \[", notify.read_text(encoding="utf-8"), re.M)) == s1.notified   # numbered (§4.6)
     s2 = run_once(cfg, gate0_sources())                          # nothing new → no stale body left
     assert s2.notified == 0 and not notify.exists()
 
@@ -64,7 +66,8 @@ def test_heartbeat_aggregates_runs(tmp_path):
     md = Path(write_heartbeat(cfg)).read_text(encoding="utf-8")
     assert "2 run(s)" in md
     assert "eligibility:requires_work_auth | 2" in md            # summed over both runs
-    assert "Near misses" in md
+    # §4.6: near misses exclude already_notified / not_new — the second run's are all already seen
+    assert "Near misses" not in md
     assert "MLH Fellowship: no_published_round" in md             # S6 programs maintenance lines
     assert "has not run" in render_heartbeat_md([])
     assert s1.run_id                                             # sanity

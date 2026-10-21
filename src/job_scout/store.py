@@ -104,12 +104,28 @@ def upsert_and_reconcile(conn: sqlite3.Connection, opps: list[Opportunity], run_
     return counts
 
 
+def first_seen_of(conn: sqlite3.Connection, opps: list[Opportunity]) -> list[datetime | None]:
+    """The stored `first_seen` of each record (None if not stored) — the truth for "first seen", since
+    `discovered_date` is re-stamped every run."""
+    out = []
+    for opp in opps:
+        row = conn.execute("SELECT first_seen FROM opportunities WHERE key = ?", (_identity_key(opp),)).fetchone()
+        out.append(datetime.fromisoformat(row["first_seen"]) if row else None)
+    return out
+
+
 def mark_notified(conn: sqlite3.Connection, opps: list[Opportunity]) -> None:
     now = datetime.now(timezone.utc)
     for opp in opps:
         opp.notified_at = now
         conn.execute("UPDATE opportunities SET notified_at=? WHERE key=?", (now.isoformat(), _identity_key(opp)))
     conn.commit()
+
+
+def recent_runs(conn: sqlite3.Connection, n: int = 7) -> list[dict]:
+    """The last `n` run records (`RunSummary.as_record()`), newest first."""
+    rows = conn.execute("SELECT summary FROM runs ORDER BY started DESC LIMIT ?", (n,)).fetchall()
+    return [json.loads(r["summary"]) for r in rows if r["summary"]]
 
 
 def record_run(conn: sqlite3.Connection, run_id: str, started: str, summary: dict) -> None:

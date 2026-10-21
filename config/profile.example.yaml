@@ -46,3 +46,4 @@ scoring:
 notify:
   mode: "file"                        # "file" (zero-dep) | "email" (Gmail SMTP app password)
   digest_path: "data/digest.html"
+  cadence: "weekly"                   # Mondays: the whole pending pool + funnel; other days: urgent only

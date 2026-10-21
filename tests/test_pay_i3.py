@@ -4,6 +4,7 @@ texts (tests/fixtures/labels_2026-10-21_records.json)."""
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -99,6 +100,6 @@ def test_outside_interests_paid_first_with_company_and_pay():
         assert section_of(o) == OUTSIDE_INTERESTS
     other.relevance.semantic_similarity, vantum.relevance.semantic_similarity = 0.9, 0.1   # title fit favours other
     md = render_issue_md([other, vantum], CFG)
-    lines = [ln for ln in md.splitlines() if ln.startswith("- [ ]")]
+    lines = [ln for ln in md.splitlines() if re.match(r"\d+\. \[", ln)]   # numbered (§4.6)
     assert "QA Tester" in lines[0] and "Vantum" in lines[0] and "$500 to $1,000 USD per month" in lines[0]
     assert "Other Co" in lines[1]

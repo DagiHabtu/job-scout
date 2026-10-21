@@ -138,6 +138,9 @@ class SourceConfig(BaseModel):
 class NotifyConfig(BaseModel):
     mode: str = "file"                       # "file" (zero-dep default) | "email"
     digest_path: str = "data/digest.html"
+    # "weekly" (spec 2026-10-21 §4.6): Mondays deliver the whole pending pool with the funnel, other days
+    # only urgent items. "every_run": every selected item each run (tests, local runs).
+    cadence: str = "every_run"
     # email is the optional free upgrade (Gmail SMTP + app password); creds come from env
     smtp_host: str | None = None
     smtp_user: str | None = None
