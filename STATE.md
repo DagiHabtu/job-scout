@@ -6,9 +6,9 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: 4.6 (not started) — weekly digest, urgent-only daily, numbered items; then the 4.6 review.
+Step in progress: review of 4.6 (fresh-context, read-only) → then 4.8.
 Do not merge to or push `main`; Dagi merges.
-Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`).
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`) · review 4.1+4.2 (`b669124`) · 4.3 (`c40b9bd`) · 4.4 (`4fe21fd`) · 4.7 (`b6dc285`) · 4.5 (`9eb2a35`) · 4.6 (`1584548`, `8161d0a`).
 Deviations from spec (iteration 3):
   (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
   a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
@@ -137,6 +137,28 @@ Deviations from spec (iteration 3):
   - `affidea-innov` Junior Digital Innovation Engineer — Affidea BV
     - asks: Bachelor's degree or diploma in Computer Science, Software Engineering, Information Technology, or a related field, OR a completed coding bootcamp / equivalent self-taught portfolio demonstrating comparable practical ability. 0-3 years' professional software development or technical research experience; recent graduates and career-changers with a…
   **565 passed.**
+- 2026-10-21 — **4.6 done** (`1584548`, profile `8161d0a`). Tests first (`tests/test_delivery_i3.py`, 11; collection
+  failed before the code). Mechanism: `NotifyConfig.cadence` = `weekly` (config/profile.yaml + example) | `every_run`
+  (code default — tests and local runs keep the old every-run delivery; the pending pool and deferral apply only to
+  `weekly`). Pending pool = never notified ∧ (NEW/UPDATED ∨ store `first_seen` ≤ 14 days) — `store.first_seen_of`
+  (`discovered_date` is re-stamped each run). `gate_reason(..., *, pending=False)` and `gate_reasons(..., *, pending,
+  urgent_only)` are keyword-only additions; no stage signature changed. Urgent = stipend program or deadline ≤ 14
+  days. Non-Monday: non-urgent selections → `deferred:weekly` **before** the caps (a deferred item never reads as
+  capped). Monday = `today.weekday() == 0` with `today` = the profile timezone's date (`zoneinfo`; UTC fallback where
+  the tz database is missing, e.g. this Windows venv — same date at the 04:00 UTC cron); `run_once(today=…)` and new
+  CLI `--today` / workflow_dispatch input `today` inject it. Monday always writes notify.md (even with 0 items: it
+  carries the folded funnel = `heartbeat_body` of the last 7 runs + maintenance notes, replacing the heartbeat issue —
+  workflow step removed; `--heartbeat` kept for manual use). Pipeline writes `data/notify_title.txt` (gitignored):
+  `Job Scout weekly — N new — <date>` / `Job Scout: N urgent — <date>` (`N new` under every_run). Caps per digest:
+  Check eligibility 10, Aspirational 2, Outside 5. Item format per §4.6; "matched:" dropped from the issue (kept in
+  the HTML). Interpretations: a deadline line `**Deadline:**` is kept; a known program's `condition (not checked)`
+  evidence lines are kept as one `**Check yourself:**` line (the one-evidence-line format would drop "18+", "20
+  hours/week" — things only Dagi can check); the hidden map is written even when empty (`{}`). Seed step rewritten:
+  numbered test item + reply hint + map `{"1": "seed:delivery-test"}`, keeping a funnel-only weekly body. Heartbeat
+  near misses skip already_notified / not_new / deferred:weekly. Pre-existing tests changed (one-line justification
+  inline): test_delivery ×3 (numbered format; near misses now exclude seen records), test_final_review_i2 d3 + test_gate_review_s5
+  l3 (cap 10), test_interest_s11 ×2 + test_pay_i3 + test_stage_s10 (numbered / `**Stage:**` format; first-run
+  regression pins `every_run` — it loads the weekly profile). **576 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
