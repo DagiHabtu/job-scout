@@ -6,7 +6,7 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: 4.3 (review of 4.1+4.2 running).
+Step in progress: 4.3.
 Do not merge to or push `main`; Dagi merges.
 Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`) · 4.2 (`7a5f58f`).
 Deviations from spec (iteration 3):
@@ -26,6 +26,14 @@ Deviations from spec (iteration 3):
   Location: Remote (Relocation to Portugal Available)"); a `Remote (<list>)` item mentioning relocation is not a
   place; a body `Remote (<list>)` naming the user's region → REMOTE_REGION_INCLUDES_USER **0.7** (spec table gives
   no confidence; same as a body worldwide phrase), `Remote (Global)` → WORLDWIDE 0.7.
+  (i3-e) 4.1 review fixes (beyond the spec's shapes): "based/located/… in <place>" is no requirement when the five
+  words before it hold a negation or condition (not, don't, doesn't, no, without, if, whether, wherever) or a
+  descriptive subject (most, many, some, several, hq, headquarters, founded, cost, colleagues, employees, staff,
+  teammates, engineers, members — unless hiring/seeking/looking/recruiting is there too); "<place>-based" is no
+  requirement after "is/was" (unless you/candidate/applicant precede it) or before "(and|or <word>) customers…"
+  or "hours/time zone/schedule"; the spec's a/an/our/the guard does NOT apply when a person noun follows
+  ("a US-based engineer" → excluded 0.75); the preference window stops at . ! ? or a newline (not ':'); the
+  §4.1 body shapes run only for an absent, bare "Remote" or marker location (§3), not an unrecognised field.
 
 ### Iteration-3 pass log
 - 2026-10-21 — **4.1 done** (`1f59601`). Tests first (`tests/test_eligibility_i3.py`; collection failed before the
@@ -47,6 +55,21 @@ Deviations from spec (iteration 3):
   marker case's eligibility line reads "No location restriction listed on Himalayas or in the posting. Confirm
   before applying." Pre-existing test changed: `test_gate::_o` builds UNKNOWN at 0.5 instead of 0.8 (0.8 is now
   the unverified tier; the tests mean a bare "Remote"). **498 passed.**
+- 2026-10-21 — **Review of 4.1+4.2 CLOSED** (fixes `b669124`). Reviewer: general-purpose, read-only, on
+  06dc4c6..7a5f58f. Findings → `tests/test_eligibility_i3_review.py` first: **19 failed → confirmed → fixed**
+  (deviation i3-e): H1 negated/conditional/descriptive "based/located/living in" ×11 (e.g. "You do not need to be
+  based in the US", "If you're based in Europe", "HQ located in Austin", "cost of living in London"); H2
+  "Acme is London-based but hires globally", "US-based and European customers", "US-based hours"; M1 "a US-based
+  engineer" / "an EU-based developer" now excluded 0.75 (were UNKNOWN 0.6 with a false "states none" line); M2
+  "Perks: performance bonus." no longer turns a later requirement into a preference; M3 the new shapes no longer
+  run for an unrecognised location field. Passed before (guards, kept): real requirements still exclude ×3;
+  "Remote (Middle East and Africa)" = INCLUDES 0.7 (now asserted). **Stored rows, old vs new: 0 of 380 change.**
+  Not fixed, recorded: "<country>-based" as a brand word (chad/jordan/turkey-based) — rare, and a real place;
+  "Candidates living in the EU will be invoiced in EUR" — reads like the standard requirement shape; L1 a pay
+  word within the quoted sentence cancels a requirement — errs toward surfacing (Check eligibility), not dropping;
+  "must be based in <place>" is caught earlier as REQUIRES_WORK_AUTH 0.85 (pre-existing, still disqualifying).
+  Gate (4.2): no hole found; side effect for Dagi — unverified new-grads share the 5-per-run "Check eligibility"
+  cap with UNKNOWN internships, so they can push internships out (`unknown_cap`). Spine: no drift. **521 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
