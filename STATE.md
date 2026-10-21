@@ -6,8 +6,40 @@ Spec: `docs/SPEC-2026-10-21-iteration-3.md` (execute per its §7). Branch: `iter
 (`PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q`).
 Order: 4.1 → 4.2 → 4.3 → 4.4 → 4.7 → 4.5 → 4.6 → 4.8 → acceptance 5.1–5.4. Commits prefixed `I3-<step>:`.
 Reviews (general-purpose, read-only): after 4.1+4.2, after 4.6, whole branch.
-Step in progress: first writes.
+Step in progress: 4.2.
 Do not merge to or push `main`; Dagi merges.
+Steps done: 0 first writes (`5c73c2b`) · 4.1 (`1f59601`).
+Deviations from spec (iteration 3):
+  (i3-a) §4.1(a) "based|located|resid…|living in <place>" also skips the employer's own location: any of
+  a/an/our/the/we/company/startup/firm/agency/business/team/headquartered/office(s)/customers/clients/users/partners
+  among the three words before it ("We are an innovative SaaS startup based in Portugal", "customers primarily
+  located in North America"). The place must start the clause; any other part naming the user/world cancels it.
+  (i3-b) §4.1(b) also counts "a preference" before the place and a predicate form after it in the same sentence
+  ("… is a plus / is preferred"); a flattened heading after it ("US-based Nice to Have …", micro1) does not count.
+  (i3-c) Not a requirement either (stored bodies): "<place>-based employers/companies/clients/…", "Based in
+  Melbourne, Australia, we …", "NOT based in …", and a sentence about salary/pay/compensation ("The base salary
+  range … is for residents of the United States only").
+  (i3-d) The old coarse body rule (any excluding-region word, no Africa/global word → excluded 0.8) is NOT applied
+  to the marker: on the stored rows it excluded Affidea DevOps ('apac' inside "capacity"; §2 expects Check
+  eligibility) and "roles outside the U.S.". For BARE/OTHER/no location it is unchanged.
+  Interpretations: a "sentence" for the relocation check ends at . ! ? : or a newline (TJ: "… North America)
+  Location: Remote (Relocation to Portugal Available)"); a `Remote (<list>)` item mentioning relocation is not a
+  place; a body `Remote (<list>)` naming the user's region → REMOTE_REGION_INCLUDES_USER **0.7** (spec table gives
+  no confidence; same as a body worldwide phrase), `Remote (Global)` → WORLDWIDE 0.7.
+
+### Iteration-3 pass log
+- 2026-10-21 — **4.1 done** (`1f59601`). Tests first (`tests/test_eligibility_i3.py`; collection failed before the
+  code). Spec table: all 12 rows as specified. Fixture `tests/fixtures/labels_2026-10-21_records.json` = the 36
+  records (raw, verbatim from data/scout.db @ 06dc4c6). Probes (scratch, read-only): **all 380 stored rows, old vs new
+  code as stored** → 1 change (Sourcegraph-type "a preference for someone to reside in the US": UNKNOWN 0.5 → 0.45);
+  four Greenhouse false exclusions found on the way and fixed (i3-a/b/c). **Stored Himalayas rows with the marker:**
+  166 → UNKNOWN 0.6, 10 WORLDWIDE 0.7 (work from anywhere / no geographical restrictions / Remote (Global)), 7
+  excluded 0.75 — all genuine (Talent Journey ×2, micro1 ×3 "US-based", "EU-based participants", "based in Latin
+  America"), 3 UNKNOWN 0.5 (EWOR relocation), 2 UNKNOWN 0.45 (Xperteez). Known gap: "Location: LATAM, 100% Remote"
+  (Abstra, Emptor) is no longer excluded for the marker (the coarse rule caught it; no §4.1 shape covers
+  "Location: <place>") → UNKNOWN 0.6; both are non-target titles. Pre-existing tests changed (one-line justification
+  inline): `test_final_review::test_h2…` (Sourcegraph "require … located in the United States" now excluded 0.75 —
+  §4.1(a) before (c)), `test_himalayas` marker + `…_are_unstated_through_s2`. **488 passed.**
 
 ## RESUME — closed out (2026-10-04) (superseded by iteration 3 above; kept for history)
 Branch: main      HEAD before this update: 40c3559 Merge pull request #4 from DagiHabtu/iteration-2 (tests on it: **439 passed**)
@@ -17,7 +49,12 @@ Observation period: **2026-10-04 → 2026-10-18.** No changes to rules, profile 
 Single next action: **none until 2026-10-18.**
 Still open:
   (1) DECISION deferred: onsite/hybrid in Addis = UNKNOWN@0.4 (an Addis NEW_GRAD role is never notified; an intern lands in "Check eligibility") — deferred until a source actually delivers local roles.
-  (2) Eligibility wording gaps — NOT fixed by iteration 2 (iteration 2 did not touch these rules). Probed on main 40c3559 (Remote, intern, read-only): "You must be based in a timezone within 3 hours of CET." → `requires_work_auth` 0.85 — still **wrongly rejected** (EAT is within 3 h of CET). "We are hiring only US-based candidates …" → with location "Remote": `remote_excludes_user` 0.8 (correct); with location "Worldwide": `worldwide_remote` 0.85 — still **wrongly passed** in that case.
+  (2) [UPDATED 2026-10-21, iteration 3 §4.1] Himalayas no longer writes "Worldwide" (marker → body decides): the
+      "US-based candidates" case is fixed for every Himalayas listing. **Accepted, unchanged:** an employer-stated
+      worldwide location ("Home based - Worldwide") plus "We are hiring only US-based candidates" stays
+      `worldwide_remote` — the employer's location field is authoritative (Decision #6), pinned in
+      `test_eligibility_i3::test_spec_table`. The CET-timezone wording below is unchanged (spec §6).
+      Original note: Eligibility wording gaps — NOT fixed by iteration 2 (iteration 2 did not touch these rules). Probed on main 40c3559 (Remote, intern, read-only): "You must be based in a timezone within 3 hours of CET." → `requires_work_auth` 0.85 — still **wrongly rejected** (EAT is within 3 h of CET). "We are hiring only US-based candidates …" → with location "Remote": `remote_excludes_user` 0.8 (correct); with location "Worldwide": `worldwide_remote` 0.85 — still **wrongly passed** in that case.
   (3) Unverified: all 2027 program round dates are `expected` extrapolations (Outreachy, GSoC, LFX); whether the Himalayas API truncates descriptions (§12 "Limit").
   (4) Known limits below.
 Known limits (final review Lows not fixed, and test gaps): L2 `education.status` is recorded config only (no rule in the spec). L3 "Graduate Research Assistant" reads `not_target_class` (the `_GRAD_PROGRAM_TITLE` lookahead keeps it from NEW_GRAD), not `stage:graduate_only` — still unselected. L4 eligibility "position/role … based in" pattern (c54fe46) sits outside §12's file list — 6 probes, no false negative. L5 generic strong terms ("systems", "ai", "research") cancel most vetoes — spec-literal. L6 "2-4 years" → N=2 (stretch) — spec-literal, test-pinned. Test gaps: the first-run regression test does not check the order inside "Apply", runs in lexical mode (no model), and its synthetic cases preset `employment_type`.
